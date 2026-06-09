@@ -291,7 +291,7 @@ async function loadFromFirestore(uid){
     HABIT_LOG=load("habit_log",{});NOTES=load("quick_notes",[]);
     JOURNALS=load("journals",{});HABITS_DEF=load("habits_def",[]);
     PROFILE=load("profile",PROFILE);USER_PLAN=load("user_plan",null);
-    return !d.profile; // show onboarding if no profile yet
+    return !d.profile && !d.visited; // show onboarding only if neither profile nor visited flag exists
   }catch(e){console.error("load error:",e);return true;}
 }
 function signInWithGoogle(){
@@ -1610,7 +1610,7 @@ auth.onAuthStateChanged(async(user)=>{
     document.getElementById("loading-screen").style.display="none";
     updateUserUI(user);
     renderDash();
-    if(isNew){
+    if(isNew && !load("visited",false)){
       obStep=0;
       document.getElementById("onboarding").style.display="flex";
       renderObStep();
