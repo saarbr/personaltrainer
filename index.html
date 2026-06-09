@@ -297,7 +297,12 @@ async function loadFromFirestore(uid){
 function signInWithGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
-  auth.signInWithPopup(provider).catch(e=>console.error("signin error:",e));
+  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(isMobile){
+    auth.signInWithRedirect(provider).catch(e=>console.error("signin error:",e));
+  } else {
+    auth.signInWithPopup(provider).catch(e=>console.error("signin error:",e));
+  }
 }
 function signOutUser(){
   if(confirm("להתנתק?"))auth.signOut();
@@ -1601,6 +1606,7 @@ function finishOnboarding(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
+auth.getRedirectResult().catch(e=>console.error("redirect error:",e));
 auth.onAuthStateChanged(async(user)=>{
   if(user){
     currentUser=user;
