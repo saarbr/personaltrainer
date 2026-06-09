@@ -600,7 +600,13 @@ function renderFitness(){
     h+='</div>';
 
     if(planTab==="weekly"){
-      WEEKLY.forEach((day,i)=>{
+      const activePlan=USER_PLAN
+        ? DAYS.map(d=>{
+            const t=USER_PLAN[d]||"rest";
+            return{day:d,type:t,color:t==="strength"?"#8B7FFF":t==="run"?"#00D4A1":"#444",icon:t==="strength"?"💪":t==="run"?"🏃":"🏖️",title:t==="strength"?"אימון כוח":t==="run"?"ריצה":"מנוחה",body:[]};
+          })
+        : WEEKLY;
+      activePlan.forEach((day,i)=>{
         const isToday=day.day===todayDay();
         const key=todayStr()+"-"+day.day;
         const done=COMP[key];
