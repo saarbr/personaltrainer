@@ -169,6 +169,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
+<div id="profile-setup" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1050;flex-direction:column;overflow-y:auto;">
+  <div id="ps-content" style="padding:28px 24px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;width:100%"></div>
+</div>
+
 <div id="onboarding" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center">
   <div id="ob-dots" style="display:flex;gap:6px;margin-bottom:44px"></div>
   <div id="ob-icon" style="font-size:72px;margin-bottom:22px;line-height:1;filter:drop-shadow(0 0 18px rgba(139,127,255,0.4))"></div>
@@ -196,7 +200,8 @@ let currentUser=null;
 // ═══════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════
-const PROFILE={weight:81,tdee:2770,target:2370,protein:178,carbs:215,fat:88};
+let PROFILE=load("profile",{weight:75,tdee:2500,target:2300,protein:150,carbs:220,fat:70});
+let USER_PLAN=load("user_plan",null);
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
 const SESS={
   intervals:{label:"אינטרוולים",day:"שני",color:"#FFB347"},
@@ -266,17 +271,18 @@ function save(k,v){
 async function loadFromFirestore(uid){
   try{
     const snap=await db.collection("users").doc(uid).get();
-    if(snap.exists()){
-      const d=snap.data();
-      ["runs","comp","nut","burns","goals","tasks","habit_log","quick_notes","journals","habits_def","visited"].forEach(k=>{
-        if(d[k]!==undefined)try{localStorage.setItem("tr_"+k,JSON.stringify(d[k]));}catch(e){}
-      });
-      RUNS=load("runs",[]);COMP=load("comp",{});NUT=load("nut",{});
-      BURNS=load("burns",{});GOALS=load("goals",{});TASKS=load("tasks",{});
-      HABIT_LOG=load("habit_log",{});NOTES=load("quick_notes",[]);
-      JOURNALS=load("journals",{});HABITS_DEF=load("habits_def",[]);
-    }
-  }catch(e){console.error("load error:",e);}
+    if(!snap.exists())return true; // new user
+    const d=snap.data();
+    ["runs","comp","nut","burns","goals","tasks","habit_log","quick_notes","journals","habits_def","visited","profile","user_plan"].forEach(k=>{
+      if(d[k]!==undefined)try{localStorage.setItem("tr_"+k,JSON.stringify(d[k]));}catch(e){}
+    });
+    RUNS=load("runs",[]);COMP=load("comp",{});NUT=load("nut",{});
+    BURNS=load("burns",{});GOALS=load("goals",{});TASKS=load("tasks",{});
+    HABIT_LOG=load("habit_log",{});NOTES=load("quick_notes",[]);
+    JOURNALS=load("journals",{});HABITS_DEF=load("habits_def",[]);
+    PROFILE=load("profile",PROFILE);USER_PLAN=load("user_plan",null);
+    return false; // existing user
+  }catch(e){console.error("load error:",e);return false;}
 }
 function signInWithGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
@@ -431,7 +437,11 @@ function renderDash(){
   const t=todayStr();
   const dayName=todayDay();
   const hour=new Date().getHours();
-  const todayWorkout=WEEKLY.find(d=>d.day===dayName);
+  const todayWorkout=USER_PLAN
+    ? (USER_PLAN[dayName]&&USER_PLAN[dayName]!=="rest"
+        ? {day:dayName,type:USER_PLAN[dayName],color:USER_PLAN[dayName]==="strength"?"#8B7FFF":"#00D4A1",icon:USER_PLAN[dayName]==="strength"?"💪":"🏃",title:USER_PLAN[dayName]==="strength"?"אימון כוח":"ריצה"}
+        : null)
+    : WEEKLY.find(d=>d.day===dayName);
   const workKey=t+"-"+dayName;
   const workDone=COMP[workKey];
   const todayTasks=TASKS[t]||[];
@@ -1246,6 +1256,188 @@ document.getElementById("qcmod").addEventListener("click",function(e){if(e.targe
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();openQC();}});
 
 // ═══════════════════════════════════════════════
+// PROFILE SETUP
+// ═══════════════════════════════════════════════
+let psStep=1;
+let psData={gender:"male",activityLevel:1.55,goal:"fitness",plan:{}};
+
+function showProfileSetup(){
+  psStep=1;
+  psData={gender:"male",activityLevel:1.55,goal:"fitness",plan:{}};
+  DAYS.forEach(d=>psData.plan[d]="rest");
+  // pre-fill name from Google
+  if(currentUser?.displayName) psData.name=currentUser.displayName;
+  document.getElementById("profile-setup").style.display="flex";
+  renderPsStep();
+}
+
+function renderPsStep(){
+  const el=document.getElementById("ps-content");
+  const steps=["פרטים","יעד","תוכנית","סיכום"];
+  let h='<div style="display:flex;gap:5px;margin-bottom:28px">';
+  steps.forEach((_,i)=>{
+    h+='<div style="flex:1;height:4px;border-radius:2px;background:'+(i<psStep?"var(--purple)":i===psStep-1?"var(--purple)":"rgba(255,255,255,0.1)")+';transition:all 0.3s"></div>';
+  });
+  h+='</div>';
+  if(psStep===1) h+=buildPs1();
+  else if(psStep===2) h+=buildPs2();
+  else if(psStep===3) h+=buildPs3();
+  else h+=buildPs4();
+  el.innerHTML=h;
+}
+
+function buildPs1(){
+  const g=psData.gender;
+  let h='<div style="font-size:32px;margin-bottom:8px">👤</div>';
+  h+='<div style="font-size:22px;font-weight:900;margin-bottom:4px">פרטים אישיים</div>';
+  h+='<div style="font-size:13px;color:var(--muted);margin-bottom:24px">נשתמש בפרטים לחישוב הצרכים שלך</div>';
+  h+='<div style="margin-bottom:13px"><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">שם</label>';
+  h+='<input id="ps-name" type="text" class="inp" placeholder="השם שלך" value="'+(psData.name||"")+'"/></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px">';
+  h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">גיל</label>';
+  h+='<input id="ps-age" type="number" class="inp" placeholder="25" value="'+(psData.age||"")+'"/></div>';
+  h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">מין</label>';
+  h+='<div style="display:flex;gap:6px">';
+  h+='<button onclick="psData.gender=\'male\';renderPsStep()" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(g==="male"?"var(--purple)":"var(--border)")+';background:'+(g==="male"?"rgba(139,127,255,0.15)":"var(--bg3)")+';color:'+(g==="male"?"var(--purple)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">זכר</button>';
+  h+='<button onclick="psData.gender=\'female\';renderPsStep()" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(g==="female"?"var(--pink)":"var(--border)")+';background:'+(g==="female"?"rgba(255,121,198,0.15)":"var(--bg3)")+';color:'+(g==="female"?"var(--pink)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">נקבה</button>';
+  h+='</div></div></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px">';
+  h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">משקל (ק"ג)</label>';
+  h+='<input id="ps-weight" type="number" class="inp" placeholder="70" value="'+(psData.weight||"")+'"/></div>';
+  h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">גובה (ס"מ)</label>';
+  h+='<input id="ps-height" type="number" class="inp" placeholder="175" value="'+(psData.height||"")+'"/></div>';
+  h+='</div>';
+  h+='<div id="ps-err" style="display:none;color:var(--coral);font-size:12px;margin-bottom:10px">נא למלא את כל השדות</div>';
+  h+='<button onclick="psNext1()" class="btn btn-p" style="width:100%;padding:14px;font-size:15px;margin-top:auto">הבא ←</button>';
+  return h;
+}
+
+function buildPs2(){
+  const act=psData.activityLevel;
+  const goa=psData.goal;
+  let h='<div style="font-size:32px;margin-bottom:8px">🎯</div>';
+  h+='<div style="font-size:22px;font-weight:900;margin-bottom:4px">יעד ופעילות</div>';
+  h+='<div style="font-size:13px;color:var(--muted);margin-bottom:24px">לחישוב הקלוריות המדויקות שלך</div>';
+  h+='<div style="font-size:12px;font-weight:700;margin-bottom:10px">רמת פעילות שבועית</div>';
+  [[1.2,"🛋️","יושבני","מינימום תנועה"],[1.375,"🚶","קל","1-2 אימונים"],[1.55,"🏃","בינוני","3-4 אימונים"],[1.725,"💪","גבוה","5-6 אימונים"]].forEach(([v,ic,l,s])=>{
+    const sel=act===v;
+    h+='<div onclick="psData.activityLevel='+v+';renderPsStep()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"rgba(139,127,255,0.1)":"var(--card)")+';cursor:pointer;margin-bottom:8px">';
+    h+='<span style="font-size:22px">'+ic+'</span>';
+    h+='<div><div style="font-size:13px;font-weight:700;color:'+(sel?"var(--purple)":"var(--text)")+'">'+l+'</div><div style="font-size:11px;color:var(--muted)">'+s+'</div></div>';
+    h+='<div style="margin-right:auto;width:18px;height:18px;border-radius:50%;border:2px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"var(--purple)":"transparent")+'"></div>';
+    h+='</div>';
+  });
+  h+='<div style="font-size:12px;font-weight:700;margin-top:18px;margin-bottom:10px">מה המטרה שלך?</div>';
+  [["loss","🔥","ירידה בשומן","גירעון קלורי"],["muscle","💪","בניית שריר","עודף קלורי"],["fitness","⚡","כושר כללי","תחזוקה"]].forEach(([v,ic,l,s])=>{
+    const sel=goa===v;
+    h+='<div onclick="psData.goal=\''+v+'\';renderPsStep()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"rgba(0,212,161,0.08)":"var(--card)")+';cursor:pointer;margin-bottom:8px">';
+    h+='<span style="font-size:22px">'+ic+'</span>';
+    h+='<div><div style="font-size:13px;font-weight:700;color:'+(sel?"var(--teal)":"var(--text)")+'">'+l+'</div><div style="font-size:11px;color:var(--muted)">'+s+'</div></div>';
+    h+='<div style="margin-right:auto;width:18px;height:18px;border-radius:50%;border:2px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"var(--teal)":"transparent")+'"></div>';
+    h+='</div>';
+  });
+  h+='<div style="display:flex;gap:10px;margin-top:20px">';
+  h+='<button onclick="psStep=1;renderPsStep()" class="btn" style="flex:1;padding:13px;background:var(--bg3);color:var(--muted)">חזור</button>';
+  h+='<button onclick="psStep=3;renderPsStep()" class="btn btn-p" style="flex:2;padding:13px;font-size:15px">הבא ←</button>';
+  h+='</div>';
+  return h;
+}
+
+function buildPs3(){
+  let h='<div style="font-size:32px;margin-bottom:8px">📅</div>';
+  h+='<div style="font-size:22px;font-weight:900;margin-bottom:4px">תוכנית שבועית</div>';
+  h+='<div style="font-size:13px;color:var(--muted);margin-bottom:24px">בחר סוג אימון לכל יום</div>';
+  const types=[["rest","🏖️","מנוחה"],["strength","💪","כוח"],["run","🏃","ריצה"]];
+  DAYS.forEach(day=>{
+    const cur=psData.plan[day]||"rest";
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
+    h+='<div style="width:44px;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0">'+day+'</div>';
+    h+='<div style="display:flex;gap:5px;flex:1">';
+    types.forEach(([v,ic,l])=>{
+      const sel=cur===v;
+      const col=v==="strength"?"var(--purple)":v==="run"?"var(--teal)":"var(--muted)";
+      h+='<button onclick="psData.plan[\''+day+'\']=\''+v+'\';renderPsStep()" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid '+(sel?col:"var(--border)")+';background:'+(sel?"rgba(139,127,255,0.12)":"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px">';
+      h+='<span style="font-size:16px">'+ic+'</span>'+l+'</button>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div style="display:flex;gap:10px;margin-top:20px">';
+  h+='<button onclick="psStep=2;renderPsStep()" class="btn" style="flex:1;padding:13px;background:var(--bg3);color:var(--muted)">חזור</button>';
+  h+='<button onclick="psStep=4;renderPsStep()" class="btn btn-p" style="flex:2;padding:13px;font-size:15px">הבא ←</button>';
+  h+='</div>';
+  return h;
+}
+
+function buildPs4(){
+  const p=calcProfile();
+  let h='<div style="font-size:32px;margin-bottom:8px">🚀</div>';
+  h+='<div style="font-size:22px;font-weight:900;margin-bottom:4px">הכל מוכן, '+(psData.name||"")+'!</div>';
+  h+='<div style="font-size:13px;color:var(--muted);margin-bottom:24px">הנה הפרופיל שחושב עבורך</div>';
+  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px">';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px">📊 יעדים יומיים</div>';
+  [["קלוריות TDEE",p.tdee+"","var(--muted)"],["יעד קלוריות",p.target+"","var(--coral)"],["חלבון",p.protein+'ג\'','var(--purple)'],["פחמימות",p.carbs+'ג\'','var(--teal)'],["שומן",p.fat+'ג\'','var(--amber)']].forEach(([l,v,c])=>{
+    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:13px;color:var(--muted)">'+l+'</span><span style="font-size:14px;font-weight:800;color:'+c+'">'+v+'</span></div>';
+  });
+  h+='</div>';
+  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:24px">';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px">📅 תוכנית שבועית</div>';
+  DAYS.forEach(d=>{
+    const t=psData.plan[d];
+    const ic=t==="strength"?"💪":t==="run"?"🏃":"🏖️";
+    const l=t==="strength"?"כוח":t==="run"?"ריצה":"מנוחה";
+    const c=t==="strength"?"var(--purple)":t==="run"?"var(--teal)":"var(--muted)";
+    h+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span style="color:var(--muted)">'+d+'</span><span style="color:'+c+';font-weight:700">'+ic+' '+l+'</span></div>';
+  });
+  h+='</div>';
+  h+='<div style="display:flex;gap:10px">';
+  h+='<button onclick="psStep=3;renderPsStep()" class="btn" style="flex:1;padding:13px;background:var(--bg3);color:var(--muted)">חזור</button>';
+  h+='<button onclick="psFinish()" class="btn btn-p" style="flex:2;padding:13px;font-size:15px">✓ התחל!</button>';
+  h+='</div>';
+  return h;
+}
+
+function calcProfile(){
+  const w=Number(psData.weight)||75;
+  const h=Number(psData.height)||175;
+  const a=Number(psData.age)||25;
+  const bmr=psData.gender==="male"?(10*w+6.25*h-5*a+5):(10*w+6.25*h-5*a-161);
+  const tdee=Math.round(bmr*psData.activityLevel);
+  let target,protein;
+  if(psData.goal==="loss"){target=tdee-500;protein=Math.round(w*2);}
+  else if(psData.goal==="muscle"){target=tdee+200;protein=Math.round(w*2.2);}
+  else{target=tdee;protein=Math.round(w*1.8);}
+  const fat=Math.round(target*0.27/9);
+  const carbs=Math.round((target-protein*4-fat*9)/4);
+  return{...psData,tdee,target,protein,fat,carbs};
+}
+
+function psNext1(){
+  const name=document.getElementById("ps-name")?.value?.trim();
+  const age=document.getElementById("ps-age")?.value;
+  const weight=document.getElementById("ps-weight")?.value;
+  const height=document.getElementById("ps-height")?.value;
+  const err=document.getElementById("ps-err");
+  if(!age||!weight||!height){if(err)err.style.display="block";return;}
+  psData.name=name;psData.age=Number(age);psData.weight=Number(weight);psData.height=Number(height);
+  psStep=2;renderPsStep();
+}
+
+function psFinish(){
+  const p=calcProfile();
+  PROFILE={weight:p.weight,tdee:p.tdee,target:p.target,protein:p.protein,carbs:p.carbs,fat:p.fat};
+  USER_PLAN=p.plan;
+  save("profile",PROFILE);
+  save("user_plan",USER_PLAN);
+  if(p.name&&currentUser){
+    db.collection("users").doc(currentUser.uid).set({displayName:p.name},{merge:true}).catch(()=>{});
+  }
+  save("visited",true);
+  document.getElementById("profile-setup").style.display="none";
+  renderDash();
+  toast("ברוך הבא ל-MyWay! 🚀");
+}
+
+// ═══════════════════════════════════════════════
 // ONBOARDING
 // ═══════════════════════════════════════════════
 let obStep=0;
@@ -1268,8 +1460,8 @@ function onboardingBack(){
   if(obStep>0){obStep--;renderObStep();}
 }
 function finishOnboarding(){
-  save("visited",true);
   document.getElementById("onboarding").style.display="none";
+  showProfileSetup();
 }
 
 // ═══════════════════════════════════════════════
@@ -1280,11 +1472,11 @@ auth.onAuthStateChanged(async(user)=>{
     currentUser=user;
     document.getElementById("signin-screen").style.display="none";
     document.getElementById("loading-screen").style.display="flex";
-    await loadFromFirestore(user.uid);
+    const isNew=await loadFromFirestore(user.uid);
     document.getElementById("loading-screen").style.display="none";
     updateUserUI(user);
     renderDash();
-    if(!load("visited",false)){
+    if(isNew){
       obStep=0;
       document.getElementById("onboarding").style.display="flex";
       renderObStep();
