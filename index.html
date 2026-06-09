@@ -297,13 +297,19 @@ async function loadFromFirestore(uid){
 function signInWithGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
-  auth.signInWithPopup(provider).catch(e=>{
-    if(e.code==='auth/popup-blocked'){
-      auth.signInWithRedirect(provider).catch(err=>console.error("redirect error:",err));
-    } else if(e.code!=='auth/popup-closed-by-user'){
-      console.error("signin error:",e);
-    }
-  });
+  // iOS PWA (standalone) must use redirect — popup doesn't return to the app
+  const isIOSPWA=/iPhone|iPad|iPod/i.test(navigator.userAgent)&&window.navigator.standalone===true;
+  if(isIOSPWA){
+    auth.signInWithRedirect(provider).catch(e=>console.error("signin error:",e));
+  } else {
+    auth.signInWithPopup(provider).catch(e=>{
+      if(e.code==='auth/popup-blocked'){
+        auth.signInWithRedirect(provider).catch(err=>console.error("redirect error:",err));
+      } else if(e.code!=='auth/popup-closed-by-user'){
+        console.error("signin error:",e);
+      }
+    });
+  }
 }
 function signOutUser(){
   if(confirm("להתנתק?"))auth.signOut();
