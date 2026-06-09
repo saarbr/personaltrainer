@@ -1,12 +1,34 @@
+async function verifyFirebaseToken(token) {
+  if (!token) return false;
+  const apiKey = process.env.FIREBASE_API_KEY;
+  if (!apiKey) return false;
+  try {
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: token }) }
+    );
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!(data.users && data.users.length > 0);
+  } catch {
+    return false;
+  }
+}
+
 exports.handler = async function(event, context) {
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
 
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers, body: "" };
   if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
+
+  const authHeader = event.headers["authorization"] || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const valid = await verifyFirebaseToken(token);
+  if (!valid) return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized" }) };
 
   try {
     const body = JSON.parse(event.body);
@@ -15,7 +37,6 @@ exports.handler = async function(event, context) {
     let messages;
 
     if (type === "food") {
-      // Food analysis from text
       messages = [{
         role: "user",
         content: `נתח את הארוחה הבאה וחשב ערכים תזונתיים. החזר JSON בלבד ללא markdown:
@@ -26,7 +47,6 @@ exports.handler = async function(event, context) {
 חשוב: תן הערכה ריאלית ומדויקת ככל האפשר לפי כמויות סטנדרטיות אם לא צוינו כמויות.`
       }];
     } else {
-      // Garmin image analysis
       if (!image) return { statusCode: 400, headers, body: JSON.stringify({ error: "No image provided" }) };
       messages = [{
         role: "user",
