@@ -271,7 +271,7 @@ function save(k,v){
 async function loadFromFirestore(uid){
   try{
     const snap=await db.collection("users").doc(uid).get();
-    if(!snap.exists())return true; // new user
+    if(!snap.exists())return true; // brand new user
     const d=snap.data();
     ["runs","comp","nut","burns","goals","tasks","habit_log","quick_notes","journals","habits_def","visited","profile","user_plan"].forEach(k=>{
       if(d[k]!==undefined)try{localStorage.setItem("tr_"+k,JSON.stringify(d[k]));}catch(e){}
@@ -281,8 +281,8 @@ async function loadFromFirestore(uid){
     HABIT_LOG=load("habit_log",{});NOTES=load("quick_notes",[]);
     JOURNALS=load("journals",{});HABITS_DEF=load("habits_def",[]);
     PROFILE=load("profile",PROFILE);USER_PLAN=load("user_plan",null);
-    return false; // existing user
-  }catch(e){console.error("load error:",e);return false;}
+    return !d.profile; // show onboarding if no profile yet
+  }catch(e){console.error("load error:",e);return true;}
 }
 function signInWithGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
