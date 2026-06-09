@@ -169,6 +169,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
+<div id="workout-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:flex-end;justify-content:center;">
+  <div style="background:#12122A;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:600px;border-top:1px solid rgba(139,127,255,0.3);max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div id="we-title" style="font-size:16px;font-weight:800"></div>
+      <button onclick="closeWorkoutEdit()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div id="we-content"></div>
+  </div>
+</div>
+
 <div id="profile-setup" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1050;flex-direction:column;overflow-y:auto;">
   <div id="ps-content" style="padding:28px 24px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;width:100%"></div>
 </div>
@@ -602,10 +612,11 @@ function renderFitness(){
     if(planTab==="weekly"){
       const activePlan=USER_PLAN
         ? DAYS.map(d=>{
-            const t=USER_PLAN[d]||"rest";
-            return{day:d,type:t,color:t==="strength"?"#8B7FFF":t==="run"?"#00D4A1":"#444",icon:t==="strength"?"💪":t==="run"?"🏃":"🏖️",title:t==="strength"?"אימון כוח":t==="run"?"ריצה":"מנוחה",body:[]};
+            const dp=getDayPlan(d);
+            const t=dp.type;
+            return{day:d,type:t,color:t==="strength"?"#8B7FFF":t==="run"?"#00D4A1":"#555",icon:t==="strength"?"💪":t==="run"?"🏃":"🏖️",title:dp.title||(t==="strength"?"אימון כוח":t==="run"?"ריצה":"מנוחה"),dp};
           })
-        : WEEKLY;
+        : WEEKLY.map(d=>({...d,dp:null}));
       activePlan.forEach((day,i)=>{
         const isToday=day.day===todayDay();
         const key=todayStr()+"-"+day.day;
@@ -616,24 +627,34 @@ function renderFitness(){
         h+='<div style="display:flex;align-items:center;gap:9px;cursor:pointer" onclick="openDay='+(isOpen?"null":i)+';renderFitness()">';
         h+='<div style="width:34px;height:34px;border-radius:50%;background:'+c2r(tc,0.2)+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+day.icon+'</div>';
         h+='<div style="flex:1"><div style="font-size:12px;font-weight:600;color:'+(isToday?tc:"var(--text)")+'">'+day.day+(isToday?' <span style="font-size:9px;background:'+tc+';color:#fff;padding:1px 6px;border-radius:4px">היום</span>':"")+'</div><div style="font-size:10px;color:var(--muted);margin-top:1px">'+day.title+'</div></div>';
+        if(day.type!=="rest"&&USER_PLAN) h+='<button onclick="event.stopPropagation();openWorkoutEdit(\''+day.day+'\')" style="padding:4px 9px;border-radius:7px;border:1px solid rgba(139,127,255,0.3);background:transparent;color:var(--purple);font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">✏️ ערוך</button>';
         h+='<button onclick="event.stopPropagation();COMP[\''+key+'\']=!'+done+';save(\'comp\',COMP);renderFitness()" style="width:28px;height:28px;border-radius:50%;border:2px solid '+(done?tc:"var(--border2)")+';background:'+(done?c2r(tc,0.2):"transparent")+';cursor:pointer;font-size:13px;color:'+(done?tc:"transparent")+';">'+(done?"✓":"")+'</button>';
         h+='<span style="font-size:10px;color:var(--muted)">'+(isOpen?"▲":"▼")+'</span>';
         h+='</div>';
         if(isOpen){
           h+='<div style="padding-top:10px;border-top:1px solid var(--border);margin-top:10px">';
-          day.body.forEach(item=>{
-            if(item.s){
-              h+='<div style="font-size:10px;font-weight:600;color:'+tc+';text-transform:uppercase;letter-spacing:0.04em;padding:7px 0 4px">';
-              h+=item.s+'</div>';
-            } else {
-              h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)">';
-              h+='<div><span style="font-size:11px">'+item.n+'</span>'+(item.note?'<div style="font-size:9px;color:var(--muted)">'+item.note+'</div>':"")+'</div>';
-              h+='<div style="display:flex;gap:4px">';
-              if(item.sets!=="—") h+='<span style="font-size:9px;color:var(--muted);background:rgba(255,255,255,0.06);padding:2px 5px;border-radius:4px">'+item.sets+'×</span>';
-              h+='<span style="font-size:9px;color:'+tc+';background:'+c2r(tc,0.15)+';padding:2px 5px;border-radius:4px">'+item.reps+'</span>';
-              h+='</div></div>';
-            }
-          });
+          if(day.dp&&day.type==="strength"&&day.dp.exercises?.length){
+            h+='<div style="font-size:10px;font-weight:700;color:'+tc+';text-transform:uppercase;margin-bottom:8px">תרגילים</div>';
+            day.dp.exercises.forEach(ex=>{
+              h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
+              h+='<span style="font-size:12px">'+ex.name+'</span>';
+              h+='<div style="display:flex;gap:5px"><span style="font-size:10px;color:var(--muted);background:rgba(255,255,255,0.07);padding:2px 6px;border-radius:4px">'+ex.sets+'×</span><span style="font-size:10px;color:'+tc+';background:'+c2r(tc,0.15)+';padding:2px 6px;border-radius:4px">'+ex.reps+'</span></div>';
+              h+='</div>';
+            });
+          } else if(day.dp&&day.type==="run"){
+            const rType={easy:"קלה",tempo:"טמפו",intervals:"אינטרוולים",long:"ארוכה"}[day.dp.runType||"easy"];
+            if(day.dp.distance) h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:12px;color:var(--muted)">מרחק</span><span style="font-size:12px;font-weight:700;color:'+tc+'">'+day.dp.distance+' ק"מ</span></div>';
+            if(rType) h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:12px;color:var(--muted)">סוג</span><span style="font-size:12px;font-weight:700;color:'+tc+'">ריצה '+rType+'</span></div>';
+            if(day.dp.pace) h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:12px;color:var(--muted)">קצב יעד</span><span style="font-size:12px;font-weight:700;color:'+tc+'">'+day.dp.pace+' /ק"מ</span></div>';
+            if(day.dp.hr) h+='<div style="display:flex;justify-content:space-between;padding:5px 0"><span style="font-size:12px;color:var(--muted)">דופק יעד</span><span style="font-size:12px;font-weight:700;color:'+tc+'">'+day.dp.hr+' BPM</span></div>';
+          } else if(!USER_PLAN){
+            (day.body||[]).forEach(item=>{
+              if(item.s){h+='<div style="font-size:10px;font-weight:600;color:'+tc+';text-transform:uppercase;padding:7px 0 4px">'+item.s+'</div>';}
+              else{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="font-size:11px">'+item.n+'</span><div style="display:flex;gap:4px">'+(item.sets!=="—"?'<span style="font-size:9px;color:var(--muted);background:rgba(255,255,255,0.06);padding:2px 5px;border-radius:4px">'+item.sets+'×</span>':'')+'<span style="font-size:9px;color:'+tc+';background:'+c2r(tc,0.15)+';padding:2px 5px;border-radius:4px">'+item.reps+'</span></div></div>';}
+            });
+          } else {
+            h+='<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px">לחץ ✏️ ערוך להוספת פרטים</div>';
+          }
           h+='</div>';
         }
         h+='</div>';
@@ -1263,6 +1284,111 @@ document.getElementById("qcmod").addEventListener("click",function(e){if(e.targe
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();openQC();}});
 
 // ═══════════════════════════════════════════════
+// WORKOUT EDITOR
+// ═══════════════════════════════════════════════
+function getDayPlan(day){
+  if(!USER_PLAN) return {type:"rest"};
+  const d=USER_PLAN[day];
+  if(!d) return {type:"rest"};
+  if(typeof d==="string") return {type:d}; // backwards compat
+  return d;
+}
+function normalizePlan(){
+  if(!USER_PLAN) return;
+  DAYS.forEach(d=>{
+    if(typeof USER_PLAN[d]==="string"){
+      USER_PLAN[d]={type:USER_PLAN[d]};
+    }
+  });
+}
+
+let weDay=null;
+function openWorkoutEdit(day){
+  normalizePlan();
+  weDay=day;
+  const dp=getDayPlan(day);
+  const icon=dp.type==="strength"?"💪":"🏃";
+  document.getElementById("we-title").textContent=icon+" "+day;
+  document.getElementById("workout-edit-modal").style.display="flex";
+  renderWorkoutEdit();
+}
+function closeWorkoutEdit(){
+  document.getElementById("workout-edit-modal").style.display="none";
+  weDay=null;
+}
+function renderWorkoutEdit(){
+  const dp=getDayPlan(weDay);
+  const tc=dp.type==="strength"?"var(--purple)":"var(--teal)";
+  let h="";
+  if(dp.type==="strength"){
+    h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px">תרגילים</div>';
+    const exs=dp.exercises||[];
+    exs.forEach((ex,i)=>{
+      h+='<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">';
+      h+='<input type="text" value="'+ex.name+'" oninput="updateExercise('+i+',\'name\',this.value)" class="inp" placeholder="שם תרגיל" style="flex:2;font-size:12px;padding:8px"/>';
+      h+='<input type="text" value="'+ex.sets+'" oninput="updateExercise('+i+',\'sets\',this.value)" class="inp" placeholder="סטים" style="width:52px;font-size:12px;padding:8px;text-align:center"/>';
+      h+='<input type="text" value="'+ex.reps+'" oninput="updateExercise('+i+',\'reps\',this.value)" class="inp" placeholder="חזרות" style="width:64px;font-size:12px;padding:8px;text-align:center"/>';
+      h+='<button onclick="removeExercise('+i+')" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>';
+      h+='</div>';
+    });
+    h+='<button onclick="addExercise()" class="btn" style="width:100%;padding:10px;background:var(--bg3);color:var(--purple);font-size:13px;font-weight:700;margin-bottom:14px">+ הוסף תרגיל</button>';
+  } else {
+    const rt=dp.runType||"easy";
+    h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px">סוג ריצה</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px">';
+    [["easy","🚶","קלה"],["tempo","💨","טמפו"],["intervals","⚡","אינטרוולים"],["long","🛣️","ארוכה"]].forEach(([v,ic,l])=>{
+      const sel=rt===v;
+      h+='<button onclick="setRunType(\''+v+'\')" style="padding:10px;border-radius:10px;border:1.5px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"rgba(0,212,161,0.1)":"var(--bg3)")+';color:'+(sel?"var(--teal)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
+    });
+    h+='</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">';
+    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px">מרחק (ק"מ)</label>';
+    h+='<input id="we-dist" type="number" class="inp" step="0.5" placeholder="6" value="'+(dp.distance||"")+'"/></div>';
+    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px">קצב (MM:SS)</label>';
+    h+='<input id="we-pace" type="text" class="inp" placeholder="6:30" value="'+(dp.pace||"")+'"/></div>';
+    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px">דופק יעד</label>';
+    h+='<input id="we-hr" type="number" class="inp" placeholder="145" value="'+(dp.hr||"")+'"/></div>';
+    h+='</div>';
+  }
+  h+='<button onclick="saveWorkoutDay()" class="btn btn-p" style="width:100%;padding:13px;font-size:14px">💾 שמור</button>';
+  document.getElementById("we-content").innerHTML=h;
+}
+function addExercise(){
+  normalizePlan();
+  if(!USER_PLAN[weDay].exercises) USER_PLAN[weDay].exercises=[];
+  USER_PLAN[weDay].exercises.push({name:"",sets:"3",reps:"10"});
+  renderWorkoutEdit();
+}
+function removeExercise(idx){
+  normalizePlan();
+  USER_PLAN[weDay].exercises.splice(idx,1);
+  renderWorkoutEdit();
+}
+function updateExercise(idx,field,val){
+  normalizePlan();
+  if(!USER_PLAN[weDay].exercises) return;
+  USER_PLAN[weDay].exercises[idx][field]=val;
+}
+function setRunType(val){
+  normalizePlan();
+  USER_PLAN[weDay].runType=val;
+  renderWorkoutEdit();
+}
+function saveWorkoutDay(){
+  normalizePlan();
+  const dp=USER_PLAN[weDay];
+  if(dp.type==="run"){
+    dp.distance=document.getElementById("we-dist")?.value?Number(document.getElementById("we-dist").value):null;
+    dp.pace=document.getElementById("we-pace")?.value||"";
+    dp.hr=document.getElementById("we-hr")?.value?Number(document.getElementById("we-hr").value):null;
+  }
+  save("user_plan",USER_PLAN);
+  closeWorkoutEdit();
+  toast("✓ "+weDay+" נשמר!");
+  renderFitness();
+}
+
+// ═══════════════════════════════════════════════
 // PROFILE SETUP
 // ═══════════════════════════════════════════════
 let psStep=1;
@@ -1432,7 +1558,8 @@ function psNext1(){
 function psFinish(){
   const p=calcProfile();
   PROFILE={weight:p.weight,tdee:p.tdee,target:p.target,protein:p.protein,carbs:p.carbs,fat:p.fat};
-  USER_PLAN=p.plan;
+  USER_PLAN={};
+  DAYS.forEach(d=>{ USER_PLAN[d]={type:p.plan[d]||"rest"}; });
   save("profile",PROFILE);
   save("user_plan",USER_PLAN);
   if(p.name&&currentUser){
