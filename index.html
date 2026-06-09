@@ -1606,7 +1606,13 @@ function finishOnboarding(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-auth.getRedirectResult().catch(e=>console.error("redirect error:",e));
+// Show loading immediately so redirect flow doesn't flash sign-in screen
+document.getElementById("loading-screen").style.display="flex";
+
+auth.getRedirectResult().then(r=>{
+  if(r&&r.user)console.log("redirect login:",r.user.email);
+}).catch(e=>console.error("redirect error:",e));
+
 auth.onAuthStateChanged(async(user)=>{
   if(user){
     currentUser=user;
@@ -1624,6 +1630,7 @@ auth.onAuthStateChanged(async(user)=>{
   } else {
     currentUser=null;
     document.getElementById("user-avatar").innerHTML="";
+    document.getElementById("loading-screen").style.display="none";
     document.getElementById("signin-screen").style.display="flex";
   }
 });
