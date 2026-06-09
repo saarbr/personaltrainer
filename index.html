@@ -297,12 +297,13 @@ async function loadFromFirestore(uid){
 function signInWithGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
-  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if(isMobile){
-    auth.signInWithRedirect(provider).catch(e=>console.error("signin error:",e));
-  } else {
-    auth.signInWithPopup(provider).catch(e=>console.error("signin error:",e));
-  }
+  auth.signInWithPopup(provider).catch(e=>{
+    if(e.code==='auth/popup-blocked'){
+      auth.signInWithRedirect(provider).catch(err=>console.error("redirect error:",err));
+    } else if(e.code!=='auth/popup-closed-by-user'){
+      console.error("signin error:",e);
+    }
+  });
 }
 function signOutUser(){
   if(confirm("להתנתק?"))auth.signOut();
@@ -1606,34 +1607,39 @@ function finishOnboarding(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-// Show loading immediately so redirect flow doesn't flash sign-in screen
+// Show loading immediately, then await redirect result before listening to auth state
 document.getElementById("loading-screen").style.display="flex";
 
-auth.getRedirectResult().then(r=>{
-  if(r&&r.user)console.log("redirect login:",r.user.email);
-}).catch(e=>console.error("redirect error:",e));
-
-auth.onAuthStateChanged(async(user)=>{
-  if(user){
-    currentUser=user;
-    document.getElementById("signin-screen").style.display="none";
-    document.getElementById("loading-screen").style.display="flex";
-    const isNew=await loadFromFirestore(user.uid);
-    document.getElementById("loading-screen").style.display="none";
-    updateUserUI(user);
-    renderDash();
-    if(isNew && !load("visited",false)){
-      obStep=0;
-      document.getElementById("onboarding").style.display="flex";
-      renderObStep();
-    }
-  } else {
-    currentUser=null;
-    document.getElementById("user-avatar").innerHTML="";
-    document.getElementById("loading-screen").style.display="none";
-    document.getElementById("signin-screen").style.display="flex";
+(async function initAuth(){
+  try{
+    const r=await auth.getRedirectResult();
+    if(r&&r.user)console.log("redirect login:",r.user.email);
+  }catch(e){
+    console.error("redirect error:",e);
   }
-});
+
+  auth.onAuthStateChanged(async(user)=>{
+    if(user){
+      currentUser=user;
+      document.getElementById("signin-screen").style.display="none";
+      document.getElementById("loading-screen").style.display="flex";
+      const isNew=await loadFromFirestore(user.uid);
+      document.getElementById("loading-screen").style.display="none";
+      updateUserUI(user);
+      renderDash();
+      if(isNew && !load("visited",false)){
+        obStep=0;
+        document.getElementById("onboarding").style.display="flex";
+        renderObStep();
+      }
+    } else {
+      currentUser=null;
+      document.getElementById("user-avatar").innerHTML="";
+      document.getElementById("loading-screen").style.display="none";
+      document.getElementById("signin-screen").style.display="flex";
+    }
+  });
+})();
 </script>
 </body>
 </html>
