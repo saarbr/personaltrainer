@@ -149,6 +149,18 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
+<div id="onboarding" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center">
+  <div id="ob-dots" style="display:flex;gap:6px;margin-bottom:44px"></div>
+  <div id="ob-icon" style="font-size:72px;margin-bottom:22px;line-height:1;filter:drop-shadow(0 0 18px rgba(139,127,255,0.4))"></div>
+  <div id="ob-title" style="font-size:24px;font-weight:900;margin-bottom:14px;letter-spacing:-0.5px"></div>
+  <div id="ob-desc" style="font-size:14px;color:var(--muted);line-height:1.75;max-width:300px;margin-bottom:52px"></div>
+  <div style="display:flex;gap:10px;width:100%;max-width:320px">
+    <button id="ob-back" onclick="onboardingBack()" class="btn" style="flex:1;padding:13px;background:var(--bg3);color:var(--muted);display:none;font-size:13px">חזור</button>
+    <button id="ob-next" onclick="onboardingNext()" class="btn btn-p" style="flex:1;padding:14px;font-size:14px"></button>
+  </div>
+  <button onclick="finishOnboarding()" style="background:none;border:none;color:var(--muted2);font-size:12px;margin-top:18px;cursor:pointer;font-family:Rubik,sans-serif">דלג</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -201,12 +213,16 @@ const CATS=[
   {id:"social",label:"חברתי / משפחה",icon:"❤️",color:"#FF6B6B"},
   {id:"growth",label:"צמיחה אישית / למידה",icon:"📚",color:"#00CEC9"}
 ];
-let HABITS_DEF=load("habits_def",[
-  {id:"water",label:"8 כוסות מים",icon:"💧"},
-  {id:"vitamins",label:"ויטמינים / קריאטין",icon:"💊"},
-  {id:"sleep",label:"שינה 7+ שעות",icon:"😴"}
-]);
+let HABITS_DEF=load("habits_def",[]);
 const BURN_P=[["יום כוח",350],["אינטרוולים",420],["Tempo",380],["שחרור",220],["ריצה ארוכה",520],["מנוחה",0]];
+const OB_SLIDES=[
+  {icon:"👋",title:"ברוך הבא ל-MyWay!",desc:"האפליקציה האישית שלך לכושר, תזונה ופרודוקטיביות.\nבוא נסביר לך בקצרה איך הכל עובד."},
+  {icon:"📊",title:"לוח הבקרה",desc:"המרכז שלך — אימון היום, מעקב הרגלים יומיים, משימות להיום ולמחר, וסטטיסטיקות מהירות על תזונה ויעדים."},
+  {icon:"💪",title:"כושר",desc:"תוכנית אימונים מלאה ל-12 שבועות עם כוח וריצה. אפשר להעלות screenshot מגרמין ואנחנו מחלצים את כל הנתונים אוטומטית עם AI."},
+  {icon:"🥗",title:"תזונה",desc:"יומן אכילה חכם — פשוט תכתוב מה אכלת ואנחנו מחשבים קלוריות, חלבון, פחמימות ושומן אוטומטית. גם מעקב גירעון קלורי יומי."},
+  {icon:"🎯",title:"פרודוקטיביות",desc:"הגדר יעדים יומיים לכושר, תזונה, שינה, עבודה ועוד. כתוב יומן בוקר וערב ועקוב אחרי הצמיחה שלך לאורך זמן."},
+  {icon:"⚡",title:'כפתור "+"',desc:"הכפתור הסגול הצף תמיד איתך — לחץ עליו להוספה מהירה של משימה להיום, למחר, או הערה מהירה."},
+];
 
 // ═══════════════════════════════════════════════
 // STORAGE
@@ -1164,9 +1180,41 @@ document.getElementById("qcmod").addEventListener("click",function(e){if(e.targe
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();openQC();}});
 
 // ═══════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════
+let obStep=0;
+function renderObStep(){
+  const s=OB_SLIDES[obStep];
+  const isLast=obStep===OB_SLIDES.length-1;
+  document.getElementById("ob-icon").textContent=s.icon;
+  document.getElementById("ob-title").textContent=s.title;
+  document.getElementById("ob-desc").innerHTML=s.desc.replace(/\n/g,"<br>");
+  document.getElementById("ob-next").textContent=isLast?"🚀 בוא נתחיל!":"הבא ←";
+  document.getElementById("ob-back").style.display=obStep===0?"none":"flex";
+  const dots=document.getElementById("ob-dots");
+  dots.innerHTML=OB_SLIDES.map((_,i)=>'<div style="width:'+(i===obStep?"22px":"8px")+';height:8px;border-radius:4px;background:'+(i===obStep?"var(--purple)":"rgba(255,255,255,0.15)")+';transition:all 0.3s"></div>').join("");
+}
+function onboardingNext(){
+  if(obStep<OB_SLIDES.length-1){obStep++;renderObStep();}
+  else finishOnboarding();
+}
+function onboardingBack(){
+  if(obStep>0){obStep--;renderObStep();}
+}
+function finishOnboarding(){
+  save("visited",true);
+  document.getElementById("onboarding").style.display="none";
+}
+
+// ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
 renderDash();
+if(!load("visited",false)){
+  obStep=0;
+  document.getElementById("onboarding").style.display="flex";
+  renderObStep();
+}
 </script>
 </body>
 </html>
