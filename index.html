@@ -323,6 +323,18 @@ const CATS=[
 ];
 let HABITS_DEF=load("habits_def",[]);
 const BURN_P=[["יום כוח",350],["אינטרוולים",420],["Tempo",380],["שחרור",220],["ריצה ארוכה",520],["מנוחה",0]];
+const QUICK_FOODS=[
+  {e:"🥚",l:"ביצה",cal:70,p:6,c:0,f:5},
+  {e:"🥛",l:'קוטג' 250g',cal:170,p:22,c:7,f:5},
+  {e:"🍗",l:"חזה עוף 100g",cal:165,p:31,c:0,f:4},
+  {e:"🥤",l:"שייק חלבון",cal:140,p:25,c:8,f:2},
+  {e:"🍫",l:"בר חלבון",cal:200,p:20,c:18,f:7},
+  {e:"🥜",l:"חמ. בוטנים כף",cal:95,p:4,c:3,f:8},
+  {e:"🧀",l:'גבינה 5%',cal:70,p:8,c:1,f:4},
+  {e:"🐟",l:"טונה 100g",cal:116,p:26,c:0,f:1},
+  {e:"🍌",l:"בננה",cal:90,p:1,c:23,f:0},
+  {e:"🍞",l:"לחם שיפון",cal:80,p:3,c:15,f:1}
+];
 const QUOTES=[
   "הצלחה היא סכום של מאמצים קטנים שחוזרים יום אחר יום.",
   "הגוף משיג מה שהמוח מאמין.",
@@ -717,7 +729,7 @@ function renderDash(){
   const hour=new Date().getHours();
   const _dws=USER_PLAN?getDayWorkouts(dayName):null;
   const todayWorkout=_dws!=null
-    ?(_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#8B7FFF":"#00D4A1",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":"ריצה"}:null)
+    ?(_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#8B7FFF":"#00D4A1",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":({"easy":"ריצה קלה","tempo":"ריצת טמפו","intervals":"ריצת אינטרוולים","long":"ריצה ארוכה"}[_dws[0].runType]||"ריצה")}:null)
     :WEEKLY.find(d=>d.day===dayName);
   const workKey=t+"-"+dayName;
   const workDone=COMP[workKey];
@@ -1329,6 +1341,31 @@ function renderNut(){
     });
     h+='</div></div>';
 
+    // ── QUICK LOG WIDGET ──
+    h+='<div style="margin-bottom:12px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">';
+    h+='<div style="font-size:12px;font-weight:800">⚡ הוסף מהיר</div>';
+    h+='<div style="font-size:10px;color:var(--muted)">לחיצה אחת ← רשום מיידי</div>';
+    h+='</div>';
+    h+='<div style="overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scrollbar-width:none">';
+    h+='<div style="display:flex;gap:7px;width:max-content">';
+    QUICK_FOODS.forEach((q,qi)=>{
+      h+='<button onclick="quickLogFood('+qi+')" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;border-radius:13px;border:1px solid var(--border2);background:var(--card);cursor:pointer;min-width:64px;flex-shrink:0;transition:all 0.15s;active:scale(0.95)">';
+      h+='<span style="font-size:20px;line-height:1">'+q.e+'</span>';
+      h+='<span style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap">'+q.l+'</span>';
+      h+='<span style="font-size:9px;color:var(--purple);font-weight:700">P '+q.p+'g</span>';
+      h+='<span style="font-size:9px;color:var(--muted)">'+q.cal+' קל</span>';
+      h+='</button>';
+    });
+    h+='</div></div>';
+    h+='<div style="display:flex;gap:6px;margin-top:8px">';
+    h+='<div style="font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:4px;flex-shrink:0">💊 חלבון:</div>';
+    [10,20,30,40].forEach(g=>{
+      h+='<button onclick="quickAddProtein('+g+')" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid rgba(139,127,255,0.3);background:rgba(139,127,255,0.08);color:var(--purple);font-family:Rubik,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+'+g+'g</button>';
+    });
+    h+='</div>';
+    h+='</div>';
+
     // Burn selector
     h+='<div class="card"><div style="font-size:12px;font-weight:700;margin-bottom:9px">🔥 שריפת קלוריות</div>';
     h+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px">';
@@ -1473,6 +1510,21 @@ function addNut(){
   save("nut",NUT);toast("✓ ארוחה נשמרה! 🍽️");renderNut();
 }
 function delNut(idx){NUT[selDate].splice(idx,1);save("nut",NUT);renderNut();}
+function quickLogFood(idx){
+  const q=QUICK_FOODS[idx];if(!q)return;
+  if(!NUT[selDate])NUT[selDate]=[];
+  const now=new Date();
+  const time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+  NUT[selDate].push({id:Date.now(),desc:q.e+" "+q.l,cal:q.cal,p:q.p,c:q.c,f:q.f,time});
+  save("nut",NUT);toast("✓ "+q.l+" נוסף!");renderNut();
+}
+function quickAddProtein(g){
+  if(!NUT[selDate])NUT[selDate]=[];
+  const now=new Date();
+  const time=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+  NUT[selDate].push({id:Date.now(),desc:"💊 "+g+"g חלבון",cal:g*4,p:g,c:0,f:0,time});
+  save("nut",NUT);toast("✓ +"+g+"g חלבון נוסף!");renderNut();
+}
 function nutChangeDay(delta){
   const d=new Date(selDate+'T12:00:00');
   d.setDate(d.getDate()+delta);
