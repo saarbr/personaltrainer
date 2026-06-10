@@ -243,6 +243,14 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
+<div id="profile-modal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:900;flex-direction:column;overflow-y:auto">
+  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.2);padding:13px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
+    <button onclick="closeProfileModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px">←</button>
+    <div style="font-size:16px;font-weight:800;flex:1">הפרופיל שלי</div>
+  </div>
+  <div id="profile-modal-content" style="padding:20px 16px 40px"></div>
+</div>
+
 <div id="profile-setup" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1050;flex-direction:column;overflow-y:auto;">
   <div id="ps-content" style="padding:28px 24px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;width:100%"></div>
 </div>
@@ -562,11 +570,87 @@ function updateUserUI(user){
   const el=document.getElementById("user-avatar");
   if(!el)return;
   if(user.photoURL){
-    el.innerHTML='<img src="'+user.photoURL+'" onclick="signOutUser()" style="width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid rgba(139,127,255,0.4)" title="התנתק"/>';
+    el.innerHTML='<img src="'+user.photoURL+'" onclick="openProfileModal()" style="width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid rgba(139,127,255,0.4)" title="פרופיל"/>';
   } else {
     const init=(user.displayName||"U")[0];
-    el.innerHTML='<div onclick="signOutUser()" style="width:30px;height:30px;border-radius:50%;background:var(--purple-g);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;color:#fff">'+init+'</div>';
+    el.innerHTML='<div onclick="openProfileModal()" style="width:30px;height:30px;border-radius:50%;background:var(--purple-g);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;color:#fff">'+init+'</div>';
   }
+}
+
+function openProfileModal(){
+  const modal=document.getElementById("profile-modal");
+  modal.style.display="flex";
+  renderProfileModal();
+}
+function closeProfileModal(){
+  document.getElementById("profile-modal").style.display="none";
+}
+function renderProfileModal(){
+  const user=currentUser;
+  const p=PROFILE;
+  let h="";
+
+  // User header
+  h+='<div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(139,127,255,0.12),rgba(0,212,161,0.06));border:1px solid rgba(139,127,255,0.2);border-radius:18px;padding:16px;margin-bottom:18px">';
+  if(user&&user.photoURL){
+    h+='<img src="'+user.photoURL+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,127,255,0.5);flex-shrink:0"/>';
+  } else {
+    const init=((p.name||user?.displayName||"U")[0]||"U").toUpperCase();
+    h+='<div style="width:52px;height:52px;border-radius:50%;background:var(--purple-g);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0">'+init+'</div>';
+  }
+  h+='<div><div style="font-size:17px;font-weight:800">'+esc(p.name||(user&&user.displayName)||"")+'</div>';
+  if(user)h+='<div style="font-size:11px;color:var(--muted);margin-top:2px">'+esc(user.email||"")+'</div>';
+  h+='</div></div>';
+
+  // Personal details
+  h+='<div class="card" style="margin-bottom:11px">';
+  h+='<div style="font-size:13px;font-weight:800;margin-bottom:12px">📝 פרטים אישיים</div>';
+  h+='<div style="margin-bottom:10px"><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">שם</label>';
+  h+='<input id="pf-name" type="text" class="inp" value="'+esc(p.name||"")+'" placeholder="השם שלך"/></div>';
+  h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">משקל (ק"ג)</label>';
+  h+='<input id="pf-weight" type="number" step="0.5" class="inp" value="'+(p.weight||"")+'" placeholder="75"/></div>';
+  h+='</div>';
+
+  // Nutrition targets
+  h+='<div class="card" style="margin-bottom:11px">';
+  h+='<div style="font-size:13px;font-weight:800;margin-bottom:12px">🎯 יעדים תזונתיים</div>';
+  [
+    ["pf-tdee","TDEE – שריפה יומית (קל)","number",p.tdee||"","2500"],
+    ["pf-target","יעד קלוריות (קל)","number",p.target||"","2300"]
+  ].forEach(([id,lbl,type,val,ph])=>{
+    h+='<div style="margin-bottom:10px"><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">'+lbl+'</label>';
+    h+='<input id="'+id+'" type="'+type+'" class="inp" value="'+val+'" placeholder="'+ph+'"/></div>';
+  });
+  h+='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px;margin-top:2px">מאקרו יומי</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
+  [["pf-protein","💜 חלבון g",p.protein||"","150"],["pf-carbs","💚 פחמימות g",p.carbs||"","220"],["pf-fat","🟡 שומן g",p.fat||"","70"]].forEach(([id,lbl,val,ph])=>{
+    h+='<div><label style="font-size:10px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">'+lbl+'</label>';
+    h+='<input id="'+id+'" type="number" class="inp" value="'+val+'" placeholder="'+ph+'" style="text-align:center"/></div>';
+  });
+  h+='</div></div>';
+
+  // Actions
+  h+='<button onclick="saveProfileChanges()" class="btn btn-p" style="width:100%;padding:14px;font-size:14px;margin-bottom:10px">💾 שמור שינויים</button>';
+  h+='<button onclick="signOutFromProfile()" style="width:100%;padding:13px;border-radius:11px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.06);color:var(--coral);font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🚪 התנתק</button>';
+
+  document.getElementById("profile-modal-content").innerHTML=h;
+}
+function saveProfileChanges(){
+  const name=document.getElementById("pf-name").value.trim();
+  const weight=parseFloat(document.getElementById("pf-weight").value)||PROFILE.weight;
+  const tdee=parseInt(document.getElementById("pf-tdee").value)||PROFILE.tdee;
+  const target=parseInt(document.getElementById("pf-target").value)||PROFILE.target;
+  const protein=parseInt(document.getElementById("pf-protein").value)||PROFILE.protein;
+  const carbs=parseInt(document.getElementById("pf-carbs").value)||PROFILE.carbs;
+  const fat=parseInt(document.getElementById("pf-fat").value)||PROFILE.fat;
+  PROFILE={...PROFILE,name,weight,tdee,target,protein,carbs,fat};
+  save("profile",PROFILE);
+  toast("✓ פרופיל עודכן!");
+  renderProfileModal();
+  if(currentPg==="dash")renderDash();
+}
+function signOutFromProfile(){
+  if(confirm("להתנתק?"))auth.signOut();
 }
 
 let RUNS=load("runs",[]);
