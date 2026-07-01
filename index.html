@@ -485,7 +485,7 @@ function save(k,v){
 async function loadFromFirestore(uid){
   try{
     const snap=await db.collection("users").doc(uid).get();
-    if(!snap.exists())return true; // brand new user
+    if(!snap.exists)return true; // brand new user
     const d=snap.data();
     ["runs","comp","nut","burns","goals","tasks","habit_log","quick_notes","journals","habits_def","visited","profile","user_plan"].forEach(k=>{
       if(d[k]!==undefined)try{localStorage.setItem("tr_"+k,JSON.stringify(d[k]));}catch(e){}
@@ -546,25 +546,89 @@ function submitAuth(){
     auth.signInWithEmailAndPassword(email,pass).catch(e=>showAuthError(getAuthError(e)));
   }
 }
+function showGoogleAuthError(e){
+  if(!e)return;
+  if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;
+  const errEl=document.getElementById("auth-err");
+  if(!errEl)return;
+  const msgs={
+    'auth/unauthorized-domain':'הדומיין לא מורשה ב-Firebase — הוסף אותו ב-Firebase Console → Authentication → Authorized domains',
+    'auth/popup-blocked':'הפופאפ נחסם, נסה לאפשר פופאפים בדפדפן',
+    'auth/network-request-failed':'בעיית תקשורת, בדוק חיבור לאינטרנט',
+    'auth/internal-error':'שגיאה פנימית, נסה שוב מאוחר יותר',
+    'auth/operation-not-allowed':'כניסה עם Google אינה מופעלת ב-Firebase',
+  };
+  errEl.textContent=msgs[e.code]||(e.message||'שגיאת כניסה עם Google');
+  errEl.style.display="block";
+  console.error("google auth error:",e.code,e.message);
+}
 function signInWithGoogle(){
+  const errEl=document.getElementById("auth-err");
+  if(errEl)errEl.style.display="none";
   const provider=new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
-  // iOS PWA (standalone) must use redirect — popup doesn't return to the app
-  const isIOSPWA=/iPhone|iPad|iPod/i.test(navigator.userAgent)&&window.navigator.standalone===true;
-  if(isIOSPWA){
-    auth.signInWithRedirect(provider).catch(e=>console.error("signin error:",e));
-  } else {
-    auth.signInWithPopup(provider).catch(e=>{
-      if(e.code==='auth/popup-blocked'){
-        auth.signInWithRedirect(provider).catch(err=>console.error("redirect error:",err));
-      } else if(e.code!=='auth/popup-closed-by-user'){
-        console.error("signin error:",e);
-      }
-    });
-  }
+  auth.signInWithPopup(provider).catch(e=>{
+    if(e.code==='auth/popup-blocked'){
+      auth.signInWithRedirect(provider).catch(showGoogleAuthError);
+    } else {
+      showGoogleAuthError(e);
+    }
+  });
 }
 function signOutUser(){
   if(confirm("להתנתק?"))auth.signOut();
+}
+
+let authMode='login';
+function switchAuthMode(mode){
+  authMode=mode;
+  const loginTab=document.getElementById("auth-tab-login");
+  const registerTab=document.getElementById("auth-tab-register");
+  const confirmWrap=document.getElementById("auth-confirm-wrap");
+  const submitBtn=document.getElementById("auth-submit");
+  if(loginTab){loginTab.style.background=mode==='login'?"var(--purple)":"transparent";loginTab.style.color=mode==='login'?"#fff":"var(--muted)";}
+  if(registerTab){registerTab.style.background=mode==='register'?"var(--purple)":"transparent";registerTab.style.color=mode==='register'?"#fff":"var(--muted)";}
+  if(confirmWrap)confirmWrap.style.display=mode==='register'?"block":"none";
+  if(submitBtn)submitBtn.textContent=mode==='login'?"כניסה":"הרשמה";
+  const err=document.getElementById("auth-err");
+  if(err)err.style.display="none";
+}
+async function submitEmailAuth(){
+  const email=document.getElementById("auth-email")?.value?.trim();
+  const pass=document.getElementById("auth-pass")?.value;
+  const confirm=document.getElementById("auth-confirm")?.value;
+  const errEl=document.getElementById("auth-err");
+  if(errEl)errEl.style.display="none";
+  if(!email||!pass){
+    if(errEl){errEl.textContent="נא למלא אימייל וסיסמה";errEl.style.display="block";}
+    return;
+  }
+  if(authMode==='register'){
+    if(pass.length<6){if(errEl){errEl.textContent="הסיסמה חייבת להיות לפחות 6 תווים";errEl.style.display="block";}return;}
+    if(pass!==confirm){if(errEl){errEl.textContent="הסיסמאות אינן תואמות";errEl.style.display="block";}return;}
+  }
+  const btn=document.getElementById("auth-submit");
+  if(btn){btn.textContent="...";btn.disabled=true;}
+  try{
+    if(authMode==='login'){
+      await auth.signInWithEmailAndPassword(email,pass);
+    } else {
+      await auth.createUserWithEmailAndPassword(email,pass);
+    }
+  }catch(e){
+    const msgs={
+      'auth/user-not-found':'משתמש לא נמצא',
+      'auth/wrong-password':'סיסמה שגויה',
+      'auth/invalid-credential':'אימייל או סיסמה שגויים',
+      'auth/email-already-in-use':'אימייל כבר רשום, נסה להתחבר',
+      'auth/invalid-email':'אימייל לא תקין',
+      'auth/weak-password':'הסיסמה חלשה מדי (לפחות 6 תווים)',
+      'auth/too-many-requests':'יותר מדי נסיונות, נסה מאוחר יותר',
+      'auth/network-request-failed':'בעיית תקשורת, בדוק חיבור לאינטרנט',
+    };
+    if(errEl){errEl.textContent=msgs[e.code]||e.message;errEl.style.display="block";}
+  }
+  if(btn){btn.textContent=authMode==='login'?"כניסה":"הרשמה";btn.disabled=false;}
 }
 function updateUserUI(user){
   const el=document.getElementById("user-avatar");
@@ -2587,15 +2651,16 @@ document.addEventListener('visibilitychange',function(){
   if(!document.hidden&&currentUser&&currentPg==='dash')renderDash();
 });
 
-// Show loading immediately, then await redirect result before listening to auth state
 document.getElementById("loading-screen").style.display="flex";
 
 (async function initAuth(){
+  let redirectError=null;
   try{
     const r=await auth.getRedirectResult();
     if(r&&r.user)console.log("redirect login:",r.user.email);
   }catch(e){
     console.error("redirect error:",e);
+    redirectError=e;
   }
 
   auth.onAuthStateChanged(async(user)=>{
@@ -2618,6 +2683,7 @@ document.getElementById("loading-screen").style.display="flex";
       document.getElementById("user-avatar").innerHTML="";
       document.getElementById("loading-screen").style.display="none";
       document.getElementById("signin-screen").style.display="flex";
+      if(redirectError){showGoogleAuthError(redirectError);redirectError=null;}
     }
   });
 })();
