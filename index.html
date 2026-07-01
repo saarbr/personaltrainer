@@ -133,9 +133,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="loading-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1900;flex-direction:column;align-items:center;justify-content:center">
-  <video autoplay loop muted playsinline style="width:200px;height:200px;object-fit:contain;mix-blend-mode:screen">
+  <video id="logo-vid" loop muted playsinline style="display:none">
     <source src="logo.mp4" type="video/mp4">
   </video>
+  <canvas id="logo-canvas" style="width:200px;height:200px;display:block"></canvas>
 </div>
 
 <div class="header">
@@ -2686,6 +2687,38 @@ document.getElementById("loading-screen").style.display="flex";
       if(redirectError){showGoogleAuthError(redirectError);redirectError=null;}
     }
   });
+})();
+
+(function initLogoAnimation(){
+  const vid=document.getElementById('logo-vid');
+  const canvas=document.getElementById('logo-canvas');
+  if(!vid||!canvas)return;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  let rafId,bgR=null,bgG=null,bgB=null;
+
+  function frame(){
+    if(document.getElementById('loading-screen').style.display==='none'){
+      cancelAnimationFrame(rafId);return;
+    }
+    if(vid.readyState>=2){
+      if(!canvas.width){canvas.width=vid.videoWidth||480;canvas.height=vid.videoHeight||480;}
+      ctx.drawImage(vid,0,0,canvas.width,canvas.height);
+      try{
+        const d=ctx.getImageData(0,0,canvas.width,canvas.height);
+        const px=d.data;
+        if(bgR===null){bgR=px[0];bgG=px[1];bgB=px[2];}
+        const tol=45;
+        for(let i=0;i<px.length;i+=4){
+          if(Math.abs(px[i]-bgR)<tol&&Math.abs(px[i+1]-bgG)<tol&&Math.abs(px[i+2]-bgB)<tol)px[i+3]=0;
+        }
+        ctx.putImageData(d,0,0);
+      }catch(e){}
+    }
+    rafId=requestAnimationFrame(frame);
+  }
+
+  vid.addEventListener('play',function(){cancelAnimationFrame(rafId);frame();});
+  vid.play().catch(()=>{});
 })();
 </script>
 </body>
