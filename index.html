@@ -59,6 +59,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 .page{display:none;padding:14px 16px 8px;animation:fadeIn 0.2s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .subtabs{display:flex;gap:5px;margin-bottom:12px;background:var(--card);
   border-radius:13px;padding:4px;border:1px solid var(--border);}
 .stb{flex:1;padding:8px 5px;border-radius:9px;border:none;cursor:pointer;
@@ -132,10 +133,8 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
-<div id="loading-screen" style="display:none;position:fixed;inset:0;background:#000;z-index:1900;flex-direction:column;align-items:center;justify-content:center">
-  <video id="logo-vid" autoplay loop muted playsinline style="width:220px;height:220px;object-fit:contain;mix-blend-mode:screen">
-    <source src="logo.mp4" type="video/mp4">
-  </video>
+<div id="loading-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1900;flex-direction:column;align-items:center;justify-content:center">
+  <div style="width:52px;height:52px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.9s linear infinite"></div>
 </div>
 
 <div class="header">
@@ -2691,8 +2690,6 @@ showLoading();
 function showLoading(){
   const ls=document.getElementById('loading-screen');
   if(ls)ls.style.display='flex';
-  const vid=document.getElementById('logo-vid');
-  if(vid)vid.play().catch(()=>{});
 }
 function hideLoading(){
   const ls=document.getElementById('loading-screen');
