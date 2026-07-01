@@ -209,7 +209,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="ex-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:700;flex-direction:column;">
-  <div style="padding:16px;background:#12122A;border-bottom:1px solid rgba(139,127,255,0.2);flex-shrink:0">
+  <div style="padding:calc(16px + env(safe-area-inset-top)) 16px 16px;background:#12122A;border-bottom:1px solid rgba(139,127,255,0.2);flex-shrink:0">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <div style="font-size:16px;font-weight:800;flex:1">💪 בחר תרגיל</div>
       <button onclick="closeExPicker()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0">✕</button>
@@ -221,7 +221,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="active-workout-modal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:800;flex-direction:column;overflow:hidden">
-  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.25);padding:13px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.25);padding:calc(13px + env(safe-area-inset-top)) 16px 13px;display:flex;align-items:center;gap:12px;flex-shrink:0">
     <button onclick="confirmFinishWorkout()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px">✕</button>
     <div style="flex:1;min-width:0">
       <div style="font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.4px">אימון פעיל</div>
@@ -244,7 +244,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="profile-modal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:900;flex-direction:column;overflow-y:auto">
-  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.2);padding:13px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
+  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.2);padding:calc(13px + env(safe-area-inset-top)) 16px 13px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
     <button onclick="closeProfileModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px">←</button>
     <div style="font-size:16px;font-weight:800;flex:1">הפרופיל שלי</div>
   </div>
