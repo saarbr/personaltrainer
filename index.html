@@ -132,11 +132,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
-<div id="loading-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1900;flex-direction:column;align-items:center;justify-content:center">
-  <video id="logo-vid" loop muted playsinline style="display:none">
+<div id="loading-screen" style="display:none;position:fixed;inset:0;background:#000;z-index:1900;flex-direction:column;align-items:center;justify-content:center">
+  <video id="logo-vid" autoplay loop muted playsinline style="width:220px;height:220px;object-fit:contain;mix-blend-mode:screen">
     <source src="logo.mp4" type="video/mp4">
   </video>
-  <canvas id="logo-canvas" style="width:200px;height:200px;display:block"></canvas>
 </div>
 
 <div class="header">
@@ -2652,7 +2651,7 @@ document.addEventListener('visibilitychange',function(){
   if(!document.hidden&&currentUser&&currentPg==='dash')renderDash();
 });
 
-document.getElementById("loading-screen").style.display="flex";
+showLoading();
 
 (async function initAuth(){
   let redirectError=null;
@@ -2668,9 +2667,9 @@ document.getElementById("loading-screen").style.display="flex";
     if(user){
       currentUser=user;
       document.getElementById("signin-screen").style.display="none";
-      document.getElementById("loading-screen").style.display="flex";
+      showLoading();
       const isNew=await loadFromFirestore(user.uid);
-      document.getElementById("loading-screen").style.display="none";
+      hideLoading();
       updateUserUI(user);
       updateThemeBtn();
       renderDash();
@@ -2682,49 +2681,23 @@ document.getElementById("loading-screen").style.display="flex";
     } else {
       currentUser=null;
       document.getElementById("user-avatar").innerHTML="";
-      document.getElementById("loading-screen").style.display="none";
+      hideLoading();
       document.getElementById("signin-screen").style.display="flex";
       if(redirectError){showGoogleAuthError(redirectError);redirectError=null;}
     }
   });
 })();
 
-(function initLogoAnimation(){
+function showLoading(){
+  const ls=document.getElementById('loading-screen');
+  if(ls)ls.style.display='flex';
   const vid=document.getElementById('logo-vid');
-  const canvas=document.getElementById('logo-canvas');
-  if(!vid||!canvas)return;
-  const ctx=canvas.getContext('2d',{willReadFrequently:true});
-  let rafId,bgR=null,bgG=null,bgB=null;
-
-  function frame(){
-    const ls=document.getElementById('loading-screen');
-    if(!ls||ls.style.display==='none'){cancelAnimationFrame(rafId);return;}
-    if(vid.readyState>=2){
-      if(!canvas.width||canvas.width===300){
-        canvas.width=vid.videoWidth||480;
-        canvas.height=vid.videoHeight||480;
-      }
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(vid,0,0,canvas.width,canvas.height);
-      try{
-        const d=ctx.getImageData(0,0,canvas.width,canvas.height);
-        const px=d.data;
-        if(bgR===null){bgR=px[0];bgG=px[1];bgB=px[2];}
-        const tol=45;
-        for(let i=0;i<px.length;i+=4){
-          if(Math.abs(px[i]-bgR)<tol&&Math.abs(px[i+1]-bgG)<tol&&Math.abs(px[i+2]-bgB)<tol)px[i+3]=0;
-        }
-        ctx.putImageData(d,0,0);
-      }catch(e){
-        vid.style.display='block';canvas.style.display='none';
-      }
-    }
-    rafId=requestAnimationFrame(frame);
-  }
-
-  vid.play().catch(()=>{});
-  rafId=requestAnimationFrame(frame);
-})();
+  if(vid)vid.play().catch(()=>{});
+}
+function hideLoading(){
+  const ls=document.getElementById('loading-screen');
+  if(ls)ls.style.display='none';
+}
 </script>
 </body>
 </html>
