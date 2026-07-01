@@ -947,12 +947,12 @@ function renderDash(){
   // ── TODAY'S WORKOUT ──
   if(todayWorkout){
     const tc=todayWorkout.color;
-    const dw=_dws[0];
+    const dw=_dws?_dws[0]:null;
     let wSummary='';
-    if(dw.type==='run'&&dw.segments&&dw.segments.length){
+    if(dw&&dw.type==='run'&&dw.segments&&dw.segments.length){
       const totalKm=dw.segments.reduce((a,sg)=>{const d=parseFloat(sg.dist)||0;return a+(sg.unit==="m"?d/1000:d)*(sg.reps||1);},0);
       wSummary=dw.segments.length+' מקטעים · '+totalKm.toFixed(1)+' ק"מ';
-    } else if(dw.type==='strength'&&dw.exercises&&dw.exercises.length){
+    } else if(dw&&dw.type==='strength'&&dw.exercises&&dw.exercises.length){
       wSummary=dw.exercises.length+' תרגילים';
     }
     h+='<div onclick="goToTodayWorkout()" style="cursor:pointer;background:'+c2r(tc,0.1)+';border:1px solid '+c2r(tc,0.3)+';border-radius:18px;padding:0;margin-bottom:12px;overflow:hidden">';
