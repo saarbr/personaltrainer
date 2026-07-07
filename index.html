@@ -211,6 +211,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
+<div id="copy-workout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:650;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px)">
+  <div style="background:#0E1120;border-radius:24px 24px 0 0;padding:22px 20px;width:100%;max-width:600px;border-top:1px solid rgba(139,127,255,0.22);box-shadow:0 -8px 40px rgba(0,0,0,0.4)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800">📋 העתק אימון ליום</div>
+      <button onclick="closeCopyWorkout()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div id="copy-modal-days"></div>
+  </div>
+</div>
+
 <div id="ex-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:700;flex-direction:column;">
   <div style="padding:calc(16px + env(safe-area-inset-top)) 16px 16px;background:#12122A;border-bottom:1px solid rgba(139,127,255,0.2);flex-shrink:0">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -1571,6 +1581,7 @@ function buildFitnessCalendar(){
         h+='<div style="display:flex;gap:4px;margin-bottom:7px">';
         if(w.type==="strength") h+='<button onclick="startWorkout(\''+day+'\','+i+')" style="flex:1;padding:4px 5px;border-radius:6px;border:none;background:var(--teal);color:#0E1220;font-family:Rubik,sans-serif;font-size:9px;font-weight:800;cursor:pointer">▶ התחל</button>';
         h+='<button onclick="openWorkoutEdit(\''+day+'\','+i+')" style="flex:1;padding:4px;border-radius:6px;border:1px solid rgba(139,127,255,0.25);background:transparent;color:var(--purple);font-family:Rubik,sans-serif;font-size:9px;font-weight:700;cursor:pointer">✏️ ערוך</button>';
+        h+='<button onclick="openCopyWorkout(\''+day+'\','+i+')" style="padding:4px 7px;border-radius:6px;border:1px solid rgba(116,185,255,0.25);background:transparent;color:var(--blue);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer" title="העתק ליום אחר">📋</button>';
         h+='<button onclick="removeWorkoutFromDay(\''+day+'\','+i+')" style="padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--muted2);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer">✕</button>';
         h+='</div>';
 
@@ -2222,6 +2233,7 @@ function saveQC(){
   else if(currentPg==="productivity")renderProductivity();
 }
 document.getElementById("qcmod").addEventListener("click",function(e){if(e.target===this)closeQC();});
+document.getElementById("copy-workout-modal").addEventListener("click",function(e){if(e.target===this)closeCopyWorkout();});
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();openQC();}});
 
 // ═══════════════════════════════════════════════
@@ -2248,6 +2260,48 @@ function normalizePlan(){
     else if(typeof USER_PLAN[d]==="string"){USER_PLAN[d]=[{type:USER_PLAN[d]}];}
     else if(!Array.isArray(USER_PLAN[d])){USER_PLAN[d]=USER_PLAN[d].type==="rest"?[]:[USER_PLAN[d]];}
   });
+}
+
+let copySource=null;
+function openCopyWorkout(day,idx){
+  if(!USER_PLAN){toast("אין תוכנית אימונים מוגדרת");return;}
+  copySource={day,idx};
+  const src=getDayWorkouts(day)[idx];
+  const icon=src?.type==="strength"?"💪":"🏃";
+  const label=src?.type==="strength"?"אימון כוח":"ריצה";
+  const el=document.getElementById("copy-modal-days");
+  if(el){
+    let h='<div style="font-size:12px;color:var(--muted);margin-bottom:12px">מעתיק: <strong style="color:var(--text)">'+icon+' '+label+' ('+day+')</strong></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    DAYS.forEach(d=>{
+      const isSource=d===day;
+      const existing=getDayWorkouts(d).length;
+      h+='<button onclick="doCopyWorkout(\''+d+'\')" '+(isSource?"disabled":"")+' style="padding:12px 10px;border-radius:13px;border:1px solid '+(isSource?"transparent":"var(--border2)")+';background:'+(isSource?"rgba(255,255,255,0.04)":"var(--bg3)")+';color:'+(isSource?"var(--muted2)":"var(--text)")+';font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:'+(isSource?"default":"pointer")+';text-align:right;display:flex;justify-content:space-between;align-items:center">';
+      h+='<span>'+d+'</span>';
+      h+=(isSource?'<span style="font-size:10px;color:var(--muted2)">מקור</span>':(existing?'<span style="font-size:10px;color:var(--muted)">+'+existing+'</span>':''));
+      h+='</button>';
+    });
+    h+='</div>';
+    el.innerHTML=h;
+  }
+  document.getElementById("copy-workout-modal").style.display="flex";
+}
+function closeCopyWorkout(){
+  document.getElementById("copy-workout-modal").style.display="none";
+  copySource=null;
+}
+function doCopyWorkout(targetDay){
+  if(!copySource||!USER_PLAN)return;
+  normalizePlan();
+  const src=getDayWorkouts(copySource.day)[copySource.idx];
+  if(!src){closeCopyWorkout();return;}
+  const copy=JSON.parse(JSON.stringify(src));
+  if(!Array.isArray(USER_PLAN[targetDay]))USER_PLAN[targetDay]=[];
+  USER_PLAN[targetDay].push(copy);
+  save("user_plan",USER_PLAN);
+  closeCopyWorkout();
+  toast("✓ אימון הועתק ל"+targetDay+"!");
+  renderFitness();
 }
 
 let weDay=null;
