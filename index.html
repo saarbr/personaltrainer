@@ -93,6 +93,43 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   z-index:999;opacity:0;transition:all 0.28s;pointer-events:none;white-space:nowrap;
   box-shadow:0 4px 20px rgba(0,212,161,0.12);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SPECIAL EFFECTS ── */
+/* Ripple */
+.ripple-host{position:relative;overflow:hidden;}
+.rwave{position:absolute;border-radius:50%;background:rgba(255,255,255,0.22);
+  width:8px;height:8px;margin:-4px;pointer-events:none;
+  animation:rwave-anim 0.55s ease-out forwards;}
+@keyframes rwave-anim{to{transform:scale(28);opacity:0}}
+
+/* Hero animated gradient */
+@keyframes heroGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Score ring draw */
+.score-ring-line{transition:stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1);}
+
+/* Number count-up handled in JS */
+
+/* Confetti fall */
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}
+  80%{opacity:1}
+  100%{transform:translateY(90vh) rotate(600deg) scale(0.6);opacity:0}
+}
+
+/* Subtle card hover glow */
+.card:hover{box-shadow:0 4px 30px rgba(139,127,255,0.13),0 2px 18px rgba(0,0,0,0.2);transition:box-shadow 0.3s;}
+
+/* Floating orbs in hero */
+@keyframes floatOrb{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6px,-10px) scale(1.06)}}
+
+/* Stagger entrance for list items */
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* Progress bar shimmer */
+@keyframes shimmerBar{0%{background-position:200% center}100%{background-position:-200% center}}
+.shimmer-bar{background:linear-gradient(90deg,transparent 25%,rgba(255,255,255,0.35) 50%,transparent 75%) !important;background-size:200% auto !important;animation:shimmerBar 1.8s linear infinite !important;}
+
 #qcbtn{position:fixed;bottom:calc(var(--nav-h)+14px);left:16px;
   width:50px;height:50px;border-radius:50%;border:none;cursor:pointer;
   background:var(--purple-g);color:#fff;font-size:24px;
@@ -357,36 +394,41 @@ const QUICK_FOODS=[
   {e:"🍞",l:"לחם שיפון",cal:80,p:3,c:15,f:1}
 ];
 const QUOTES=[
-  "הצלחה היא סכום של מאמצים קטנים שחוזרים יום אחר יום.",
-  "הגוף משיג מה שהמוח מאמין.",
-  "אל תחכה למוטיבציה — צור אותה.",
-  "כל אימון הוא השקעה בעצמך.",
-  "הכאב של היום הוא הכוח של מחר.",
-  "התקדמות, לא שלמות.",
-  "הדרך הארוכה ביותר מתחילה בצעד אחד.",
-  "אתה חזק יותר ממה שאתה חושב.",
-  "כל יום הוא הזדמנות חדשה.",
-  "האדם היחיד שצריך להיות טוב ממנו — הוא אתה של אתמול.",
-  "תוצאות גדולות דורשות מאמצים גדולים.",
-  "אל תוותר. הסיבה שאתה לא מוותר היא הסיבה שתצליח.",
-  "הגוף שלך יכול לעשות הכל — הראש שלך צריך להאמין.",
-  "שמור על המסלול. ההתמדה מנצחת כישרון.",
-  "כל rep הוא צעד קרוב יותר ליעד.",
-  "הכוח לא בא מן הנצחון — הוא בא מהמאבק.",
-  "אל תמדוד את עצמך בהישגים של אחרים.",
-  "היום שהיית יכול לוותר הוא היום שאתה בוחר להמשיך.",
-  "ייגיעת בלילה — הצלחה בבוקר.",
-  "קשיים בונים אופי.",
-  "כל אימון שאתה מסיים הוא ניצחון.",
-  "הגישה קובעת הכל.",
-  "פחות תירוצים, יותר תוצאות.",
-  "תאמין בתהליך.",
-  "אתה לא רק מאמן את הגוף — אתה מאמן את הרוח.",
-  "הנחישות מגיעה מבפנים.",
-  "כשקשה לך — זכור למה התחלת.",
-  "גוף חזק, מוח חד.",
-  "כל יום שאתה לא מתקדם — מישהו אחר כן.",
-  "האימון הקשה ביותר הוא זה שהתחלת.",
+  {q:"אל תספור את הימים — עשה את הימים לספור.",a:"מוחמד עלי"},
+  {q:"הכאב הוא זמני. הוויתור נשאר לנצח.",a:"לאנס ארמסטרונג"},
+  {q:"הכישרון ניצח משחקים, אבל העבודה הקשה ניצחת אליפויות.",a:"מייקל ג'ורדן"},
+  {q:"אני לא מפחד מאיש שתרגל 10,000 בעיטות שונות. אני מפחד ממי שתרגל בעיטה אחת 10,000 פעמים.",a:"ברוס לי"},
+  {q:"כל מה שהמוח יכול להאמין ולדמיין — הוא יכול להשיג.",a:"נפוליאון היל"},
+  {q:"אתה לא מפסיד עד שאתה מפסיק לנסות.",a:"מייק דיטקה"},
+  {q:"הגוף משיג מה שהמוח מאמין.",a:"ברוס לי"},
+  {q:"אם זה לא מאתגר אותך — זה לא משנה אותך.",a:"פרד דיוויסון"},
+  {q:"ההבדל בין הבלתי אפשרי לאפשרי טמון ברצון של האדם.",a:"טומי לאסורדה"},
+  {q:"אנשים שאומרים שהכוח שלי מגיע מהגנטיקה טועים — הוא מגיע מהעבודה.",a:"ארנולד שוורצנגר"},
+  {q:"לפעמים אתה מנצח, לפעמים אתה לומד.",a:"נלסון מנדלה"},
+  {q:"הדרך היחידה לעשות עבודה נהדרת היא לאהוב את מה שאתה עושה.",a:"סטיב ג'ובס"},
+  {q:"אנחנו מה שאנחנו עושים שוב ושוב. המצוינות, אם כך, היא לא מעשה אלא הרגל.",a:"אריסטו"},
+  {q:"קשה לפעמים. אבל קשה זמני — מוותר זה לנצח.",a:"קובי בראיינט"},
+  {q:"אני נכשלתי שוב ושוב בחיי. ולכן — הצלחתי.",a:"מייקל ג'ורדן"},
+  {q:"אתה רוצה לדעת מי אתה? אל תשאל. תעשה. פעולה תגדיר אותך ותגלה אותך.",a:"תומאס ג'פרסון"},
+  {q:"הדבר הבלתי אפשרי של היום הוא החימום של מחר.",a:"אלאן טיורינג"},
+  {q:"עשה את הדבר שאתה חושב שאתה לא יכול לעשות.",a:"אלינור רוזוולט"},
+  {q:"לא משנה כמה אתה הולך לאט — אתה מנצח את כל מי שיושב בבית.",a:"קובי בראיינט"},
+  {q:"ייסורים זמניים. גאווה — לנצח.",a:"טום פלאץ"},
+  {q:"אנשים רגילים עם מסירות יוצאת דופן מגיעים לתוצאות יוצאות דופן.",a:"ג'ים ראון"},
+  {q:"אל תתן לאתמול לקחת יותר מדי מהיום.",a:"וויל רוג'רס"},
+  {q:"כשאתה עייף, זכור למה התחלת.",a:"קובי בראיינט"},
+  {q:"ההצלחה היא לא סופית, הכישלון אינו קטלני — האומץ להמשיך הוא מה שחשוב.",a:"וינסטון צ'רצ'יל"},
+  {q:"אם אתה רוצה משהו שלא היה לך מעולם — עשה משהו שלא עשית מעולם.",a:"תומאס ג'פרסון"},
+  {q:"כאב, יגיעה, זיעה — זה לא עונש. זו ההשקעה.",a:"ארנולד שוורצנגר"},
+  {q:"אני עושה את הדברים הכי קשים קודם כדי שהשאר יהיה קל.",a:"סרינה וויליאמס"},
+  {q:"אל תפחד להיות טוב. פחד מלהפסיק להתאמן.",a:"רוג'ר פדרר"},
+  {q:"כל הישג גדול בא אחרי רצף של כישלונות.",a:"וולט דיסני"},
+  {q:"אתה לא יכול לשלוט על מה שקורה לך, אבל אתה שולט איך אתה מגיב.",a:"מייאה אנג'לו"},
+  {q:"הייתי עובד 16 שעות ביום כי אני אוהב את מה שאני עושה.",a:"אילון מאסק"},
+  {q:"כשאני מסתכל על מה שעשיתי — אני מסתכל על מה שלא עשיתי.",a:"ליאונל מסי"},
+  {q:"כישרון הוא דבר יפה, אבל עבודה קשה — עליה אתה יכול לסמוך.",a:"גאיל דיוורס"},
+  {q:"אני לא מאמין בגבולות. אני מאמין בעבודה.",a:"דוויין ג'ונסון"},
+  {q:"המוח שלי תמיד אמר לי שהגוף שלי עייף. ואני תמיד סירבתי להקשיב.",a:"קרל לואיס"},
 ];
 const OB_SLIDES=[
   {icon:"👋",title:"ברוך הבא ל-MyWay!",desc:"האפליקציה האישית שלך לכושר, תזונה ופרודוקטיביות.\nבוא נסביר לך בקצרה איך הכל עובד."},
@@ -938,12 +980,11 @@ function renderDash(){
   const deficit=PROFILE.tdee-(nutTot.cal-burnT);
   const todayHabits=HABIT_LOG[t]||{};
   const habitsDone=HABITS_DEF.filter(h=>todayHabits[h.id]).length;
-  const streak=calcStreak();
   const greetWord=hour<5?"לילה טוב":hour<12?"בוקר טוב":hour<17?"צהריים טובים":"ערב טוב";
   const greetIcon=hour<5?"🌙":hour<12?"☀️":hour<17?"👋":"🌙";
   const defColor=deficit>=300&&deficit<=600?"var(--teal)":deficit>600?"var(--amber)":"#FF6B6B";
   const firstName=getUserFirstName();
-  const quote=getDailyQuote();
+  const _q=getDailyQuote();const quote=_q?.q||_q||"";const quoteAuthor=_q?.a||"";
 
   const calPct=Math.min(100,Math.round((nutTot.cal/PROFILE.target)*100));
   const protPct=Math.min(100,Math.round((nutTot.p/PROFILE.protein)*100));
@@ -951,15 +992,14 @@ function renderDash(){
   let h="";
 
   // ── HERO GREETING ──
-  h+='<div style="background:linear-gradient(135deg,rgba(139,127,255,0.15),rgba(0,212,161,0.08));border:1px solid rgba(139,127,255,0.25);border-radius:22px;padding:20px 18px 16px;margin-bottom:12px;position:relative;overflow:hidden">';
-  h+='<div style="position:absolute;top:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(139,127,255,0.12),transparent 70%);pointer-events:none"></div>';
-  if(streak>0){
-    h+='<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,179,71,0.15);border:1px solid rgba(255,179,71,0.35);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--amber);margin-bottom:10px">🔥 '+streak+' ימים רצופים</div>';
-  }
+  h+='<div style="background:linear-gradient(135deg,rgba(139,127,255,0.18) 0%,rgba(0,212,161,0.1) 50%,rgba(116,185,255,0.1) 100%);background-size:300% 300%;animation:heroGrad 10s ease infinite;border:1px solid rgba(139,127,255,0.28);border-radius:22px;padding:20px 18px 16px;margin-bottom:12px;position:relative;overflow:hidden">';
+  h+='<div style="position:absolute;top:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(139,127,255,0.14),transparent 70%);pointer-events:none;animation:floatOrb 7s ease-in-out infinite"></div>';
+  h+='<div style="position:absolute;bottom:-30px;right:-20px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,161,0.1),transparent 70%);pointer-events:none;animation:floatOrb 9s ease-in-out infinite reverse"></div>';
   h+='<div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.3px;margin-bottom:6px">'+dayName+' · '+new Date().toLocaleDateString("he-IL",{day:"numeric",month:"long"})+'</div>';
   h+='<div style="font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1.2">'+greetWord+(firstName?", "+firstName:"")+" "+greetIcon+'</div>';
   h+='<div style="height:1px;background:linear-gradient(90deg,rgba(139,127,255,0.4),transparent);margin:12px 0"></div>';
-  h+='<div style="font-size:12px;color:rgba(240,242,255,0.6);font-style:italic;line-height:1.65">"'+esc(quote)+'"</div>';
+  h+='<div style="font-size:12px;color:rgba(240,242,255,0.65);font-style:italic;line-height:1.65">"'+esc(quote)+'"</div>';
+  if(quoteAuthor)h+='<div style="font-size:11px;color:rgba(139,127,255,0.8);font-weight:700;margin-top:5px;text-align:left">— '+esc(quoteAuthor)+'</div>';
   h+='</div>';
 
   // ── DAILY SCORE ──
@@ -977,9 +1017,9 @@ function renderDash(){
   h+='<div style="background:var(--card);border:1px solid '+c2r(scoreHex,0.35)+';border-radius:20px;padding:16px 18px;margin-bottom:12px">';
   h+='<div style="display:flex;align-items:center;gap:16px">';
   h+='<div style="position:relative;width:90px;height:90px;flex-shrink:0">';
-  h+='<svg width="90" height="90"><circle cx="45" cy="45" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/><circle cx="45" cy="45" r="'+r+'" fill="none" stroke="'+scoreColor+'" stroke-width="9" stroke-dasharray="'+dash.toFixed(1)+' '+circ.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 45 45)"/></svg>';
+  h+='<svg width="90" height="90"><circle cx="45" cy="45" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/><circle id="score-ring-line" cx="45" cy="45" r="'+r+'" fill="none" stroke="'+scoreColor+'" stroke-width="9" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 45 45)" class="score-ring-line"/></svg>';
   h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">';
-  h+='<div style="font-size:26px;font-weight:900;color:'+scoreColor+';line-height:1">'+dayScore+'</div>';
+  h+='<div id="score-num" style="font-size:26px;font-weight:900;color:'+scoreColor+';line-height:1">0</div>';
   h+='<div style="font-size:9px;color:var(--muted)">/ 100</div>';
   h+='</div></div>';
   h+='<div style="flex:1">';
@@ -1137,6 +1177,15 @@ function renderDash(){
   h+='</div></div>';
 
   el.innerHTML=h;
+  // ── animate score ring & number ──
+  requestAnimationFrame(()=>{
+    const ring=document.getElementById('score-ring-line');
+    const numEl=document.getElementById('score-num');
+    const _circ=2*Math.PI*38;
+    if(ring){ring.style.strokeDashoffset=(_circ*(1-dayScore/100)).toFixed(1);}
+    if(numEl)animCount(numEl,dayScore);
+    if(dayScore>=100)setTimeout(launchConfetti,400);
+  });
 }
 
 function toggleTask(date,idx){
@@ -2097,8 +2146,6 @@ function buildGoalsHTML(){
   const doneCats=CATS.filter(c=>todayData[c.id]?.done).length;
   const scored=CATS.filter(c=>todayData[c.id]?.score);
   const avgScore=scored.length?Math.round(scored.reduce((s,c)=>s+(todayData[c.id]?.score||0),0)/scored.length):0;
-  const streak=calcStreak();
-
   let h='<div style="display:flex;gap:5px;margin-bottom:11px">';
   [["today","🎯 היום"],["new","✏️ יעד חדש"],["history","📊 היסטוריה"]].forEach(([k,l])=>{
     h+='<button onclick="goalsView=\''+k+'\';renderProductivity()" style="flex:1;padding:8px 5px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;background:'+(goalsView===k?"var(--purple)":"var(--bg2)")+';color:'+(goalsView===k?"#fff":"var(--muted)")+'">'+l+'</button>';
@@ -2108,8 +2155,8 @@ function buildGoalsHTML(){
   if(goalsView==="today"){
     h+='<input type="date" value="'+goalDate+'" onchange="goalDate=this.value;renderProductivity()" class="inp" style="margin-bottom:11px;font-size:12px"/>';
     if(totalSet>0&&goalDate===t){
-      h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px">';
-      [["הושלמו",doneCats+"/"+totalSet,"var(--purple)"],["ציון",avgScore||"—",(avgScore>=7?"#00D4A1":avgScore>=5?"#FFB347":"#FF6B6B")],["רצף",streak,"var(--amber)"]].forEach(([l,v,c])=>{
+      h+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:11px">';
+      [["הושלמו",doneCats+"/"+totalSet,"var(--purple)"],["ציון",avgScore||"—",(avgScore>=7?"#00D4A1":avgScore>=5?"#FFB347":"#FF6B6B")]].forEach(([l,v,c])=>{
         h+='<div style="background:var(--card);border-radius:12px;padding:11px;text-align:center"><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px">'+l+'</div><div style="font-size:22px;font-weight:900;color:'+c+'">'+v+'</div></div>';
       });
       h+='</div>';
@@ -2790,6 +2837,7 @@ function finishWorkoutConfirm(){
   document.getElementById("active-workout-modal").style.display="none";
   activeWorkout=null;
   toast("🏆 אימון הסתיים! "+mins+" דקות");
+  setTimeout(launchConfetti,300);
   renderFitness();
 }
 function setNewSegType(t){
@@ -3239,6 +3287,47 @@ function showLoading(){
 function hideLoading(){
   const ls=document.getElementById('loading-screen');
   if(ls)ls.style.display='none';
+}
+
+// ── RIPPLE ──
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('button');
+  if(!btn||btn.style.background==='none'||btn.style.background==='transparent')return;
+  btn.classList.add('ripple-host');
+  const r=btn.getBoundingClientRect();
+  const w=document.createElement('div');
+  w.className='rwave';
+  w.style.left=(e.clientX-r.left)+'px';
+  w.style.top=(e.clientY-r.top)+'px';
+  btn.appendChild(w);
+  w.addEventListener('animationend',()=>w.remove());
+},{passive:true});
+
+// ── CONFETTI ──
+function launchConfetti(){
+  const cols=['#8B7FFF','#00D4A1','#FFB347','#FF6B6B','#74B9FF','#FF79C6','#A29BFE'];
+  for(let i=0;i<70;i++){
+    const el=document.createElement('div');
+    const size=5+Math.random()*8;
+    const delay=Math.random()*0.6;
+    const dur=1.4+Math.random()*1.2;
+    el.style.cssText=`position:fixed;top:-10px;left:${10+Math.random()*80}vw;width:${size}px;height:${size}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.4?'50%':'3px'};pointer-events:none;z-index:9999;animation:confettiFall ${dur}s ease ${delay}s forwards`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+// ── COUNT-UP ──
+function animCount(el,target,dur=900){
+  if(!el)return;
+  const start=Date.now();
+  const from=parseInt(el.textContent)||0;
+  (function tick(){
+    const p=Math.min((Date.now()-start)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(target-from)*ease);
+    if(p<1)requestAnimationFrame(tick);
+  })();
 }
 </script>
 </body>
