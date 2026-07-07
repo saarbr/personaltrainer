@@ -731,6 +731,8 @@ function signOutFromProfile(){
 }
 
 let RUNS=load("runs",[]);
+let STR_LOG=load("str_log",[]);
+let _strExpandId=null;
 let COMP=load("comp",{});
 let NUT=load("nut",{});
 let BURNS=load("burns",{});
@@ -1230,47 +1232,100 @@ function renderFitness(){
     h+='</div>';
   }
   else {
-    if(!RUNS.length){
-      h+='<div class="empty"><div class="ei">🏃</div><div class="et">עדיין אין ריצות</div><div class="es">הוסף את הריצה הראשונה!</div></div>';
+    const allEntries=[
+      ...RUNS.map(r=>({...r,_type:"run"})),
+      ...STR_LOG.map(s=>({...s,_type:"strength"}))
+    ].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id-a.id);
+    if(!allEntries.length){
+      h+='<div class="empty"><div class="ei">🏋️</div><div class="et">עדיין אין אימונים</div><div class="es">סיים אימון כדי לראות אותו כאן</div></div>';
     } else {
-      h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">כל הריצות · '+RUNS.length+' אימונים</div>';
-      [...RUNS].sort((a,b)=>b.week-a.week||b.id-a.id).forEach(run=>{
-        const sess=SESS[run.type];
-        const tgt=getTargets(run.week)[run.type];
-        const diff=parseFloat((run.km-parseFloat(tgt)).toFixed(1));
-        const hrT=HR[run.type];
-        const hrOk=!run.avgHr||(run.avgHr>=hrT.min&&run.avgHr<=hrT.max);
-        h+='<div style="background:var(--card);border-radius:13px;padding:12px;margin-bottom:8px;display:flex;gap:9px;align-items:flex-start;border:1px solid '+c2r(sess.color,0.25)+'">';
-        h+='<div style="width:3px;border-radius:2px;background:'+sess.color+';min-height:45px;flex-shrink:0;margin-top:2px"></div>';
-        h+='<div style="flex:1">';
-        h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">';
-        h+='<span style="font-size:12px;font-weight:700;color:'+sess.color+'">'+sess.label+'</span>';
-        h+='<span style="font-size:10px;color:var(--muted);background:var(--bg3);padding:2px 6px;border-radius:20px">שבוע '+run.week+'</span>';
-        h+='<span style="font-size:10px;color:var(--muted)">'+run.date+'</span>';
-        h+='</div>';
-        h+='<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px">';
-        h+='<span style="font-size:18px;font-weight:900">'+run.km+'</span><span style="font-size:12px;color:var(--muted)">ק"מ</span>';
-        h+='<span style="font-size:12px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
-        if(run.avgHr) h+='<span style="font-size:12px;font-weight:600;color:'+(hrOk?"#00D4A1":"#FFB347")+'">♥ '+run.avgHr+'</span>';
-        h+='<span style="font-size:11px;font-weight:600;color:'+(diff>=0?"#00D4A1":"#FFB347")+'">'+(diff>=0?"+":"")+diff+' מיעד</span>';
-        h+='</div>';
-        if(run.notes) h+='<div style="font-size:11px;color:var(--muted2);font-style:italic;margin-top:2px">'+esc(run.notes)+'</div>';
-        if(run.splits&&run.splits.length){
-          h+='<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">';
-          h+='<div style="font-size:10px;font-weight:700;color:'+sess.color+';text-transform:uppercase;margin-bottom:5px">Splits · '+run.splits.length+' מקטעים</div>';
-          h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr;gap:2px 6px;font-size:10px">';
-          h+='<span style="color:var(--muted2)">#</span><span style="color:var(--muted2)">מרחק</span><span style="color:var(--muted2)">קצב</span><span style="color:var(--muted2)">דופק</span>';
-          run.splits.forEach(s=>{
-            h+='<span style="color:var(--muted)">'+s.lap+'</span>';
-            h+='<span style="color:var(--teal);">'+(s.dist?s.dist+' ק"מ':'—')+'</span>';
-            h+='<span style="color:var(--purple)">'+(s.pace||'—')+'</span>';
-            h+='<span style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'—')+'</span>';
-          });
-          h+='</div></div>';
+      h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">היסטוריה · '+allEntries.length+' אימונים</div>';
+      allEntries.forEach(entry=>{
+        if(entry._type==="run"){
+          const run=entry;
+          const sess=SESS[run.type];
+          const tgt=getTargets(run.week)[run.type];
+          const diff=parseFloat((run.km-parseFloat(tgt)).toFixed(1));
+          const hrT=HR[run.type];
+          const hrOk=!run.avgHr||(run.avgHr>=hrT.min&&run.avgHr<=hrT.max);
+          h+='<div style="background:var(--card);border-radius:13px;padding:12px;margin-bottom:8px;display:flex;gap:9px;align-items:flex-start;border:1px solid '+c2r(sess.color,0.25)+'">';
+          h+='<div style="width:3px;border-radius:2px;background:'+sess.color+';min-height:45px;flex-shrink:0;margin-top:2px"></div>';
+          h+='<div style="flex:1">';
+          h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">';
+          h+='<span style="font-size:12px;font-weight:700;color:'+sess.color+'">'+sess.label+'</span>';
+          h+='<span style="font-size:10px;color:var(--muted);background:var(--bg3);padding:2px 6px;border-radius:20px">שבוע '+run.week+'</span>';
+          h+='<span style="font-size:10px;color:var(--muted)">'+run.date+'</span>';
+          h+='</div>';
+          h+='<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px">';
+          h+='<span style="font-size:18px;font-weight:900">'+run.km+'</span><span style="font-size:12px;color:var(--muted)">ק"מ</span>';
+          h+='<span style="font-size:12px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
+          if(run.avgHr) h+='<span style="font-size:12px;font-weight:600;color:'+(hrOk?"#00D4A1":"#FFB347")+'">♥ '+run.avgHr+'</span>';
+          h+='<span style="font-size:11px;font-weight:600;color:'+(diff>=0?"#00D4A1":"#FFB347")+'">'+(diff>=0?"+":"")+diff+' מיעד</span>';
+          h+='</div>';
+          if(run.notes) h+='<div style="font-size:11px;color:var(--muted2);font-style:italic;margin-top:2px">'+esc(run.notes)+'</div>';
+          if(run.splits&&run.splits.length){
+            h+='<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">';
+            h+='<div style="font-size:10px;font-weight:700;color:'+sess.color+';text-transform:uppercase;margin-bottom:5px">Splits · '+run.splits.length+' מקטעים</div>';
+            h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr;gap:2px 6px;font-size:10px">';
+            h+='<span style="color:var(--muted2)">#</span><span style="color:var(--muted2)">מרחק</span><span style="color:var(--muted2)">קצב</span><span style="color:var(--muted2)">דופק</span>';
+            run.splits.forEach(s=>{
+              h+='<span style="color:var(--muted)">'+s.lap+'</span>';
+              h+='<span style="color:var(--teal);">'+(s.dist?s.dist+' ק"מ':'—')+'</span>';
+              h+='<span style="color:var(--purple)">'+(s.pace||'—')+'</span>';
+              h+='<span style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'—')+'</span>';
+            });
+            h+='</div></div>';
+          }
+          h+='</div>';
+          h+='<button onclick="delRun('+run.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px">✕</button>';
+          h+='</div>';
+        } else {
+          const s=entry;
+          const expanded=_strExpandId===s.id;
+          const mins=Math.floor((s.duration||0)/60);
+          const totalSets=s.exercises.reduce((a,ex)=>a+ex.sets.length,0);
+          const doneSets=s.exercises.reduce((a,ex)=>a+ex.sets.filter(st=>st.done).length,0);
+          h+='<div style="background:var(--card);border-radius:13px;padding:12px;margin-bottom:8px;border:1px solid rgba(139,127,255,0.25)">';
+          h+='<div style="display:flex;gap:9px;align-items:flex-start">';
+          h+='<div style="width:3px;border-radius:2px;background:var(--purple);min-height:45px;flex-shrink:0;margin-top:2px"></div>';
+          h+='<div style="flex:1">';
+          h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">';
+          h+='<span style="font-size:12px;font-weight:700;color:var(--purple)">💪 אימון כוח</span>';
+          h+='<span style="font-size:10px;color:var(--muted)">'+s.day+'</span>';
+          h+='<span style="font-size:10px;color:var(--muted)">'+s.date+'</span>';
+          h+='</div>';
+          h+='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">';
+          h+='<span style="font-size:15px;font-weight:800">'+s.exercises.length+'</span><span style="font-size:11px;color:var(--muted)">תרגילים</span>';
+          h+='<span style="font-size:15px;font-weight:800">'+doneSets+'/'+totalSets+'</span><span style="font-size:11px;color:var(--muted)">סטים</span>';
+          if(mins>0)h+='<span style="font-size:11px;color:var(--muted)">⏱ '+mins+' דק\'</span>';
+          h+='</div>';
+          h+='</div>';
+          h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">';
+          h+='<button onclick="delStrLog('+s.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px">✕</button>';
+          h+='<button onclick="_strExpandId=(_strExpandId==='+s.id+'?null:'+s.id+');renderFitness()" style="background:rgba(139,127,255,0.12);border:1px solid rgba(139,127,255,0.3);color:var(--purple);border-radius:8px;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:4px 10px">'+(expanded?"▲ סגור":"▼ פירוט")+'</button>';
+          h+='</div>';
+          h+='</div>';
+          if(expanded){
+            h+='<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">';
+            s.exercises.forEach(ex=>{
+              const exDone=ex.sets.filter(st=>st.done).length;
+              h+='<div style="margin-bottom:10px">';
+              h+='<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">'+esc(ex.name||"תרגיל")+'</div>';
+              h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr;gap:3px 8px;font-size:10px;color:var(--muted2)">';
+              h+='<span>#</span><span>חזרות</span><span>משקל</span><span>בוצע</span>';
+              ex.sets.forEach((st,si)=>{
+                h+='<span style="color:var(--muted)">'+(si+1)+'</span>';
+                h+='<span style="color:var(--text)">'+(st.reps||'—')+'</span>';
+                h+='<span style="color:var(--teal)">'+(st.weight?st.weight+' ק"ג':'—')+'</span>';
+                h+='<span>'+(st.done?'<span style="color:#00D4A1">✓</span>':'<span style="color:var(--muted2)">✗</span>')+'</span>';
+              });
+              h+='</div>';
+              h+='</div>';
+            });
+            h+='</div>';
+          }
+          h+='</div>';
         }
-        h+='</div>';
-        h+='<button onclick="delRun('+run.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px">✕</button>';
-        h+='</div>';
       });
     }
   }
@@ -1388,6 +1443,11 @@ function delRun(id){
   if(!confirm('למחוק?'))return;
   RUNS=RUNS.filter(r=>r.id!==id);
   save('runs',RUNS);renderFitness();
+}
+function delStrLog(id){
+  if(!confirm('למחוק?'))return;
+  STR_LOG=STR_LOG.filter(s=>s.id!==id);
+  save('str_log',STR_LOG);renderFitness();
 }
 
 function submitRun(){
@@ -2709,6 +2769,23 @@ function finishWorkoutConfirm(){
     }
   });
   save("workout_hist",WORKOUT_HIST);
+  // Mark workout as done in COMP
+  const _ck=activeWorkout.idx===0?(todayStr()+"-"+activeWorkout.day):(todayStr()+"-"+activeWorkout.day+"-"+activeWorkout.idx);
+  COMP[_ck]=true;
+  save("comp",COMP);
+  // Save full session to STR_LOG
+  const _strEntry={
+    id:Date.now(),
+    date:todayStr(),
+    day:activeWorkout.day,
+    duration,
+    exercises:activeWorkout.exercises.map(ex=>({
+      name:ex.name,
+      sets:ex.sets.map(s=>({reps:s.reps,weight:s.weight,done:s.done}))
+    }))
+  };
+  STR_LOG.push(_strEntry);
+  save("str_log",STR_LOG);
   const mins=Math.floor(duration/60);
   document.getElementById("active-workout-modal").style.display="none";
   activeWorkout=null;
