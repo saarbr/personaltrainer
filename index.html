@@ -2263,6 +2263,7 @@ function normalizePlan(){
 }
 
 let copySource=null;
+let exDragIdx=null;
 function openCopyWorkout(day,idx){
   if(!USER_PLAN){toast("אין תוכנית אימונים מוגדרת");return;}
   copySource={day,idx};
@@ -2337,8 +2338,9 @@ function renderWorkoutEdit(){
     exs.forEach((ex,i)=>{
       const prevKey=(ex.name||"").trim().toLowerCase();
       const prev=prevKey&&WORKOUT_HIST[prevKey]?WORKOUT_HIST[prevKey]:null;
-      h+='<div style="margin-bottom:8px">';
-      h+='<div style="display:flex;align-items:center;gap:6px">';
+      h+='<div class="ex-drag-row" draggable="true" ondragstart="exDragStart(event,'+i+')" ondragover="exDragOver(event,'+i+')" ondragenter="exDragEnter(event,'+i+')" ondragleave="exDragLeave(event,'+i+')" ondrop="exDrop(event,'+i+')" ondragend="exDragEnd()" style="margin-bottom:6px;border:1.5px solid transparent;border-radius:11px;padding:3px 2px;transition:background 0.15s,border-color 0.15s">';
+      h+='<div style="display:flex;align-items:center;gap:5px">';
+      h+='<span style="cursor:grab;color:var(--muted2);font-size:18px;padding:4px 2px;flex-shrink:0;line-height:1;user-select:none;touch-action:none">⠿</span>';
       h+='<input type="text" value="'+ex.name+'" oninput="updateExercise('+i+',\'name\',this.value)" class="inp" placeholder="שם תרגיל" style="flex:2;font-size:12px;padding:7px 8px"/>';
       h+='<input type="text" value="'+(ex.sets||"")+'" oninput="updateExercise('+i+',\'sets\',this.value)" class="inp" placeholder="סטים" style="width:44px;font-size:12px;padding:7px 6px;text-align:center"/>';
       h+='<input type="text" value="'+(ex.reps||"")+'" oninput="updateExercise('+i+',\'reps\',this.value)" class="inp" placeholder="חז\'" style="width:44px;font-size:12px;padding:7px 6px;text-align:center"/>';
@@ -2348,7 +2350,7 @@ function renderWorkoutEdit(){
       if(prev){
         const pw=prev.weight?(' @ '+prev.weight+'ק"ג'):'';
         const pd=prev.date?(' · '+prev.date.slice(5).replace('-','/')):'';
-        h+='<div style="font-size:10px;color:var(--muted);padding:2px 4px 0;display:flex;align-items:center;gap:4px">';
+        h+='<div style="font-size:10px;color:var(--muted);padding:2px 4px 0 26px;display:flex;align-items:center;gap:4px">';
         h+='<span style="color:var(--muted2)">↩</span>';
         h+='<span>פעם קודמת: '+(prev.sets||'')+'×'+(prev.reps||'')+pw+pd+'</span>';
         h+='</div>';
@@ -2435,6 +2437,51 @@ function removeExercise(idx){
   normalizePlan();
   USER_PLAN[weDay][weWorkoutIdx].exercises.splice(idx,1);
   renderWorkoutEdit();
+}
+function moveExercise(from,to){
+  normalizePlan();
+  const exs=USER_PLAN[weDay][weWorkoutIdx].exercises;
+  if(!exs||from<0||to<0||from>=exs.length||to>=exs.length)return;
+  const[moved]=exs.splice(from,1);
+  exs.splice(to,0,moved);
+  renderWorkoutEdit();
+}
+function exDragStart(e,idx){
+  exDragIdx=idx;
+  e.dataTransfer.effectAllowed='move';
+  setTimeout(()=>{
+    const rows=document.querySelectorAll('.ex-drag-row');
+    if(rows[idx])rows[idx].style.opacity='0.4';
+  },0);
+}
+function exDragOver(e,idx){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+}
+function exDragEnter(e,idx){
+  if(exDragIdx===null||exDragIdx===idx)return;
+  const rows=document.querySelectorAll('.ex-drag-row');
+  rows.forEach((r,i)=>{
+    r.style.borderColor=i===idx?'var(--purple)':'transparent';
+    r.style.background=i===idx?'rgba(139,127,255,0.08)':'';
+  });
+}
+function exDragLeave(e,idx){
+  if(!e.currentTarget.contains(e.relatedTarget)){
+    const rows=document.querySelectorAll('.ex-drag-row');
+    if(rows[idx]){rows[idx].style.borderColor='transparent';rows[idx].style.background='';}
+  }
+}
+function exDrop(e,idx){
+  e.preventDefault();
+  if(exDragIdx===null||exDragIdx===idx){exDragIdx=null;return;}
+  const from=exDragIdx;
+  exDragIdx=null;
+  moveExercise(from,idx);
+}
+function exDragEnd(){
+  exDragIdx=null;
+  document.querySelectorAll('.ex-drag-row').forEach(r=>{r.style.opacity='';r.style.borderColor='transparent';r.style.background='';});
 }
 function updateExercise(idx,field,val){
   normalizePlan();
