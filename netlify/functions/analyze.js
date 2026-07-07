@@ -46,6 +46,15 @@ exports.handler = async function(event, context) {
 
 חשוב: תן הערכה ריאלית ומדויקת ככל האפשר לפי כמויות סטנדרטיות אם לא צוינו כמויות.`
       }];
+    } else if (type === "splits") {
+      if (!image) return { statusCode: 400, headers, body: JSON.stringify({ error: "No image provided" }) };
+      messages = [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: mediaType || "image/jpeg", data: image } },
+          { type: "text", text: 'Extract all lap/split data from this Garmin/Strava splits screenshot. Return JSON only, no markdown:\n{"splits":[{"lap":<int>,"dist":<decimal km>,"pace":"<MM:SS or null>","hr":<int or null>,"time":"<MM:SS or null>"}]}\nInclude every lap row visible. If it\'s an interval workout with work/rest laps, include all of them.' }
+        ]
+      }];
     } else {
       if (!image) return { statusCode: 400, headers, body: JSON.stringify({ error: "No image provided" }) };
       messages = [{
@@ -57,6 +66,7 @@ exports.handler = async function(event, context) {
       }];
     }
 
+    const maxTokens = type === "splits" ? 1200 : 500;
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -66,7 +76,7 @@ exports.handler = async function(event, context) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 500,
+        max_tokens: maxTokens,
         messages
       })
     });
