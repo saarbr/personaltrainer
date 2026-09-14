@@ -788,7 +788,7 @@ function arcGauge(pct,w,h,accentHex,n,pw,pl,opts){
   const filled=Math.round(Math.max(0,Math.min(1,pct))*n);
   let petals='';
   for(let i=0;i<n;i++){
-    const angle=180-(i/(n-1))*180+angleOffset;
+    const angle=-90+(i/(n-1))*180+angleOffset;
     const fill=i<filled?accentHex:"var(--border2)";
     petals+='<rect x="'+(cx-pw/2).toFixed(1)+'" y="'+(cy-radiusRef/2).toFixed(1)+'" width="'+pw+'" height="'+pl+'" rx="'+(pw/2)+'" fill="'+fill+'" transform="rotate('+angle.toFixed(1)+' '+cx+' '+cy+')"/>';
   }
