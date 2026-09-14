@@ -7,91 +7,88 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>MyWay</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#07090F;--bg2:#0C0F1A;--bg3:#111520;--card:#111827;
-  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
-  --text:#EEF0FF;--muted:rgba(238,240,255,0.45);--muted2:rgba(238,240,255,0.2);
-  --purple:#8B7FFF;--purple-g:linear-gradient(135deg,#8B7FFF,#6C5CE7);
-  --teal:#00D4A1;--amber:#FFB347;--coral:#FF6B6B;--pink:#FF79C6;--blue:#74B9FF;
-  --nav-h:72px;--radius:18px;--radius-sm:12px;
+  --bg:#17140F;--bg2:#1E1A14;--bg3:#262019;--card:#1C1811;
+  --border:rgba(245,241,232,0.08);--border2:rgba(245,241,232,0.14);
+  --text:#F5F1E8;--muted:rgba(245,241,232,0.5);--muted2:rgba(245,241,232,0.24);
+  --purple:#FF7A45;--purple-g:linear-gradient(135deg,#FF7A45,#E85D2B);
+  --teal:#6FA86B;--amber:#E8B54A;--coral:#E85C4A;--pink:#D98878;--blue:#6B8FA3;
+  --nav-h:80px;--radius:12px;--radius-sm:8px;
+  --ink:#17140F;
 }
 body.light{
-  --bg:#F0F3FF;--bg2:#E6E9F7;--bg3:#DDE1F5;--card:#FFFFFF;
-  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
-  --text:#1A1D2E;--muted:rgba(26,29,46,0.45);--muted2:rgba(26,29,46,0.22);
+  --bg:#EFEAE1;--bg2:#E5DFD3;--bg3:#DAD2C2;--card:#FAF7F2;
+  --border:rgba(26,24,21,0.08);--border2:rgba(26,24,21,0.14);
+  --text:#1A1815;--muted:rgba(26,24,21,0.5);--muted2:rgba(26,24,21,0.24);
 }
-body.light .header{background:rgba(240,243,255,0.9);border-bottom-color:rgba(139,127,255,0.18);}
-body.light .nav{background:rgba(240,243,255,0.96);border-top-color:rgba(0,0,0,0.07);}
-body.light .logo-text{background:linear-gradient(120deg,#1A1D2E 40%,rgba(139,127,255,0.9));-webkit-background-clip:text;background-clip:text;}
-body.light .card{box-shadow:0 2px 14px rgba(0,0,0,0.06);}
-body.light .inp{background:#fff;border-color:rgba(0,0,0,0.13);color:var(--text);}
+body.light .header{background:rgba(239,234,225,0.9);border-bottom-color:rgba(255,122,69,0.2);}
+body.light .logo-text{background:linear-gradient(120deg,#1A1815 40%,rgba(255,122,69,0.9));-webkit-background-clip:text;background-clip:text;}
+body.light .card{box-shadow:0 2px 14px rgba(0,0,0,0.05);}
+body.light .inp{background:#fff;border-color:rgba(0,0,0,0.1);color:var(--text);}
 body.light #signin-screen{background:var(--bg);}
 body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direction:rtl;
   min-height:100vh;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));
   padding-top:env(safe-area-inset-top);overflow-x:hidden;}
 .header{position:sticky;top:0;z-index:200;
-  background:rgba(7,9,15,0.88);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
-  border-bottom:1px solid rgba(139,127,255,0.14);
-  padding:12px 18px;display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 4px 28px rgba(0,0,0,0.3);}
+  background-color:var(--bg);opacity:0.97;
+  padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
 .logo-icon{width:38px;height:38px;border-radius:12px;background:var(--purple-g);
   display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;
-  box-shadow:0 0 20px rgba(139,127,255,0.5),0 2px 8px rgba(0,0,0,0.3);}
+  box-shadow:0 0 20px rgba(255,122,69,0.4),0 2px 8px rgba(0,0,0,0.3);}
 .logo-text{font-size:24px;font-weight:900;letter-spacing:-0.5px;
-  background:linear-gradient(120deg,#fff 40%,rgba(139,127,255,0.85));
+  background:linear-gradient(120deg,var(--text) 40%,rgba(255,122,69,0.85));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .logo-sub{font-size:10px;color:var(--muted);letter-spacing:0.2px;margin-top:1px}
-.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
-  padding-bottom:env(safe-area-inset-bottom);
-  background:rgba(7,9,15,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-top:1px solid rgba(255,255,255,0.06);display:flex;z-index:200;}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;border:none;background:transparent;color:var(--muted);cursor:pointer;
-  font-family:'Rubik',sans-serif;font-size:10px;font-weight:600;transition:all 0.22s;position:relative;padding-top:3px;}
-.nb.active{color:var(--purple)}
-.nb.active::after{content:'';position:absolute;top:0;left:22%;right:22%;height:2.5px;
-  background:var(--purple-g);border-radius:0 0 6px 6px;box-shadow:0 0 10px rgba(139,127,255,0.7);}
-.ni{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;
-  stroke-linecap:round;stroke-linejoin:round;transition:transform 0.22s;}
-.nb.active .ni{transform:scale(1.12)}
+.nav{position:fixed;bottom:12px;left:14px;right:14px;height:52px;
+  background:#151210;border:1px solid rgba(245,241,232,0.08);border-radius:26px;display:flex;align-items:center;z-index:200;
+  box-shadow:0 8px 28px rgba(0,0,0,0.4);padding:0 6px;}
+.nb{flex:1;display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;color:rgba(245,241,232,0.42);cursor:pointer;
+  font-family:'Rubik',sans-serif;transition:all 0.25s;position:relative;height:38px;padding:0;}
+.nb.active{color:#151210;}
+.nb.active::before{content:'';position:absolute;width:34px;height:34px;border-radius:50%;
+  background:var(--purple-g);box-shadow:0 4px 14px rgba(255,122,69,0.5);z-index:0;}
+.ni{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;transition:transform 0.22s;flex-shrink:0;position:relative;z-index:1;}
+.nb-label{display:none;}
 .page{display:none;padding:14px 16px 10px;animation:fadeIn 0.25s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pulse-glow{0%,100%{box-shadow:0 4px 20px rgba(139,127,255,0.6),0 0 0 0 rgba(139,127,255,0.35)}65%{box-shadow:0 4px 20px rgba(139,127,255,0.6),0 0 0 11px rgba(139,127,255,0)}}
-.subtabs{display:flex;gap:4px;margin-bottom:14px;background:var(--bg2);
-  border-radius:14px;padding:4px;border:1px solid var(--border);}
-.stb{flex:1;padding:9px 5px;border-radius:10px;border:none;cursor:pointer;
-  font-family:'Rubik',sans-serif;font-size:11px;font-weight:700;
+@keyframes pulse-glow{0%,100%{box-shadow:0 4px 20px rgba(255,122,69,0.6),0 0 0 0 rgba(255,122,69,0.35)}65%{box-shadow:0 4px 20px rgba(255,122,69,0.6),0 0 0 11px rgba(255,122,69,0)}}
+.subtabs{display:flex;gap:3px;margin-bottom:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;}
+.stb{flex:1;padding:7px 5px;border-radius:6px;border:none;cursor:pointer;
+  font-family:'Rubik',sans-serif;font-size:10px;font-weight:700;
   background:transparent;color:var(--muted);transition:all 0.22s;}
-.stb.on{color:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.stb.on{color:#151210;background:var(--purple-g);}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px;
   box-shadow:0 2px 18px rgba(0,0,0,0.2);}
 .fi{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
-.fv{font-size:28px;font-weight:900;letter-spacing:-0.5px;line-height:1;}
+.fv{font-size:28px;font-weight:900;letter-spacing:-0.5px;line-height:1;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
 .fu{font-size:10px;color:var(--muted);margin-top:2px;}
-.inp{width:100%;padding:11px 14px;border-radius:13px;border:1px solid var(--border2);
+.inp{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border2);
   background:var(--bg3);color:var(--text);font-family:'Rubik',sans-serif;font-size:13px;
   outline:none;direction:rtl;transition:border-color 0.2s,box-shadow 0.2s;}
-.inp:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,127,255,0.12);}
-.btn{padding:12px;border-radius:13px;border:none;cursor:pointer;
+.inp:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(255,122,69,0.12);}
+.btn{padding:12px;border-radius:10px;border:none;cursor:pointer;
   font-family:'Rubik',sans-serif;font-size:13px;font-weight:800;transition:all 0.2s;letter-spacing:0.1px;}
-.btn-p{background:var(--purple-g);color:#fff;box-shadow:0 4px 18px rgba(139,127,255,0.38);}
-.btn-p:active{transform:scale(0.97);box-shadow:0 2px 10px rgba(139,127,255,0.22);}
+.btn-p{background:var(--purple-g);color:#fff;box-shadow:0 4px 18px rgba(255,122,69,0.38);}
+.btn-p:active{transform:scale(0.97);box-shadow:0 2px 10px rgba(255,122,69,0.22);}
 .empty{text-align:center;padding:52px 20px;color:var(--muted);}
 .ei{font-size:48px;margin-bottom:12px;}
 .et{font-size:14px;font-weight:600;}
 .es{font-size:12px;margin-top:5px;opacity:0.65;}
 .toast{position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;
   transform:translateX(-50%) translateY(10px);
-  background:rgba(0,212,161,0.13);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(0,212,161,0.28);color:var(--teal);
-  padding:10px 22px;border-radius:32px;font-size:13px;font-weight:700;
+  background:rgba(111,168,107,0.13);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(111,168,107,0.28);color:var(--teal);
+  padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;
   z-index:999;opacity:0;transition:all 0.28s;pointer-events:none;white-space:nowrap;
-  box-shadow:0 4px 20px rgba(0,212,161,0.12);}
+  box-shadow:0 4px 20px rgba(111,168,107,0.12);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── SPECIAL EFFECTS ── */
@@ -107,6 +104,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 
 /* Score ring draw */
 .score-ring-line{transition:stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1);}
+.sketch-line{transition:stroke-dashoffset 1.1s ease-out;}
 
 /* Number count-up handled in JS */
 
@@ -118,7 +116,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 }
 
 /* Subtle card hover glow */
-.card:hover{box-shadow:0 4px 30px rgba(139,127,255,0.13),0 2px 18px rgba(0,0,0,0.2);transition:box-shadow 0.3s;}
+.card:hover{box-shadow:0 4px 30px rgba(255,122,69,0.13),0 2px 18px rgba(0,0,0,0.2);transition:box-shadow 0.3s;}
 
 /* Floating orbs in hero */
 @keyframes floatOrb{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6px,-10px) scale(1.06)}}
@@ -138,8 +136,8 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 #qcmod{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
   z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
 #qcmod.open{display:flex;}
-.qcbox{background:#0E1120;border-radius:24px 24px 0 0;padding:22px 20px;
-  width:100%;max-width:600px;border-top:1px solid rgba(139,127,255,0.22);
+.qcbox{background:#0E1120;border-radius:10px 24px 0 0;padding:22px 20px;
+  width:100%;max-width:600px;border-top:1px solid rgba(255,122,69,0.22);
   box-shadow:0 -8px 40px rgba(0,0,0,0.4);}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -149,10 +147,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <body>
 <script>if(localStorage.getItem('theme')==='light')document.body.classList.add('light');</script>
 <div id="signin-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto">
-  <div style="font-size:64px;margin-bottom:20px;filter:drop-shadow(0 0 20px rgba(139,127,255,0.5))">🏃</div>
-  <div style="font-size:36px;font-weight:900;letter-spacing:-1px;background:linear-gradient(120deg,#fff 40%,rgba(139,127,255,0.85));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">MyWay</div>
+  <div style="font-size:64px;margin-bottom:20px;filter:drop-shadow(0 0 20px rgba(255,122,69,0.5))">🏃</div>
+  <div style="font-size:36px;font-weight:900;letter-spacing:-1px;background:linear-gradient(120deg,#fff 40%,rgba(255,122,69,0.85));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">MyWay</div>
   <div style="font-size:14px;color:var(--muted);margin-bottom:32px">האפליקציה האישית שלך</div>
-  <button onclick="signInWithGoogle()" style="display:flex;align-items:center;gap:12px;padding:14px 24px;border-radius:14px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-family:Rubik,sans-serif;font-size:15px;font-weight:700;cursor:pointer;width:100%;max-width:320px;justify-content:center">
+  <button onclick="signInWithGoogle()" style="display:flex;align-items:center;gap:12px;padding:14px 24px;border-radius:10px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-family:Rubik,sans-serif;font-size:15px;font-weight:700;cursor:pointer;width:100%;max-width:320px;justify-content:center">
     <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-2.9-11.3-7.1l-6.6 4.8C9.7 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.2 5.2C40.6 35.5 44 30.2 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
     המשך עם Google
   </button>
@@ -169,7 +167,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
     <input id="si-email" type="email" placeholder="אימייל" class="inp" style="text-align:right;direction:rtl"/>
     <input id="si-pass" type="password" placeholder="סיסמה (לפחות 6 תווים)" class="inp" style="text-align:right;direction:rtl" onkeydown="if(event.key==='Enter')submitAuth()"/>
     <input id="si-pass2" type="password" placeholder="אימות סיסמה" class="inp" style="text-align:right;direction:rtl;display:none" onkeydown="if(event.key==='Enter')submitAuth()"/>
-    <div id="auth-err" style="display:none;color:#FF6B6B;font-size:12px;font-weight:600;text-align:center"></div>
+    <div id="auth-err" style="display:none;color:#E85C4A;font-size:12px;font-weight:600;text-align:center"></div>
     <button onclick="submitAuth()" class="btn btn-p" id="si-submit" style="width:100%;padding:13px;font-size:14px">כניסה</button>
   </div>
 </div>
@@ -193,16 +191,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 
 <nav class="nav">
   <button class="nb active" data-pg="dash">
-    <svg class="ni" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>לוח
+    <svg class="ni" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nb-label">לוח</span>
   </button>
   <button class="nb" data-pg="fitness">
-    <svg class="ni" viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 10h18M3 14h18"/><circle cx="3" cy="10" r="1.5"/><circle cx="21" cy="10" r="1.5"/><circle cx="3" cy="14" r="1.5"/><circle cx="21" cy="14" r="1.5"/></svg>כושר
+    <svg class="ni" viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 10h18M3 14h18"/><circle cx="3" cy="10" r="1.5"/><circle cx="21" cy="10" r="1.5"/><circle cx="3" cy="14" r="1.5"/><circle cx="21" cy="14" r="1.5"/></svg><span class="nb-label">כושר</span>
   </button>
   <button class="nb" data-pg="nutrition">
-    <svg class="ni" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>תזונה
+    <svg class="ni" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg><span class="nb-label">תזונה</span>
   </button>
   <button class="nb" data-pg="productivity">
-    <svg class="ni" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>פרודוקטיביות
+    <svg class="ni" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="nb-label">פרוד'</span>
   </button>
 </nav>
 
@@ -239,7 +237,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="workout-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:flex-end;justify-content:center;">
-  <div style="background:#12122A;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:600px;border-top:1px solid rgba(139,127,255,0.3);max-height:88vh;overflow-y:auto">
+  <div style="background:#12122A;border-radius:10px 20px 0 0;padding:20px;width:100%;max-width:600px;border-top:1px solid rgba(255,122,69,0.3);max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div id="we-title" style="font-size:16px;font-weight:800"></div>
       <button onclick="closeWorkoutEdit()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer">✕</button>
@@ -249,7 +247,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="copy-workout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:650;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px)">
-  <div style="background:#0E1120;border-radius:24px 24px 0 0;padding:22px 20px;width:100%;max-width:600px;border-top:1px solid rgba(139,127,255,0.22);box-shadow:0 -8px 40px rgba(0,0,0,0.4)">
+  <div style="background:#0E1120;border-radius:10px 24px 0 0;padding:22px 20px;width:100%;max-width:600px;border-top:1px solid rgba(255,122,69,0.22);box-shadow:0 -8px 40px rgba(0,0,0,0.4)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div style="font-size:15px;font-weight:800">📋 העתק אימון ליום</div>
       <button onclick="closeCopyWorkout()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer">✕</button>
@@ -259,7 +257,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="ex-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:700;flex-direction:column;">
-  <div style="padding:calc(16px + env(safe-area-inset-top)) 16px 16px;background:#12122A;border-bottom:1px solid rgba(139,127,255,0.2);flex-shrink:0">
+  <div style="padding:calc(16px + env(safe-area-inset-top)) 16px 16px;background:#12122A;border-bottom:1px solid rgba(255,122,69,0.2);flex-shrink:0">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <div style="font-size:16px;font-weight:800;flex:1">💪 בחר תרגיל</div>
       <button onclick="closeExPicker()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0">✕</button>
@@ -271,7 +269,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="active-workout-modal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:800;flex-direction:column;overflow:hidden">
-  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.25);padding:calc(13px + env(safe-area-inset-top)) 16px 13px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+  <div style="background:#0E1220;border-bottom:1px solid rgba(255,122,69,0.25);padding:calc(13px + env(safe-area-inset-top)) 16px 13px;display:flex;align-items:center;gap:12px;flex-shrink:0">
     <button onclick="confirmFinishWorkout()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px">✕</button>
     <div style="flex:1;min-width:0">
       <div style="font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.4px">אימון פעיל</div>
@@ -281,7 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
     <button onclick="finishWorkoutConfirm()" style="padding:9px 16px;border-radius:11px;border:none;background:var(--teal);color:#0E1220;font-family:Rubik,sans-serif;font-size:13px;font-weight:800;cursor:pointer">סיים ✓</button>
   </div>
   <div id="awo-content" style="flex:1;overflow-y:auto;padding:12px 16px 100px"></div>
-  <div id="awo-rest-bar" style="display:none;position:fixed;bottom:var(--nav-h);left:0;right:0;background:rgba(14,18,32,0.97);border-top:1px solid rgba(0,212,161,0.3);padding:10px 16px;display:none;align-items:center;gap:12px;z-index:850">
+  <div id="awo-rest-bar" style="display:none;position:fixed;bottom:var(--nav-h);left:0;right:0;background:rgba(14,18,32,0.97);border-top:1px solid rgba(111,168,107,0.3);padding:10px 16px;display:none;align-items:center;gap:12px;z-index:850">
     <div style="flex:1">
       <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;margin-bottom:1px">מנוחה</div>
       <div style="display:flex;align-items:center;gap:8px">
@@ -289,12 +287,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
         <div id="awo-rest-bar-fill" style="flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:4px"><div id="awo-rest-bar-inner" style="height:4px;background:var(--teal);border-radius:4px;transition:width 1s linear;width:100%"></div></div>
       </div>
     </div>
-    <button onclick="skipRest()" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(0,212,161,0.4);background:rgba(0,212,161,0.1);color:var(--teal);font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">דלג ⟶</button>
+    <button onclick="skipRest()" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(111,168,107,0.4);background:rgba(111,168,107,0.1);color:var(--teal);font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">דלג ⟶</button>
   </div>
 </div>
 
 <div id="profile-modal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:900;flex-direction:column;overflow-y:auto">
-  <div style="background:#0E1220;border-bottom:1px solid rgba(139,127,255,0.2);padding:calc(13px + env(safe-area-inset-top)) 16px 13px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
+  <div style="background:#0E1220;border-bottom:1px solid rgba(255,122,69,0.2);padding:calc(13px + env(safe-area-inset-top)) 16px 13px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
     <button onclick="closeProfileModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px">←</button>
     <div style="font-size:16px;font-weight:800;flex:1">הפרופיל שלי</div>
   </div>
@@ -307,7 +305,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 
 <div id="onboarding" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center">
   <div id="ob-dots" style="display:flex;gap:6px;margin-bottom:44px"></div>
-  <div id="ob-icon" style="font-size:72px;margin-bottom:22px;line-height:1;filter:drop-shadow(0 0 18px rgba(139,127,255,0.4))"></div>
+  <div id="ob-icon" style="font-size:72px;margin-bottom:22px;line-height:1;filter:drop-shadow(0 0 18px rgba(255,122,69,0.4))"></div>
   <div id="ob-title" style="font-size:24px;font-weight:900;margin-bottom:14px;letter-spacing:-0.5px"></div>
   <div id="ob-desc" style="font-size:14px;color:var(--muted);line-height:1.75;max-width:300px;margin-bottom:52px"></div>
   <div style="display:flex;gap:10px;width:100%;max-width:320px">
@@ -336,10 +334,10 @@ let PROFILE=load("profile",{weight:75,tdee:2500,target:2300,protein:150,carbs:22
 let USER_PLAN=load("user_plan",null);
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
 const RUN_TAGS={
-  easy:{label:"קלה",color:"#74B9FF"},
-  tempo:{label:"טמפו",color:"#00D4A1"},
-  intervals:{label:"אינטרוולים",color:"#FFB347"},
-  long:{label:"ארוכה",color:"#8B7FFF"}
+  easy:{label:"קלה",color:"#6B8FA3"},
+  tempo:{label:"טמפו",color:"#6FA86B"},
+  intervals:{label:"אינטרוולים",color:"#E8B54A"},
+  long:{label:"ארוכה",color:"#FF7A45"}
 };
 
 const MEALS=[
@@ -351,19 +349,19 @@ const MEALS=[
   {name:"ערב",kcal:520,items:"200 גרם סלמון/טונה | סלט + אבוקדו",p:42,c:12,f:28}
 ];
 const SUPPS=[
-  {name:"קריאטין",level:"חובה",color:"#00D4A1",dose:"5 גרם ביום"},
-  {name:"Whey חלבון",level:"חובה",color:"#00D4A1",dose:"30–40 גרם אחרי אימון"},
-  {name:"D3 + K2",level:"ממליץ",color:"#74B9FF",dose:"2000–4000 IU"},
-  {name:"מגנזיום",level:"ממליץ",color:"#74B9FF",dose:"300–400 מ\"ג לפני שינה"},
-  {name:"אומגה-3",level:"ממליץ",color:"#74B9FF",dose:"2–3 גרם EPA+DHA"}
+  {name:"קריאטין",level:"חובה",color:"#6FA86B",dose:"5 גרם ביום"},
+  {name:"Whey חלבון",level:"חובה",color:"#6FA86B",dose:"30–40 גרם אחרי אימון"},
+  {name:"D3 + K2",level:"ממליץ",color:"#6B8FA3",dose:"2000–4000 IU"},
+  {name:"מגנזיום",level:"ממליץ",color:"#6B8FA3",dose:"300–400 מ\"ג לפני שינה"},
+  {name:"אומגה-3",level:"ממליץ",color:"#6B8FA3",dose:"2–3 גרם EPA+DHA"}
 ];
 const CATS=[
-  {id:"fitness",label:"כושר",icon:"💪",color:"#8B7FFF"},
-  {id:"nutrition",label:"תזונה",icon:"🥗",color:"#00D4A1"},
-  {id:"sleep",label:"שינה",icon:"😴",color:"#74B9FF"},
-  {id:"work",label:"עבודה / פרודוקטיביות",icon:"💼",color:"#FFB347"},
-  {id:"mental",label:"מנטליות / מוטיבציה",icon:"🧠",color:"#FF79C6"},
-  {id:"social",label:"חברתי / משפחה",icon:"❤️",color:"#FF6B6B"},
+  {id:"fitness",label:"כושר",icon:"💪",color:"#FF7A45"},
+  {id:"nutrition",label:"תזונה",icon:"🥗",color:"#6FA86B"},
+  {id:"sleep",label:"שינה",icon:"😴",color:"#6B8FA3"},
+  {id:"work",label:"עבודה / פרודוקטיביות",icon:"💼",color:"#E8B54A"},
+  {id:"mental",label:"מנטליות / מוטיבציה",icon:"🧠",color:"#D98878"},
+  {id:"social",label:"חברתי / משפחה",icon:"❤️",color:"#E85C4A"},
   {id:"growth",label:"צמיחה אישית / למידה",icon:"📚",color:"#00CEC9"}
 ];
 let HABITS_DEF=load("habits_def",[]);
@@ -426,8 +424,8 @@ const OB_SLIDES=[
   {icon:"⚡",title:'כפתור "+"',desc:"הכפתור הסגול הצף תמיד איתך — לחץ עליו להוספה מהירה של משימה להיום, למחר, או הערה מהירה."},
 ];
 
-const MUSCLE_COLORS={"חזה":"#FF6B6B","גב":"#8B7FFF","כתפיים":"#FFB347","ביצפס":"#00D4A1","טריצפס":"#74B9FF","רגליים":"#FF79C6","ישבן":"#A29BFE","בטן/ליבה":"#00CEC9","קאלף":"#6C5CE7"};
-const SEG_TYPES=[["warmup","🌡️","חימום","#FFB347"],["interval","⚡","אינטרוול","#FF6B6B"],["tempo","💨","טמפו","#00D4A1"],["easy","🚶","קלה","#74B9FF"],["rest","🏖️","מנוחה","#8B7FFF"],["cooldown","❄️","שחרור","#6C5CE7"],["steady","🏃","קצב קבוע","#00CEC9"],["hill","🏔️","גבעה","#A29BFE"]];
+const MUSCLE_COLORS={"חזה":"#E85C4A","גב":"#FF7A45","כתפיים":"#E8B54A","ביצפס":"#6FA86B","טריצפס":"#6B8FA3","רגליים":"#D98878","ישבן":"#A29BFE","בטן/ליבה":"#00CEC9","קאלף":"#E85D2B"};
+const SEG_TYPES=[["warmup","🌡️","חימום","#E8B54A"],["interval","⚡","אינטרוול","#E85C4A"],["tempo","💨","טמפו","#6FA86B"],["easy","🚶","קלה","#6B8FA3"],["rest","🏖️","מנוחה","#FF7A45"],["cooldown","❄️","שחרור","#E85D2B"],["steady","🏃","קצב קבוע","#00CEC9"],["hill","🏔️","גבעה","#A29BFE"]];
 const SEG_COLORS=Object.fromEntries(SEG_TYPES.map(([v,,,c])=>[v,c]));
 const SEG_LABELS=Object.fromEntries(SEG_TYPES.map(([v,ic,l])=>[v,{ic,l}]));
 const EXERCISE_DB=[
@@ -676,7 +674,7 @@ function updateUserUI(user){
   const el=document.getElementById("user-avatar");
   if(!el)return;
   if(user.photoURL){
-    el.innerHTML='<img src="'+user.photoURL+'" onclick="openProfileModal()" style="width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid rgba(139,127,255,0.4)" title="פרופיל"/>';
+    el.innerHTML='<img src="'+user.photoURL+'" onclick="openProfileModal()" style="width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid rgba(255,122,69,0.4)" title="פרופיל"/>';
   } else {
     const init=(user.displayName||"U")[0];
     el.innerHTML='<div onclick="openProfileModal()" style="width:30px;height:30px;border-radius:50%;background:var(--purple-g);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;color:#fff">'+init+'</div>';
@@ -697,9 +695,9 @@ function renderProfileModal(){
   let h="";
 
   // User header
-  h+='<div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(139,127,255,0.12),rgba(0,212,161,0.06));border:1px solid rgba(139,127,255,0.2);border-radius:18px;padding:16px;margin-bottom:18px">';
+  h+='<div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(255,122,69,0.12),rgba(111,168,107,0.06));border:1px solid rgba(255,122,69,0.2);border-radius:10px;padding:16px;margin-bottom:18px">';
   if(user&&user.photoURL){
-    h+='<img src="'+user.photoURL+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,127,255,0.5);flex-shrink:0"/>';
+    h+='<img src="'+user.photoURL+'" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,122,69,0.5);flex-shrink:0"/>';
   } else {
     const init=((p.name||user?.displayName||"U")[0]||"U").toUpperCase();
     h+='<div style="width:52px;height:52px;border-radius:50%;background:var(--purple-g);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0">'+init+'</div>';
@@ -737,7 +735,7 @@ function renderProfileModal(){
 
   // Actions
   h+='<button onclick="saveProfileChanges()" class="btn btn-p" style="width:100%;padding:14px;font-size:14px;margin-bottom:10px">💾 שמור שינויים</button>';
-  h+='<button onclick="signOutFromProfile()" style="width:100%;padding:13px;border-radius:11px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.06);color:var(--coral);font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🚪 התנתק</button>';
+  h+='<button onclick="signOutFromProfile()" style="width:100%;padding:13px;border-radius:11px;border:1px solid rgba(232,92,74,0.3);background:rgba(232,92,74,0.06);color:var(--coral);font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🚪 התנתק</button>';
 
   document.getElementById("profile-modal-content").innerHTML=h;
 }
@@ -782,6 +780,18 @@ const fmtPace=s=>{if(!s)return"—";return Math.floor(s/60)+":"+(s%60).toString(
 const parsePace=s=>{if(!s)return null;const p=s.split(":");return parseInt(p[0])*60+(parseInt(p[1])||0);};
 const fmtDate=d=>{try{return new Date(d).toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"numeric"});}catch(e){return d;}};
 const c2r=(h,a)=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return "rgba("+r+","+g+","+b+","+a+")";};
+function arcGauge(pct,w,h,accentHex,n){
+  n=n||8;
+  const cx=w/2,cy=h-2,r=w/2-16;
+  const filled=Math.round(Math.max(0,Math.min(1,pct))*n);
+  let petals='';
+  for(let i=0;i<n;i++){
+    const angle=180-(i/(n-1))*180;
+    const fill=i<filled?accentHex:"var(--border2)";
+    petals+='<rect x="'+(cx-3)+'" y="'+(cy-r-15)+'" width="6" height="17" rx="3" fill="'+fill+'" transform="rotate('+angle.toFixed(1)+' '+cx+' '+cy+')"/>';
+  }
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+petals+'</svg>';
+}
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function toggleTheme(){
@@ -949,7 +959,7 @@ function renderDash(){
   const dayName=todayDay();
   const hour=new Date().getHours();
   const _dws=getDayWorkouts(dayName);
-  const todayWorkout=_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#8B7FFF":"#00D4A1",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":({"easy":"ריצה קלה","tempo":"ריצת טמפו","intervals":"ריצת אינטרוולים","long":"ריצה ארוכה"}[_dws[0].runType]||"ריצה")}:null;
+  const todayWorkout=_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#FF7A45":"#6FA86B",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":({"easy":"ריצה קלה","tempo":"ריצת טמפו","intervals":"ריצת אינטרוולים","long":"ריצה ארוכה"}[_dws[0].runType]||"ריצה")}:null;
   const workKey=t+"-"+dayName;
   const workDone=COMP[workKey];
   const todayTasks=TASKS[t]||[];
@@ -964,7 +974,7 @@ function renderDash(){
   const habitsDone=HABITS_DEF.filter(h=>todayHabits[h.id]).length;
   const greetWord=hour<5?"לילה טוב":hour<12?"בוקר טוב":hour<17?"צהריים טובים":"ערב טוב";
   const greetIcon=hour<5?"🌙":hour<12?"☀️":hour<17?"👋":"🌙";
-  const defColor=deficit>=300&&deficit<=600?"var(--teal)":deficit>600?"var(--amber)":"#FF6B6B";
+  const defColor=deficit>=300&&deficit<=600?"var(--teal)":deficit>600?"var(--amber)":"#E85C4A";
   const firstName=getUserFirstName();
   const _q=getDailyQuote();const quote=_q?.q||_q||"";const quoteAuthor=_q?.a||"";
 
@@ -974,19 +984,24 @@ function renderDash(){
   let h="";
 
   // ── HERO GREETING ──
-  h+='<div style="background:linear-gradient(135deg,rgba(139,127,255,0.18) 0%,rgba(0,212,161,0.1) 50%,rgba(116,185,255,0.1) 100%);background-size:300% 300%;animation:heroGrad 10s ease infinite;border:1px solid rgba(139,127,255,0.28);border-radius:22px;padding:20px 18px 16px;margin-bottom:12px;position:relative;overflow:hidden">';
-  h+='<div style="position:absolute;top:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(139,127,255,0.14),transparent 70%);pointer-events:none;animation:floatOrb 7s ease-in-out infinite"></div>';
-  h+='<div style="position:absolute;bottom:-30px;right:-20px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,161,0.1),transparent 70%);pointer-events:none;animation:floatOrb 9s ease-in-out infinite reverse"></div>';
+  h+='<div style="background:linear-gradient(135deg,rgba(255,122,69,0.16) 0%,rgba(23,20,15,0.4) 100%);border:1px solid rgba(255,122,69,0.22);border-radius:10px;padding:20px 18px 16px;margin-bottom:12px">';
   h+='<div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.3px;margin-bottom:6px">'+dayName+' · '+new Date().toLocaleDateString("he-IL",{day:"numeric",month:"long"})+'</div>';
-  h+='<div style="font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1.2">'+greetWord+(firstName?", "+firstName:"")+" "+greetIcon+'</div>';
-  h+='<div style="height:1px;background:linear-gradient(90deg,rgba(139,127,255,0.4),transparent);margin:12px 0"></div>';
+  h+='<div style="font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1.2">'+greetWord+(firstName?", "+firstName:"")+" "+greetIcon+'</div>';
+  h+='<div style="height:1px;background:linear-gradient(90deg,rgba(255,122,69,0.4),transparent);margin:12px 0"></div>';
+  h+='<div style="display:flex;align-items:center;gap:12px">';
+  h+='<svg id="quote-sketch" width="54" height="54" viewBox="0 0 100 100" style="flex-shrink:0">';
+  h+='<circle cx="50" cy="36" r="18" fill="none" stroke="var(--purple)" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" class="sketch-line" style="transition-delay:0.1s"/>';
+  h+='<path d="M18,92 C18,70 32,60 50,60 C68,60 82,70 82,92" fill="none" stroke="var(--purple)" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" class="sketch-line" style="transition-delay:0.5s"/>';
+  h+='</svg>';
+  h+='<div style="flex:1;min-width:0">';
   h+='<div style="font-size:12px;color:var(--muted);font-style:italic;line-height:1.65">"'+esc(quote)+'"</div>';
-  if(quoteAuthor)h+='<div style="font-size:11px;color:rgba(139,127,255,0.8);font-weight:700;margin-top:5px;text-align:left">— '+esc(quoteAuthor)+'</div>';
+  if(quoteAuthor)h+='<div style="font-size:11px;color:rgba(255,122,69,0.8);font-weight:700;margin-top:5px">— '+esc(quoteAuthor)+'</div>';
+  h+='</div></div>';
   h+='</div>';
 
   // ── DAILY SCORE ──
   const dayScore=calcDayScore(t);
-  const scoreHex=dayScore>=75?"#00D4A1":dayScore>=50?"#FFB347":"#FF6B6B";
+  const scoreHex=dayScore>=75?"#6FA86B":dayScore>=50?"#E8B54A":"#E85C4A";
   const scoreColor=dayScore>=75?"var(--teal)":dayScore>=50?"var(--amber)":"var(--coral)";
   const scoreLabel=dayScore>=90?"יום מושלם! ⭐":dayScore>=75?"יום מעולה! 🔥":dayScore>=50?"יום טוב 👍":dayScore>=30?"יום בינוני 🙂":"יש עוד לאן לגדול 💪";
   const hasWorkoutToday=getDayWorkouts(dayName).length>0;
@@ -995,13 +1010,12 @@ function renderDash(){
   const habDone=HABITS_DEF.filter(h=>habLog[h.id]).length;
   const tasksDoneToday=(TASKS[t]||[]).filter(tk=>tk.done).length;
   const tasksTotalToday=(TASKS[t]||[]).length;
-  const r=38,circ=2*Math.PI*r,dash=(dayScore/100)*circ;
-  h+='<div style="background:var(--card);border:1px solid '+c2r(scoreHex,0.35)+';border-radius:20px;padding:16px 18px;margin-bottom:12px">';
+  h+='<div style="background:var(--card);border:1px solid '+c2r(scoreHex,0.35)+';border-radius:10px;padding:16px 18px;margin-bottom:12px">';
   h+='<div style="display:flex;align-items:center;gap:16px">';
-  h+='<div style="position:relative;width:90px;height:90px;flex-shrink:0">';
-  h+='<svg width="90" height="90"><circle cx="45" cy="45" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/><circle id="score-ring-line" cx="45" cy="45" r="'+r+'" fill="none" stroke="'+scoreColor+'" stroke-width="9" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 45 45)" class="score-ring-line"/></svg>';
-  h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">';
-  h+='<div id="score-num" style="font-size:26px;font-weight:900;color:'+scoreColor+';line-height:1">0</div>';
+  h+='<div style="position:relative;width:100px;height:58px;flex-shrink:0">';
+  h+=arcGauge(dayScore/100,100,58,scoreHex,7);
+  h+='<div style="position:absolute;top:0;right:0;display:flex;flex-direction:column;align-items:flex-end">';
+  h+='<div id="score-num" class="num" style="font-size:24px;font-weight:700;color:'+scoreColor+';line-height:1">0</div>';
   h+='<div style="font-size:9px;color:var(--muted)">/ 100</div>';
   h+='</div></div>';
   h+='<div style="flex:1">';
@@ -1018,7 +1032,7 @@ function renderDash(){
     const yStr=yesterday.toISOString().slice(0,10);
     const yDebrief=DEBRIEF[yStr];
     if(yDebrief&&(yDebrief.bad||yDebrief.improve)){
-      h+='<div style="background:linear-gradient(135deg,rgba(139,127,255,0.12),rgba(116,185,255,0.08));border:1px solid rgba(139,127,255,0.3);border-radius:18px;padding:15px 16px;margin-bottom:12px">';
+      h+='<div style="background:linear-gradient(135deg,rgba(255,122,69,0.12),rgba(107,143,163,0.08));border:1px solid rgba(255,122,69,0.3);border-radius:10px;padding:15px 16px;margin-bottom:12px">';
       h+='<div style="font-size:12px;font-weight:800;color:var(--purple);margin-bottom:10px">💡 לקח מאתמול</div>';
       if(yDebrief.bad)h+='<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">מה היה פחות טוב</div><div style="font-size:12px;color:var(--text);line-height:1.55">'+yDebrief.bad+'</div></div>';
       if(yDebrief.improve)h+='<div><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">איך משפרים היום</div><div style="font-size:12px;color:var(--teal);line-height:1.55;font-weight:600">'+yDebrief.improve+'</div></div>';
@@ -1030,7 +1044,7 @@ function renderDash(){
   if(hour>=21){
     const existing=DEBRIEF[t]||{};
     const saved=!!(existing.bad||existing.improve);
-    h+='<div style="background:linear-gradient(135deg,rgba(116,185,255,0.08),rgba(139,127,255,0.06));border:1px solid rgba(116,185,255,0.25);border-radius:18px;padding:15px 16px;margin-bottom:12px">';
+    h+='<div style="background:linear-gradient(135deg,rgba(107,143,163,0.08),rgba(255,122,69,0.06));border:1px solid rgba(107,143,163,0.25);border-radius:10px;padding:15px 16px;margin-bottom:12px">';
     h+='<div style="font-size:12px;font-weight:800;color:var(--blue);margin-bottom:2px">🌙 תחקור יומי</div>';
     h+='<div style="font-size:10px;color:var(--muted);margin-bottom:12px">2 דקות רפלקציה — תופיע מחר בבוקר</div>';
     h+='<div style="margin-bottom:9px"><label style="font-size:10px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">מה היה פחות טוב היום?</label>';
@@ -1044,26 +1058,26 @@ function renderDash(){
   // ── STATS ROW ──
   h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
   // Calories
-  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 10px;cursor:pointer">';
+  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer">';
   h+='<div style="font-size:18px;margin-bottom:4px">🍽️</div>';
   h+='<div style="font-size:18px;font-weight:900;color:var(--coral);line-height:1">'+Math.round(nutTot.cal)+'</div>';
   h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">קל\' מתוך '+PROFILE.target+'</div>';
-  h+='<div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px"><div style="height:4px;width:'+calPct+'%;background:var(--coral);border-radius:4px;transition:width 0.4s"></div></div>';
+  h+='<div style="height:4px;background:rgba(245,241,232,0.07);border-radius:4px"><div style="height:4px;width:'+calPct+'%;background:var(--coral);border-radius:4px;transition:width 0.4s"></div></div>';
   h+='</div>';
   // Protein
-  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 10px;cursor:pointer">';
+  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer">';
   h+='<div style="font-size:18px;margin-bottom:4px">💪</div>';
   h+='<div style="font-size:18px;font-weight:900;color:var(--purple);line-height:1">'+Math.round(nutTot.p)+'g</div>';
   h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">חלבון מתוך '+PROFILE.protein+'g</div>';
-  h+='<div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px"><div style="height:4px;width:'+protPct+'%;background:var(--purple);border-radius:4px;transition:width 0.4s"></div></div>';
+  h+='<div style="height:4px;background:rgba(245,241,232,0.07);border-radius:4px"><div style="height:4px;width:'+protPct+'%;background:var(--purple);border-radius:4px;transition:width 0.4s"></div></div>';
   h+='</div>';
   // Habits
   const habPct=HABITS_DEF.length?Math.round((habitsDone/HABITS_DEF.length)*100):0;
-  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 10px">';
+  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px">';
   h+='<div style="font-size:18px;margin-bottom:4px">✅</div>';
   h+='<div style="font-size:18px;font-weight:900;color:var(--teal);line-height:1">'+habitsDone+'/'+HABITS_DEF.length+'</div>';
   h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">הרגלים</div>';
-  h+='<div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px"><div style="height:4px;width:'+habPct+'%;background:var(--teal);border-radius:4px;transition:width 0.4s"></div></div>';
+  h+='<div style="height:4px;background:rgba(245,241,232,0.07);border-radius:4px"><div style="height:4px;width:'+habPct+'%;background:var(--teal);border-radius:4px;transition:width 0.4s"></div></div>';
   h+='</div>';
   h+='</div>';
 
@@ -1071,73 +1085,73 @@ function renderDash(){
   if(todayWorkout){
     const tc=todayWorkout.color;
     const dw=_dws?_dws[0]:null;
-    let wSummary='';
+    const statChips=[];
     if(dw&&dw.type==='run'&&dw.segments&&dw.segments.length){
       const totalKm=dw.segments.reduce((a,sg)=>{const d=parseFloat(sg.dist)||0;return a+(sg.unit==="m"?d/1000:d)*(sg.reps||1);},0);
-      wSummary=dw.segments.length+' מקטעים · '+totalKm.toFixed(1)+' ק"מ';
+      statChips.push(["📏",totalKm.toFixed(1)+' ק"מ']);
+      statChips.push(["🔀",dw.segments.length+' מקטעים']);
     } else if(dw&&dw.type==='strength'&&dw.exercises&&dw.exercises.length){
-      wSummary=dw.exercises.length+' תרגילים';
+      statChips.push(["🏋️",dw.exercises.length+' תרגילים']);
     }
-    h+='<div onclick="goToTodayWorkout()" style="cursor:pointer;background:'+c2r(tc,0.1)+';border:1px solid '+c2r(tc,0.3)+';border-radius:18px;padding:0;margin-bottom:12px;overflow:hidden">';
-    h+='<div style="height:3px;background:linear-gradient(90deg,'+tc+',transparent)"></div>';
-    h+='<div style="padding:14px 15px;display:flex;align-items:center;gap:12px">';
-    h+='<div style="width:46px;height:46px;border-radius:14px;background:'+c2r(tc,0.2)+';border:1px solid '+c2r(tc,0.4)+';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 14px '+c2r(tc,0.3)+'">'+todayWorkout.icon+'</div>';
-    h+='<div style="flex:1"><div style="font-size:10px;font-weight:700;color:'+tc+';text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">אימון היום</div><div style="font-size:15px;font-weight:800">'+todayWorkout.title+'</div>'+(wSummary?'<div style="font-size:11px;color:var(--muted);margin-top:3px">'+wSummary+'</div>':'')+' </div>';
-    h+='<button onclick="event.stopPropagation();COMP[\''+workKey+'\']=!'+workDone+';save(\'comp\',COMP);renderDash()" style="padding:9px 14px;border-radius:11px;border:none;background:'+(workDone?tc:"rgba(255,255,255,0.08)")+';color:'+(workDone?"#fff":tc)+';font-family:Rubik,sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.2s">'+(workDone?"✓ בוצע":"סמן")+'</button>';
-    h+='</div></div>';
+    statChips.push(["📅",dayName]);
+    h+='<div style="position:relative;margin-top:14px;margin-bottom:16px">';
+    h+='<div style="position:absolute;top:-11px;right:14px;background:'+tc+';color:#06231C;font-size:10px;font-weight:800;padding:4px 13px;border-radius:20px;box-shadow:0 3px 10px rgba(0,0,0,0.35);z-index:2">אימון היום</div>';
+    h+='<div onclick="goToTodayWorkout()" style="cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 15px 14px">';
+    h+='<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">';
+    h+='<div style="width:48px;height:48px;border-radius:10px;background:'+c2r(tc,0.15)+';display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0">'+todayWorkout.icon+'</div>';
+    h+='<div style="flex:1;font-size:16px;font-weight:800">'+todayWorkout.title+'</div>';
+    h+='<button onclick="event.stopPropagation();COMP[\''+workKey+'\']=!'+workDone+';save(\'comp\',COMP);renderDash()" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+tc+';background:'+(workDone?tc:"transparent")+';color:'+(workDone?"#06231C":tc)+';font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s">'+(workDone?"✓ בוצע":"סמן")+'</button>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)">';
+    statChips.forEach(([ic,val])=>{h+='<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span>'+ic+'</span><span class="num" style="color:var(--text);font-weight:700">'+val+'</span></div>';});
+    h+='</div></div></div>';
   }
 
-  // ── HABITS ──
-  h+='<div class="card" style="border-radius:18px;margin-bottom:12px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-  h+='<div style="font-size:14px;font-weight:800">הרגלים יומיים</div>';
-  h+='<div style="display:flex;align-items:center;gap:8px">';
-  h+='<div style="font-size:11px;font-weight:700;color:var(--teal)">'+habitsDone+'/'+HABITS_DEF.length+'</div>';
-  h+='<button onclick="openHabitsEdit()" style="background:rgba(139,127,255,0.1);border:1px solid rgba(139,127,255,0.2);border-radius:8px;color:var(--purple);cursor:pointer;font-size:11px;font-weight:700;font-family:Rubik,sans-serif;padding:4px 9px">✏️ ערוך</button>';
+  // ── TODAY CHECKLIST (habits + tasks, unified) ──
+  const doneCnt=todayTasks.filter(tt=>tt.done).length;
+  const totalItems=HABITS_DEF.length+todayTasks.length;
+  const doneItemsCombined=habitsDone+doneCnt;
+  const combinedPct=totalItems?Math.round((doneItemsCombined/totalItems)*100):0;
+  h+='<div class="card" style="border-radius:10px;margin-bottom:12px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+  h+='<div style="font-size:14px;font-weight:800">היום</div>';
+  h+='<div style="display:flex;align-items:center;gap:10px">';
+  h+='<div style="font-size:11px;font-weight:700;color:'+(totalItems>0&&doneItemsCombined===totalItems?"var(--teal)":"var(--muted)")+'">'+doneItemsCombined+'/'+totalItems+'</div>';
+  h+='<button onclick="openHabitsEdit()" style="background:none;border:none;color:var(--purple);cursor:pointer;font-size:11px;font-weight:700;font-family:Rubik,sans-serif;padding:0">ערוך הרגלים ‹</button>';
   h+='</div></div>';
-  if(HABITS_DEF.length===0){
-    h+='<div style="text-align:center;padding:14px;color:var(--muted);font-size:12px">לחץ ערוך כדי להוסיף הרגלים</div>';
+  if(totalItems>0){
+    h+='<div style="height:3px;background:rgba(245,241,232,0.06);border-radius:3px;margin-bottom:12px"><div style="height:3px;width:'+combinedPct+'%;background:var(--teal);border-radius:3px;transition:width 0.4s"></div></div>';
+  }
+  if(totalItems===0){
+    h+='<div style="text-align:center;padding:14px;color:var(--muted);font-size:12px">אין הרגלים או משימות להיום — הוסף למטה או לחץ "ערוך הרגלים"</div>';
   } else {
     HABITS_DEF.forEach(hb=>{
       const done=todayHabits[hb.id];
-      h+='<div onclick="toggleHabit(\''+hb.id+'\',\''+t+'\')" style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:12px;background:'+(done?"rgba(0,212,161,0.07)":"rgba(255,255,255,0.03)")+';border:1px solid '+(done?"rgba(0,212,161,0.25)":"rgba(255,255,255,0.05)")+';cursor:pointer;margin-bottom:7px;transition:all 0.15s">';
-      h+='<div style="width:36px;height:36px;border-radius:11px;background:'+(done?"rgba(0,212,161,0.15)":"rgba(255,255,255,0.06)")+';display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">'+hb.icon+'</div>';
+      h+='<div onclick="toggleHabit(\''+hb.id+'\',\''+t+'\')" style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:12px;background:'+(done?"rgba(111,168,107,0.07)":"rgba(245,241,232,0.03)")+';cursor:pointer;margin-bottom:6px;transition:all 0.15s">';
+      h+='<div style="width:32px;height:32px;border-radius:10px;background:'+(done?"rgba(111,168,107,0.15)":"rgba(245,241,232,0.06)")+';display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">'+hb.icon+'</div>';
       h+='<span style="flex:1;font-size:13px;font-weight:600;'+(done?"text-decoration:line-through;color:var(--muted)":"")+'">'+esc(hb.label)+'</span>';
-      h+='<div style="width:26px;height:26px;border-radius:50%;border:2px solid '+(done?"var(--teal)":"rgba(255,255,255,0.15)")+';background:'+(done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:900;flex-shrink:0">'+(done?"✓":"")+'</div>';
+      h+='<div style="width:24px;height:24px;border-radius:50%;border:2px solid '+(done?"var(--teal)":"rgba(255,255,255,0.15)")+';background:'+(done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:900;flex-shrink:0">'+(done?"✓":"")+'</div>';
       h+='</div>';
     });
-  }
-  h+='</div>';
-
-  // ── TASKS TODAY ──
-  const doneCnt=todayTasks.filter(tt=>tt.done).length;
-  const taskPct=todayTasks.length?Math.round((doneCnt/todayTasks.length)*100):0;
-  h+='<div class="card" style="border-radius:18px;margin-bottom:12px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
-  h+='<div style="font-size:14px;font-weight:800">משימות היום</div>';
-  h+='<div style="font-size:11px;font-weight:700;color:'+(doneCnt===todayTasks.length&&todayTasks.length>0?"var(--teal)":"var(--muted)")+'">'+doneCnt+'/'+todayTasks.length+'</div>';
-  h+='</div>';
-  if(todayTasks.length>0){
-    h+='<div style="height:3px;background:rgba(255,255,255,0.06);border-radius:3px;margin-bottom:11px"><div style="height:3px;width:'+taskPct+'%;background:var(--teal);border-radius:3px;transition:width 0.4s"></div></div>';
-  }
-  if(todayTasks.length===0){
-    h+='<div style="text-align:center;padding:10px 0 6px;color:var(--muted);font-size:12px">🎯 אין משימות — הוסף משימה!</div>';
-  } else {
+    if(HABITS_DEF.length>0&&todayTasks.length>0){
+      h+='<div style="height:1px;background:var(--border);margin:8px 2px 10px"></div>';
+    }
     todayTasks.forEach((task,i)=>{
-      h+='<div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;background:'+(task.done?"rgba(0,212,161,0.06)":"rgba(255,255,255,0.03)")+';border:1px solid '+(task.done?"rgba(0,212,161,0.18)":"rgba(255,255,255,0.05)")+';margin-bottom:6px">';
-      h+='<div onclick="toggleTask(\''+t+'\','+i+')" style="width:22px;height:22px;border-radius:7px;border:2px solid '+(task.done?"var(--teal)":"rgba(255,255,255,0.2)")+';background:'+(task.done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#fff;font-weight:900;flex-shrink:0">'+(task.done?"✓":"")+'</div>';
+      h+='<div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:12px;background:'+(task.done?"rgba(111,168,107,0.06)":"rgba(245,241,232,0.03)")+';margin-bottom:6px">';
+      h+='<div onclick="toggleTask(\''+t+'\','+i+')" style="width:32px;height:32px;border-radius:10px;background:'+(task.done?"rgba(111,168,107,0.15)":"rgba(245,241,232,0.06)")+';display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;cursor:pointer">📝</div>';
       h+='<span style="flex:1;font-size:13px;'+(task.done?"text-decoration:line-through;color:var(--muted)":"font-weight:500")+'">'+esc(task.text)+'</span>';
-      h+='<button onclick="delTask(\''+t+'\','+i+')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:15px;padding:0 2px">✕</button>';
+      h+='<div onclick="toggleTask(\''+t+'\','+i+')" style="width:24px;height:24px;border-radius:50%;border:2px solid '+(task.done?"var(--teal)":"rgba(255,255,255,0.15)")+';background:'+(task.done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:900;flex-shrink:0;cursor:pointer">'+(task.done?"✓":"")+'</div>';
+      h+='<button onclick="delTask(\''+t+'\','+i+')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:13px;padding:0 0 0 2px">✕</button>';
       h+='</div>';
     });
   }
-  h+='<div style="display:flex;gap:7px;margin-top:9px">';
+  h+='<div style="display:flex;gap:7px;margin-top:4px">';
   h+='<input type="text" id="tinp-t" class="inp" placeholder="הוסף משימה להיום..." onkeydown="if(event.key===\'Enter\')addTask(\''+t+'\',\'tinp-t\')" style="flex:1;font-size:13px;padding:9px 12px"/>';
   h+='<button onclick="addTask(\''+t+'\',\'tinp-t\')" class="btn btn-p" style="padding:9px 15px;font-size:15px">+</button>';
   h+='</div></div>';
 
   // ── TASKS TOMORROW ──
-  h+='<div class="card" style="border-radius:18px;border-color:rgba(139,127,255,0.18)">';
+  h+='<div class="card" style="border-radius:10px;border-color:rgba(255,122,69,0.18)">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
   h+='<div style="font-size:14px;font-weight:800">📋 משימות למחר</div>';
   h+='<div style="font-size:11px;color:var(--muted)">'+tTasks.length+(tTasks.length===1?' משימה':' משימות')+'</div>';
@@ -1146,8 +1160,8 @@ function renderDash(){
     h+='<div style="text-align:center;padding:6px 0 8px;color:var(--muted);font-size:12px">אין משימות למחר</div>';
   } else {
     tTasks.forEach((task,i)=>{
-      h+='<div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid rgba(139,127,255,0.1);margin-bottom:6px">';
-      h+='<div style="width:7px;height:7px;border-radius:50%;background:rgba(139,127,255,0.5);flex-shrink:0"></div>';
+      h+='<div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;background:rgba(245,241,232,0.03);border:1px solid rgba(255,122,69,0.1);margin-bottom:6px">';
+      h+='<div style="width:7px;height:7px;border-radius:50%;background:rgba(255,122,69,0.5);flex-shrink:0"></div>';
       h+='<span style="flex:1;font-size:13px;color:var(--muted)">'+esc(task.text)+'</span>';
       h+='<button onclick="delTask(\''+tStr+'\','+i+')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:15px;padding:0 2px">✕</button>';
       h+='</div>';
@@ -1155,17 +1169,15 @@ function renderDash(){
   }
   h+='<div style="display:flex;gap:7px;margin-top:9px">';
   h+='<input id="tinp-tm" type="text" class="inp" placeholder="הוסף משימה למחר..." onkeydown="if(event.key===\'Enter\')addTask(\''+tStr+'\',\'tinp-tm\')" style="flex:1;font-size:13px;padding:9px 12px"/>';
-  h+='<button onclick="addTask(\''+tStr+'\',\'tinp-tm\')" class="btn" style="padding:9px 15px;font-size:15px;background:rgba(139,127,255,0.15);color:var(--purple);border:1px solid rgba(139,127,255,0.3)">+</button>';
+  h+='<button onclick="addTask(\''+tStr+'\',\'tinp-tm\')" class="btn" style="padding:9px 15px;font-size:15px;background:rgba(255,122,69,0.15);color:var(--purple);border:1px solid rgba(255,122,69,0.3)">+</button>';
   h+='</div></div>';
 
   el.innerHTML=h;
-  // ── animate score ring & number ──
+  // ── animate score number & quote sketch ──
   requestAnimationFrame(()=>{
-    const ring=document.getElementById('score-ring-line');
     const numEl=document.getElementById('score-num');
-    const _circ=2*Math.PI*38;
-    if(ring){ring.style.strokeDashoffset=(_circ*(1-dayScore/100)).toFixed(1);}
     if(numEl)animCount(numEl,dayScore);
+    document.querySelectorAll('#quote-sketch .sketch-line').forEach(p=>p.style.strokeDashoffset='0');
     if(dayScore>=100)setTimeout(launchConfetti,400);
   });
 }
@@ -1200,7 +1212,7 @@ function renderFitness(){
   const tabs=[["plan","📋 תוכנית"],["add","➕ הוסף ריצה"],["history","🕐 היסטוריה"]];
   let h='<div class="subtabs">';
   tabs.forEach(([k,l])=>{
-    h+='<button class="stb'+(fitTab===k?" on":"")+'" onclick="fitTab=\''+k+'\';renderFitness()" style="background:'+(fitTab===k?"var(--purple)":"transparent")+'">';
+    h+='<button class="stb'+(fitTab===k?" on":"")+'" onclick="fitTab=\''+k+'\';renderFitness()" style="background:'+(fitTab===k?"var(--purple-g)":"var(--bg2)")+'">';
     h+=l+'</button>';
   });
   h+='</div>';
@@ -1209,7 +1221,7 @@ function renderFitness(){
     h+=buildFitnessCalendar();
   }
   else if(fitTab==="add"){
-    h+='<div style="background:rgba(116,185,255,0.08);border:1px solid rgba(116,185,255,0.2);border-radius:12px;padding:11px 13px;margin-bottom:12px">';
+    h+='<div style="background:rgba(107,143,163,0.08);border:1px solid rgba(107,143,163,0.2);border-radius:12px;padding:11px 13px;margin-bottom:12px">';
     h+='<div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:2px">💬 פידבק AI</div>';
     h+='<div style="font-size:10px;color:var(--muted)">שלח לי screenshot מגרמין בצ\'אט ← אני מוציא נתונים ← הזן כאן</div>';
     h+='</div>';
@@ -1220,7 +1232,7 @@ function renderFitness(){
     // Main image
     h+='<div>';
     h+='<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">תמונה ראשית</div>';
-    h+='<label style="display:block;border:2px dashed rgba(139,127,255,0.35);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center">';
+    h+='<label style="display:block;border:2px dashed rgba(255,122,69,0.35);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center">';
     h+='<img id="img-preview" style="display:none;max-width:100%;max-height:100px;border-radius:7px;margin-bottom:6px;object-fit:contain"/>';
     h+='<div id="upload-lbl" style="font-size:22px;margin-bottom:3px">📊</div>';
     h+='<div style="font-size:10px;color:var(--muted)">סיכום ריצה</div>';
@@ -1230,12 +1242,12 @@ function renderFitness(){
     // Splits image
     h+='<div>';
     h+='<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">תמונת Splits</div>';
-    h+='<label style="display:block;border:2px dashed rgba(0,212,161,0.3);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center">';
+    h+='<label style="display:block;border:2px dashed rgba(111,168,107,0.3);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center">';
     h+='<img id="splits-preview" style="display:none;max-width:100%;max-height:100px;border-radius:7px;margin-bottom:6px;object-fit:contain"/>';
     h+='<div id="splits-upload-lbl" style="font-size:22px;margin-bottom:3px">📋</div>';
     h+='<div style="font-size:10px;color:var(--muted)">Splits / Laps</div>';
     h+='<input type="file" accept="image/*" style="display:none" onchange="handleSplitsUpload(this)"/></label>';
-    h+='<button id="splits-analyze-btn" onclick="analyzeSplitsImg()" style="display:none;width:100%;margin-top:6px;padding:8px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:800;background:linear-gradient(135deg,#00D4A1,#00A882);color:#fff">🔍 נתח</button>';
+    h+='<button id="splits-analyze-btn" onclick="analyzeSplitsImg()" style="display:none;width:100%;margin-top:6px;padding:8px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:800;background:linear-gradient(135deg,#6FA86B,#00A882);color:#fff">🔍 נתח</button>';
     h+='</div>';
     h+='</div>';
     h+='<div id="analyze-status" style="margin-bottom:6px"></div>';
@@ -1258,7 +1270,7 @@ function renderFitness(){
     h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">מאמץ</label><select id="aeff" class="inp"><option>קל</option><option selected>בינוני</option><option>קשה</option><option>מאוד קשה</option></select></div>';
     h+='</div>';
     h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">הערות</label><textarea id="anotes" class="inp" style="height:52px" placeholder="איך הרגשת..."></textarea></div>';
-    h+='<div id="aerr" style="display:none;padding:8px 11px;border-radius:9px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);color:var(--coral);font-size:12px;margin-top:7px">נא למלא מרחק וקצב</div>';
+    h+='<div id="aerr" style="display:none;padding:8px 11px;border-radius:9px;background:rgba(232,92,74,0.1);border:1px solid rgba(232,92,74,0.3);color:var(--coral);font-size:12px;margin-top:7px">נא למלא מרחק וקצב</div>';
     h+='<button onclick="submitRun()" class="btn btn-p" style="width:100%;margin-top:10px;font-size:14px">🏃 שמור ריצה</button>';
     h+='</div>';
     h+='</div>';
@@ -1276,8 +1288,8 @@ function renderFitness(){
         if(entry._type==="run"){
           const run=entry;
           const tag=run.type&&RUN_TAGS[run.type];
-          const tagColor=tag?tag.color:"#00D4A1";
-          h+='<div style="background:var(--card);border-radius:13px;padding:12px;margin-bottom:8px;display:flex;gap:9px;align-items:flex-start;border:1px solid '+c2r(tagColor,0.25)+'">';
+          const tagColor=tag?tag.color:"#6FA86B";
+          h+='<div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;gap:9px;align-items:flex-start;border:1px solid '+c2r(tagColor,0.25)+'">';
           h+='<div style="width:3px;border-radius:2px;background:'+tagColor+';min-height:45px;flex-shrink:0;margin-top:2px"></div>';
           h+='<div style="flex:1">';
           h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">';
@@ -1285,21 +1297,21 @@ function renderFitness(){
           h+='<span style="font-size:10px;color:var(--muted)">'+run.date+'</span>';
           h+='</div>';
           h+='<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px">';
-          h+='<span style="font-size:18px;font-weight:900">'+run.km+'</span><span style="font-size:12px;color:var(--muted)">ק"מ</span>';
-          h+='<span style="font-size:12px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
-          if(run.avgHr) h+='<span style="font-size:12px;font-weight:600;color:var(--muted)">♥ '+run.avgHr+'</span>';
+          h+='<span class="num" style="font-size:18px;font-weight:700">'+run.km+'</span><span style="font-size:12px;color:var(--muted)">ק"מ</span>';
+          h+='<span class="num" style="font-size:12px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
+          if(run.avgHr) h+='<span class="num" style="font-size:12px;font-weight:600;color:var(--muted)">♥ '+run.avgHr+'</span>';
           h+='</div>';
           if(run.notes) h+='<div style="font-size:11px;color:var(--muted2);font-style:italic;margin-top:2px">'+esc(run.notes)+'</div>';
           if(run.splits&&run.splits.length){
-            h+='<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">';
+            h+='<div style="margin-top:8px;border-top:1px solid rgba(245,241,232,0.06);padding-top:8px">';
             h+='<div style="font-size:10px;font-weight:700;color:'+tagColor+';text-transform:uppercase;margin-bottom:5px">Splits · '+run.splits.length+' מקטעים</div>';
             h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr;gap:2px 6px;font-size:10px">';
             h+='<span style="color:var(--muted2)">#</span><span style="color:var(--muted2)">מרחק</span><span style="color:var(--muted2)">קצב</span><span style="color:var(--muted2)">דופק</span>';
             run.splits.forEach(s=>{
-              h+='<span style="color:var(--muted)">'+s.lap+'</span>';
-              h+='<span style="color:var(--teal);">'+(s.dist?s.dist+' ק"מ':'—')+'</span>';
-              h+='<span style="color:var(--purple)">'+(s.pace||'—')+'</span>';
-              h+='<span style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'—')+'</span>';
+              h+='<span class="num" style="color:var(--muted)">'+s.lap+'</span>';
+              h+='<span class="num" style="color:var(--teal);">'+(s.dist?s.dist+' ק"מ':'—')+'</span>';
+              h+='<span class="num" style="color:var(--purple)">'+(s.pace||'—')+'</span>';
+              h+='<span class="num" style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'—')+'</span>';
             });
             h+='</div></div>';
           }
@@ -1312,7 +1324,7 @@ function renderFitness(){
           const mins=Math.floor((s.duration||0)/60);
           const totalSets=s.exercises.reduce((a,ex)=>a+ex.sets.length,0);
           const doneSets=s.exercises.reduce((a,ex)=>a+ex.sets.filter(st=>st.done).length,0);
-          h+='<div style="background:var(--card);border-radius:13px;padding:12px;margin-bottom:8px;border:1px solid rgba(139,127,255,0.25)">';
+          h+='<div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,122,69,0.25)">';
           h+='<div style="display:flex;gap:9px;align-items:flex-start">';
           h+='<div style="width:3px;border-radius:2px;background:var(--purple);min-height:45px;flex-shrink:0;margin-top:2px"></div>';
           h+='<div style="flex:1">';
@@ -1329,11 +1341,11 @@ function renderFitness(){
           h+='</div>';
           h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">';
           h+='<button onclick="delStrLog('+s.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px">✕</button>';
-          h+='<button onclick="_strExpandId=(_strExpandId==='+s.id+'?null:'+s.id+');renderFitness()" style="background:rgba(139,127,255,0.12);border:1px solid rgba(139,127,255,0.3);color:var(--purple);border-radius:8px;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:4px 10px">'+(expanded?"▲ סגור":"▼ פירוט")+'</button>';
+          h+='<button onclick="_strExpandId=(_strExpandId==='+s.id+'?null:'+s.id+');renderFitness()" style="background:rgba(255,122,69,0.12);border:1px solid rgba(255,122,69,0.3);color:var(--purple);border-radius:8px;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:4px 10px">'+(expanded?"▲ סגור":"▼ פירוט")+'</button>';
           h+='</div>';
           h+='</div>';
           if(expanded){
-            h+='<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">';
+            h+='<div style="margin-top:10px;border-top:1px solid rgba(245,241,232,0.06);padding-top:10px">';
             s.exercises.forEach(ex=>{
               const exDone=ex.sets.filter(st=>st.done).length;
               h+='<div style="margin-bottom:10px">';
@@ -1344,7 +1356,7 @@ function renderFitness(){
                 h+='<span style="color:var(--muted)">'+(si+1)+'</span>';
                 h+='<span style="color:var(--text)">'+(st.reps||'—')+'</span>';
                 h+='<span style="color:var(--teal)">'+(st.weight?st.weight+' ק"ג':'—')+'</span>';
-                h+='<span>'+(st.done?'<span style="color:#00D4A1">✓</span>':'<span style="color:var(--muted2)">✗</span>')+'</span>';
+                h+='<span>'+(st.done?'<span style="color:#6FA86B">✓</span>':'<span style="color:var(--muted2)">✗</span>')+'</span>';
               });
               h+='</div>';
               h+='</div>';
@@ -1405,9 +1417,9 @@ async function analyzeGarminImg(){
     if(result.avgHr)document.getElementById("ahr").value=result.avgHr;
     const details=document.getElementById("run-details");if(details)details.style.display="block";
     const hint=document.getElementById("run-details-hint");if(hint)hint.style.display="none";
-    if(status)status.innerHTML='<div style="background:rgba(0,212,161,0.1);border:1px solid rgba(0,212,161,0.3);border-radius:9px;padding:9px 12px;font-size:12px;color:#00D4A1">✓ זוהה: '+esc(result.km)+' ק"מ · קצב '+esc(result.pace)+' · דופק '+esc(result.avgHr||"—")+'</div>';
+    if(status)status.innerHTML='<div style="background:rgba(111,168,107,0.1);border:1px solid rgba(111,168,107,0.3);border-radius:9px;padding:9px 12px;font-size:12px;color:#6FA86B">✓ זוהה: '+esc(result.km)+' ק"מ · קצב '+esc(result.pace)+' · דופק '+esc(result.avgHr||"—")+'</div>';
   }catch(e){
-    if(status)status.innerHTML='<div style="background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:9px;padding:9px 12px;font-size:11px;color:#FF6B6B">שגיאה: '+esc(e.message)+'</div>';
+    if(status)status.innerHTML='<div style="background:rgba(232,92,74,0.1);border:1px solid rgba(232,92,74,0.3);border-radius:9px;padding:9px 12px;font-size:11px;color:#E85C4A">שגיאה: '+esc(e.message)+'</div>';
   }
   if(btn){btn.textContent="🔍 נתח שוב";btn.disabled=false;}
 }
@@ -1454,17 +1466,17 @@ async function analyzeSplitsImg(){
     if(result.error)throw new Error(result.error);
     pendingSplits=result.splits||[];
     if(status){
-      let rows=pendingSplits.map((s,i)=>'<div style="display:flex;gap:8px;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'+
+      let rows=pendingSplits.map((s,i)=>'<div style="display:flex;gap:8px;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(245,241,232,0.05)">'+
         '<span style="color:var(--muted);min-width:22px">'+s.lap+'</span>'+
         '<span style="min-width:50px;color:var(--teal)">'+(s.dist?s.dist+' ק"מ':'')+'</span>'+
         '<span style="min-width:50px;color:var(--purple)">'+(s.pace?s.pace+'/ק"מ':'')+'</span>'+
         '<span style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'')+'</span>'+
         '</div>').join('');
-      status.innerHTML='<div style="background:rgba(0,212,161,0.08);border:1px solid rgba(0,212,161,0.25);border-radius:10px;padding:10px 12px">'+
+      status.innerHTML='<div style="background:rgba(111,168,107,0.08);border:1px solid rgba(111,168,107,0.25);border-radius:10px;padding:10px 12px">'+
         '<div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:7px">✓ זוהו '+pendingSplits.length+' splits</div>'+rows+'</div>';
     }
   }catch(e){
-    if(status)status.innerHTML='<div style="background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:9px;padding:9px;font-size:11px;color:var(--coral)">שגיאה: '+esc(e.message)+'</div>';
+    if(status)status.innerHTML='<div style="background:rgba(232,92,74,0.1);border:1px solid rgba(232,92,74,0.3);border-radius:9px;padding:9px;font-size:11px;color:var(--coral)">שגיאה: '+esc(e.message)+'</div>';
   }
   if(btn){btn.textContent="🔍 נתח שוב";btn.disabled=false;}
 }
@@ -1546,7 +1558,7 @@ async function analyzeFood(){
     const d = data;
     window._pendingFood = d;
     result.innerHTML =
-      '<div style="background:rgba(0,212,161,0.08);border:1px solid rgba(0,212,161,0.25);border-radius:12px;padding:13px;margin-bottom:9px">' +
+      '<div style="background:rgba(111,168,107,0.08);border:1px solid rgba(111,168,107,0.25);border-radius:12px;padding:13px;margin-bottom:9px">' +
       '<div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:8px">✓ ' + esc(d.desc) + '</div>' +
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">' +
       '<div style="background:var(--bg3);border-radius:9px;padding:9px;text-align:center"><div style="font-size:9px;color:var(--muted);margin-bottom:2px">קלוריות</div><div style="font-size:18px;font-weight:800;color:var(--coral)">' + esc(d.cal) + '</div></div>' +
@@ -1629,16 +1641,16 @@ function buildFitnessCalendar(){
     const isToday=day===today;
     const hasDone=workouts.length&&workouts.some((_,i)=>!!COMP[i===0?(t+"-"+day):(t+"-"+day+"-"+i)]);
 
-    h+=(isToday?'<div id="fitness-today-col"':'<div')+' style="width:calc(50vw - 22px);min-width:160px;max-width:260px;flex-shrink:0;background:var(--card);border:1.5px solid '+(isToday?"rgba(139,127,255,0.5)":"var(--border)")+';border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:0'+(isToday?';box-shadow:0 0 0 3px rgba(139,127,255,0.08)':'')+'">';
+    h+=(isToday?'<div id="fitness-today-col"':'<div')+' style="width:calc(50vw - 22px);min-width:160px;max-width:260px;flex-shrink:0;background:var(--card);border:1.5px solid '+(isToday?"rgba(255,122,69,0.5)":"var(--border)")+';border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:0'+(isToday?';box-shadow:0 0 0 3px rgba(255,122,69,0.08)':'')+'">';
 
     // Day header
     h+='<div style="margin-bottom:8px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">';
     h+='<div style="font-size:13px;font-weight:900;color:'+(isToday?"var(--purple)":"var(--text)")+'">'+day+'</div>';
-    h+='<button onclick="addWorkoutToDay(\''+day+'\')" style="padding:2px 7px;border-radius:5px;border:none;background:rgba(139,127,255,0.13);color:var(--purple);font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">+</button>';
+    h+='<button onclick="addWorkoutToDay(\''+day+'\')" style="padding:2px 7px;border-radius:5px;border:none;background:rgba(255,122,69,0.13);color:var(--purple);font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">+</button>';
     h+='</div>';
     if(isToday)h+='<span style="font-size:8px;background:var(--purple);color:#fff;padding:1px 6px;border-radius:3px;font-weight:700">היום</span>';
-    else if(hasDone)h+='<span style="font-size:8px;color:#00D4A1;font-weight:700">✓ בוצע</span>';
+    else if(hasDone)h+='<span style="font-size:8px;color:#6FA86B;font-weight:700">✓ בוצע</span>';
     h+='</div>';
     h+='<div style="height:1px;background:var(--border);margin-bottom:8px"></div>';
 
@@ -1649,7 +1661,7 @@ function buildFitnessCalendar(){
       h+='</div>';
     } else {
       workouts.forEach((w,i)=>{
-        const color=w.type==="strength"?"#8B7FFF":"#00D4A1";
+        const color=w.type==="strength"?"#FF7A45":"#6FA86B";
         const icon=w.type==="strength"?"💪":w.type==="run"?"🏃":"🏖️";
         const runLbl={"easy":"קלה","tempo":"טמפו","intervals":"אינטרוולים","long":"ארוכה"}[w.runType]||"";
         const typeLabel=w.type==="strength"?"אימון כוח":"ריצה"+(runLbl?" "+runLbl:"");
@@ -1669,8 +1681,8 @@ function buildFitnessCalendar(){
         // Action buttons
         h+='<div style="display:flex;gap:4px;margin-bottom:7px">';
         if(w.type==="strength") h+='<button onclick="startWorkout(\''+day+'\','+i+')" style="flex:1;padding:4px 5px;border-radius:6px;border:none;background:var(--teal);color:#0E1220;font-family:Rubik,sans-serif;font-size:9px;font-weight:800;cursor:pointer">▶ התחל</button>';
-        h+='<button onclick="openWorkoutEdit(\''+day+'\','+i+')" style="flex:1;padding:4px;border-radius:6px;border:1px solid rgba(139,127,255,0.25);background:transparent;color:var(--purple);font-family:Rubik,sans-serif;font-size:9px;font-weight:700;cursor:pointer">✏️ ערוך</button>';
-        h+='<button onclick="openCopyWorkout(\''+day+'\','+i+')" style="padding:4px 7px;border-radius:6px;border:1px solid rgba(116,185,255,0.25);background:transparent;color:var(--blue);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer" title="העתק ליום אחר">📋</button>';
+        h+='<button onclick="openWorkoutEdit(\''+day+'\','+i+')" style="flex:1;padding:4px;border-radius:6px;border:1px solid rgba(255,122,69,0.25);background:transparent;color:var(--purple);font-family:Rubik,sans-serif;font-size:9px;font-weight:700;cursor:pointer">✏️ ערוך</button>';
+        h+='<button onclick="openCopyWorkout(\''+day+'\','+i+')" style="padding:4px 7px;border-radius:6px;border:1px solid rgba(107,143,163,0.25);background:transparent;color:var(--blue);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer" title="העתק ליום אחר">📋</button>';
         h+='<button onclick="removeWorkoutFromDay(\''+day+'\','+i+')" style="padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--muted2);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer">✕</button>';
         h+='</div>';
 
@@ -1681,9 +1693,9 @@ function buildFitnessCalendar(){
             h+='<div style="font-size:10px;color:var(--muted);font-style:italic">אין תרגילים</div>';
           } else {
             exs.forEach(ex=>{
-              h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.03);margin-bottom:3px">';
+              h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:6px;background:rgba(245,241,232,0.03);margin-bottom:3px">';
               h+='<span style="font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-left:4px">'+esc(ex.name||"תרגיל")+'</span>';
-              h+='<span style="font-size:9px;color:#8B7FFF;white-space:nowrap;flex-shrink:0">'+ex.sets+'×'+ex.reps+'</span>';
+              h+='<span style="font-size:9px;color:#FF7A45;white-space:nowrap;flex-shrink:0">'+ex.sets+'×'+ex.reps+'</span>';
               h+='</div>';
             });
           }
@@ -1698,7 +1710,7 @@ function buildFitnessCalendar(){
             const totalKm=segs.reduce((a,sg)=>{const d=parseFloat(sg.dist)||0;return a+(sg.unit==="m"?d/1000:d)*(sg.reps||1);},0);
             segs.forEach(seg=>{
               const si=SEG_LABELS[seg.segType]||{ic:"🏃",l:"מקטע"};
-              const col=SEG_COLORS[seg.segType]||"#00D4A1";
+              const col=SEG_COLORS[seg.segType]||"#6FA86B";
               const distLbl=seg.unit==="m"?seg.dist+"מ'":(seg.dist+'ק"מ');
               h+='<div style="padding:4px 6px;border-radius:6px;background:'+c2r(col,0.07)+';border:1px solid '+c2r(col,0.18)+';margin-bottom:3px">';
               h+='<div style="display:flex;align-items:center;gap:4px">';
@@ -1730,7 +1742,7 @@ function renderNut(){
   const netCal=tot.cal-burnT;
   const def=PROFILE.tdee-netCal;
   const defOk=def>=300&&def<=600,defBig=def>600;
-  const defColor=defOk?"#00D4A1":defBig?"#FFB347":"#FF6B6B";
+  const defColor=defOk?"#6FA86B":defBig?"#E8B54A":"#E85C4A";
 
   let h='<div style="display:flex;gap:5px;margin-bottom:12px">';
   [["log","📝 יומן"],["history","📊 היסטוריה"],["plan","🥗 תפריט"]].forEach(([k,l])=>{
@@ -1746,28 +1758,32 @@ function renderNut(){
     h+='<button onclick="nutChangeDay(1)" style="width:36px;height:36px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:'+(isToday?"var(--muted2)":"var(--text)")+';font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;'+(isToday?"opacity:0.35;pointer-events:none":"")+'">›</button>';
     h+='</div>';
 
-    // Calorie ring
-    const pct=Math.min(tot.cal/PROFILE.target*100,130);
-    const r=42;const circ=2*Math.PI*r;const dash=Math.min(pct/100,1)*circ;
-    const ringColor=tot.cal>PROFILE.target?"#FF6B6B":defBig?"#FFB347":"#00D4A1";
+    // Calorie gauge
+    const pct=Math.min(tot.cal/PROFILE.target,1.3);
+    const ringColor=tot.cal>PROFILE.target?"#E85C4A":defBig?"#E8B54A":"#6FA86B";
     h+='<div class="card">';
     h+='<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">';
-    h+='<svg width="100" height="100" style="flex-shrink:0"><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+ringColor+'" stroke-width="9" stroke-dasharray="'+dash+' '+circ+'" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="47" text-anchor="middle" font-family="Rubik,sans-serif" font-size="18" font-weight="900" fill="var(--text)">'+Math.round(tot.cal)+'</text><text x="50" y="62" text-anchor="middle" font-family="Rubik,sans-serif" font-size="10" fill="var(--muted)">/ '+PROFILE.target+'</text></svg>';
+    h+='<div style="position:relative;width:110px;height:64px;flex-shrink:0">';
+    h+=arcGauge(pct,110,64,ringColor,8);
+    h+='<div style="position:absolute;top:0;right:0;text-align:right">';
+    h+='<div class="num" style="font-size:18px;font-weight:700;color:var(--text)">'+Math.round(tot.cal)+'</div>';
+    h+='<div style="font-size:10px;color:var(--muted)">/ '+PROFILE.target+'</div>';
+    h+='</div></div>';
     h+='<div style="flex:1">';
     [["נאכל",Math.round(tot.cal),"var(--text)"],["שריפה 🔥",burnT,"var(--amber)"],["נטו",Math.round(netCal),"var(--purple)"],["גירעון",Math.round(def),defColor]].forEach(([l,v,c])=>{
-      h+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px"><span style="color:var(--muted)">'+l+'</span><span style="font-weight:800;color:'+c+'">'+v+' קל</span></div>';
+      h+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(245,241,232,0.04);font-size:12px"><span style="color:var(--muted)">'+l+'</span><span style="font-weight:800;color:'+c+'">'+v+' קל</span></div>';
     });
     h+='<div style="margin-top:8px;padding:8px 11px;border-radius:10px;background:'+c2r(defColor,0.1)+';border:1px solid '+c2r(defColor,0.25)+';color:'+defColor+';font-size:11px;font-weight:700;text-align:center">';
     h+=(defOk?"✓ גירעון אידיאלי":defBig?"⚠️ גדול מדי":tot.cal===0?"הזן ארוחות":"גירעון קטן")+' · '+Math.abs(Math.round(def))+' קל</div>';
     h+='</div></div>';
     // Macros
     h+='<div style="display:flex;gap:7px">';
-    [{l:"חלבון",v:tot.p,t:PROFILE.protein,c:"#8B7FFF"},{l:"פחמימות",v:tot.c,t:PROFILE.carbs,c:"#00D4A1"},{l:"שומן",v:tot.f,t:PROFILE.fat,c:"#FFB347"}].forEach(m=>{
+    [{l:"חלבון",v:tot.p,t:PROFILE.protein,c:"#FF7A45"},{l:"פחמימות",v:tot.c,t:PROFILE.carbs,c:"#6FA86B"},{l:"שומן",v:tot.f,t:PROFILE.fat,c:"#E8B54A"}].forEach(m=>{
       h+='<div style="flex:1;background:var(--bg3);border-radius:11px;padding:9px 7px;text-align:center;border:1px solid '+c2r(m.c,0.2)+'">';
       h+='<div style="font-size:9px;font-weight:700;color:'+m.c+';text-transform:uppercase;margin-bottom:3px">'+m.l+'</div>';
       h+='<div style="font-size:15px;font-weight:800;color:'+m.c+'">'+Math.round(m.v)+'</div>';
       h+='<div style="font-size:9px;color:var(--muted)">/ '+m.t+'g</div>';
-      h+='<div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+Math.min(m.t?m.v/m.t*100:0,100)+'%;background:'+m.c+'"></div></div>';
+      h+='<div style="height:3px;background:rgba(245,241,232,0.08);border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+Math.min(m.t?m.v/m.t*100:0,100)+'%;background:'+m.c+'"></div></div>';
       h+='</div>';
     });
     h+='</div></div>';
@@ -1781,18 +1797,17 @@ function renderNut(){
     h+='<div style="overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scrollbar-width:none">';
     h+='<div style="display:flex;gap:7px;width:max-content">';
     QUICK_FOODS.forEach((q,qi)=>{
-      h+='<button onclick="quickLogFood('+qi+')" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;border-radius:13px;border:1px solid var(--border2);background:var(--card);cursor:pointer;min-width:64px;flex-shrink:0;transition:all 0.15s;active:scale(0.95)">';
-      h+='<span style="font-size:20px;line-height:1">'+q.e+'</span>';
+      h+='<button onclick="quickLogFood('+qi+')" style="display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;min-width:66px;flex-shrink:0">';
+      h+='<div style="width:52px;height:52px;border-radius:50%;background:var(--card);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:22px">'+q.e+'</div>';
       h+='<span style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap">'+q.l+'</span>';
-      h+='<span style="font-size:9px;color:var(--purple);font-weight:700">P '+q.p+'g</span>';
-      h+='<span style="font-size:9px;color:var(--muted)">'+q.cal+' קל</span>';
+      h+='<span class="num" style="font-size:9px;color:var(--muted)">'+q.cal+' קל</span>';
       h+='</button>';
     });
     h+='</div></div>';
     h+='<div style="display:flex;gap:6px;margin-top:8px">';
     h+='<div style="font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:4px;flex-shrink:0">💊 חלבון:</div>';
     [10,20,30,40].forEach(g=>{
-      h+='<button onclick="quickAddProtein('+g+')" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid rgba(139,127,255,0.3);background:rgba(139,127,255,0.08);color:var(--purple);font-family:Rubik,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+'+g+'g</button>';
+      h+='<button onclick="quickAddProtein('+g+')" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid rgba(255,122,69,0.3);background:rgba(255,122,69,0.08);color:var(--purple);font-family:Rubik,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+'+g+'g</button>';
     });
     h+='</div>';
     h+='</div>';
@@ -1802,7 +1817,7 @@ function renderNut(){
     h+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px">';
     BURN_P.forEach(([label,val])=>{
       const sel=dayType===label;
-      h+='<button onclick="dayType=\''+label+'\';setBurn()" style="padding:5px 10px;border-radius:18px;border:1px solid '+(sel?"var(--amber)":"var(--border2)")+';background:'+(sel?"rgba(255,179,71,0.15)":"transparent")+';color:'+(sel?"var(--amber)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">'+label+' ~'+val+'</button>';
+      h+='<button onclick="dayType=\''+label+'\';setBurn()" style="padding:5px 10px;border-radius:10px;border:1px solid '+(sel?"var(--amber)":"var(--border2)")+';background:'+(sel?"rgba(232,181,74,0.15)":"transparent")+';color:'+(sel?"var(--amber)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">'+label+' ~'+val+'</button>';
     });
     h+='</div>';
     h+='<div style="display:flex;gap:7px">';
@@ -1821,13 +1836,13 @@ function renderNut(){
     h+='</div>';
     h+='<button onclick="analyzeFood()" id="ai-food-btn" class="btn btn-p" style="width:100%;margin-bottom:10px">🔍 נתח עם AI</button>';
     h+='<div id="ai-food-result" style="display:none">';
-    h+='<div style="background:rgba(0,212,161,0.08);border:1px solid rgba(0,212,161,0.25);border-radius:11px;padding:12px;margin-bottom:10px">';
+    h+='<div style="background:rgba(111,168,107,0.08);border:1px solid rgba(111,168,107,0.25);border-radius:11px;padding:12px;margin-bottom:10px">';
     h+='<div style="font-size:13px;font-weight:700;margin-bottom:8px" id="ai-food-desc"></div>';
     h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px" id="ai-food-macros"></div>';
     h+='<div id="ai-food-notes" style="font-size:11px;color:var(--muted);margin-bottom:10px"></div>';
     h+='<button onclick="confirmAddFood()" class="btn btn-p" style="width:100%;font-size:14px">✓ הוסף ליומן</button>';
     h+='</div></div>';
-    h+='<div id="ai-food-err" style="display:none;padding:8px;border-radius:9px;background:rgba(255,107,107,0.1);color:var(--coral);font-size:12px;margin-bottom:7px"></div>';
+    h+='<div id="ai-food-err" style="display:none;padding:8px;border-radius:9px;background:rgba(232,92,74,0.1);color:var(--coral);font-size:12px;margin-bottom:7px"></div>';
     h+='<div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">';
     h+='<div style="font-size:11px;color:var(--muted);margin-bottom:8px">או הכנס ידנית:</div>';
     h+='<div style="display:flex;gap:7px;margin-bottom:7px">';
@@ -1846,15 +1861,25 @@ function renderNut(){
     if(todayE.length>0){
       h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:9px">ארוחות · '+fmtDate(selDate)+'</div>';
       todayE.forEach((e,i)=>{
-        h+='<div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:7px">';
-        h+='<div style="font-size:10px;color:var(--muted);margin-bottom:3px">'+e.time+'</div>';
-        h+='<div style="font-size:13px;margin-bottom:5px">'+e.desc+'</div>';
-        h+='<div style="display:flex;gap:7px;font-size:11px;align-items:center">';
-        h+='<span style="color:var(--coral);font-weight:700">'+e.cal+' קל</span>';
-        h+='<span style="color:var(--purple)">P:'+e.p+'g</span>';
-        h+='<span style="color:var(--teal)">C:'+e.c+'g</span>';
-        h+='<span style="color:var(--amber)">F:'+e.f+'g</span>';
-        h+='<button onclick="delNut('+i+')" style="margin-right:auto;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px">✕</button>';
+        const hr=parseInt((e.time||"").split(":")[0]);
+        const mealIcon=isNaN(hr)?"🍽️":hr<11?"🍳":hr<16?"🍲":hr<21?"🍽️":"🌙";
+        const pctOfGoal=PROFILE.target?Math.round(e.cal/PROFILE.target*100):0;
+        h+='<div style="padding:12px 4px;border-bottom:1px solid var(--border)">';
+        h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px">';
+        h+='<div style="width:44px;height:44px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">'+mealIcon+'</div>';
+        h+='<div style="flex:1;min-width:0">';
+        h+='<div style="font-size:13px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(e.desc)+'</div>';
+        h+='<div class="num" style="font-size:10px;color:var(--muted)">'+e.time+'</div>';
+        h+='</div>';
+        h+='<div style="text-align:left;flex-shrink:0">';
+        h+='<div class="num" style="font-size:15px;font-weight:800">'+e.cal+' קל</div>';
+        h+='<div class="num" style="font-size:10px;color:var(--purple);font-weight:700">'+pctOfGoal+'% מהיעד</div>';
+        h+='</div></div>';
+        h+='<div style="display:flex;align-items:center;gap:16px">';
+        [["חלבון",e.p,"var(--purple)"],["פחמימות",e.c,"var(--teal)"],["שומן",e.f,"var(--amber)"]].forEach(([lbl,val,col])=>{
+          h+='<div style="text-align:center"><div style="font-size:9px;color:var(--muted);margin-bottom:1px">'+lbl+'</div><div class="num" style="font-size:12px;font-weight:700;color:'+col+'">'+val+'g</div></div>';
+        });
+        h+='<button onclick="delNut('+i+')" style="margin-right:auto;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px">✕</button>';
         h+='</div></div>';
       });
     }
@@ -1884,9 +1909,9 @@ function renderNut(){
         h+='</div>';
         h+='<div style="font-size:11px;color:var(--muted2);margin-bottom:6px;line-height:1.6">'+m.items+'</div>';
         h+='<div style="display:flex;gap:7px;font-size:10px">';
-        h+='<span style="background:rgba(139,127,255,0.15);color:var(--purple);padding:2px 7px;border-radius:4px;font-weight:600">P '+m.p+'g</span>';
-        h+='<span style="background:rgba(0,212,161,0.12);color:var(--teal);padding:2px 7px;border-radius:4px;font-weight:600">C '+m.c+'g</span>';
-        h+='<span style="background:rgba(255,179,71,0.12);color:var(--amber);padding:2px 7px;border-radius:4px;font-weight:600">F '+m.f+'g</span>';
+        h+='<span style="background:rgba(255,122,69,0.15);color:var(--purple);padding:2px 7px;border-radius:4px;font-weight:600">P '+m.p+'g</span>';
+        h+='<span style="background:rgba(111,168,107,0.12);color:var(--teal);padding:2px 7px;border-radius:4px;font-weight:600">C '+m.c+'g</span>';
+        h+='<span style="background:rgba(232,181,74,0.12);color:var(--amber);padding:2px 7px;border-radius:4px;font-weight:600">F '+m.f+'g</span>';
         h+='</div></div>';
       });
     } else {
@@ -1909,8 +1934,8 @@ function renderNut(){
         const dE=NUT[date];const dB=BURNS[date]||0;
         const dT=dE.reduce((a,e)=>({cal:a.cal+e.cal,p:a.p+e.p,c:a.c+e.c,f:a.f+e.f}),{cal:0,p:0,c:0,f:0});
         const dDef=PROFILE.tdee-(dT.cal-dB);
-        const dc=dDef>=300&&dDef<=600?"#00D4A1":dDef>600?"#FFB347":"#FF6B6B";
-        h+='<div onclick="selDate=\''+date+'\';nutView=\'log\';renderNut()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer">';
+        const dc=dDef>=300&&dDef<=600?"#6FA86B":dDef>600?"#E8B54A":"#E85C4A";
+        h+='<div onclick="selDate=\''+date+'\';nutView=\'log\';renderNut()" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer">';
         h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
         h+='<div style="font-size:13px;font-weight:700">'+fmtDate(date)+'</div>';
         h+='<div style="font-size:12px;font-weight:700;color:'+dc+'">גירעון '+Math.round(dDef)+' קל</div>';
@@ -1970,7 +1995,7 @@ function renderProductivity(){
   const el=document.getElementById("pg-productivity");
   let h='<div class="subtabs">';
   [["score","📊 ציון"],["notes","📝 הערות"]].forEach(([k,l])=>{
-    h+='<button class="stb'+(prodTab===k?" on":"")+'" onclick="prodTab=\''+k+'\';renderProductivity()" style="background:'+(prodTab===k?"var(--pink)":"transparent")+'">';
+    h+='<button class="stb'+(prodTab===k?" on":"")+'" onclick="prodTab=\''+k+'\';renderProductivity()" style="background:'+(prodTab===k?"var(--pink)":"var(--bg2)")+'">';
     h+=l+'</button>';
   });
   h+='</div>';
@@ -1993,7 +2018,7 @@ function buildScoreHTML(){
   const isToday=t===todayStr();
   const dayName=DAYS[new Date(t+'T12:00:00').getDay()];
   const score=calcDayScore(t);
-  const scoreHex=score>=75?"#00D4A1":score>=50?"#FFB347":"#FF6B6B";
+  const scoreHex=score>=75?"#6FA86B":score>=50?"#E8B54A":"#E85C4A";
   const scoreColor=score>=75?"var(--teal)":score>=50?"var(--amber)":"var(--coral)";
   const scoreLabel=score>=90?"יום מושלם! ⭐":score>=75?"יום מעולה! 🔥":score>=50?"יום טוב 👍":score>=30?"יום בינוני 🙂":"יש עוד לאן לגדול 💪";
 
@@ -2010,9 +2035,6 @@ function buildScoreHTML(){
   const tl=TASKS[t]||[];
   const doneT=tl.filter(tk=>tk.done).length;
 
-  // Ring
-  const r=52,circ=2*Math.PI*r,dash=(score/100)*circ;
-
   let h='';
 
   // Date nav
@@ -2022,12 +2044,12 @@ function buildScoreHTML(){
   h+='<button onclick="scoreDateChange(1)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:'+(isToday?"0.3":"1")+';pointer-events:'+(isToday?"none":"auto")+'">›</button>';
   h+='</div>';
 
-  // Score ring + label
+  // Score gauge + label
   h+='<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:18px">';
-  h+='<div style="position:relative;width:130px;height:130px">';
-  h+='<svg width="130" height="130"><circle cx="65" cy="65" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="11"/><circle cx="65" cy="65" r="'+r+'" fill="none" stroke="'+scoreColor+'" stroke-width="11" stroke-dasharray="'+dash.toFixed(1)+' '+circ.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 65 65)"/></svg>';
-  h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">';
-  h+='<div style="font-size:40px;font-weight:900;color:'+scoreColor+';line-height:1">'+score+'</div>';
+  h+='<div style="position:relative;width:200px;height:116px">';
+  h+=arcGauge(score/100,200,116,scoreHex,11);
+  h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px">';
+  h+='<div class="num" style="font-size:40px;font-weight:700;color:'+scoreColor+';line-height:1">'+score+'</div>';
   h+='<div style="font-size:11px;color:var(--muted)">מתוך 100</div>';
   h+='</div></div>';
   h+='<div style="font-size:15px;font-weight:800;color:'+scoreColor+';margin-top:10px">'+scoreLabel+'</div>';
@@ -2039,7 +2061,7 @@ function buildScoreHTML(){
 
   if(hasW){
     const wPts=workDone?(hasW?35:0):0;
-    h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(245,241,232,0.05)">';
     h+='<span style="font-size:20px">🏋️</span>';
     h+='<span style="flex:1;font-size:13px">אימון</span>';
     h+='<span style="font-size:12px;font-weight:700;color:'+(workDone?"var(--teal)":"var(--muted2)")+'">'+(workDone?"✓ בוצע":"✗ לא בוצע")+'</span>';
@@ -2047,7 +2069,7 @@ function buildScoreHTML(){
   }
 
   if(totalH>0){
-    h+='<div style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
+    h+='<div style="padding:9px 0;border-bottom:1px solid rgba(245,241,232,0.05)">';
     h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">';
     h+='<span style="font-size:20px">✅</span>';
     h+='<span style="flex:1;font-size:13px">הרגלים</span>';
@@ -2088,7 +2110,7 @@ function buildScoreHTML(){
   // Debrief if exists
   const db=DEBRIEF[t];
   if(db&&(db.bad||db.improve)){
-    h+='<div style="background:linear-gradient(135deg,rgba(139,127,255,0.1),rgba(116,185,255,0.06));border:1px solid rgba(139,127,255,0.25);border-radius:16px;padding:14px;margin-bottom:11px">';
+    h+='<div style="background:linear-gradient(135deg,rgba(255,122,69,0.1),rgba(107,143,163,0.06));border:1px solid rgba(255,122,69,0.25);border-radius:10px;padding:14px;margin-bottom:11px">';
     h+='<div style="font-size:11px;font-weight:800;color:var(--purple);margin-bottom:10px">🌙 תחקור היום</div>';
     if(db.bad)h+='<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px">מה היה פחות טוב</div><div style="font-size:12px;line-height:1.55">'+db.bad+'</div></div>';
     if(db.improve)h+='<div><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px">איך משפרים</div><div style="font-size:12px;color:var(--teal);font-weight:600;line-height:1.55">'+db.improve+'</div></div>';
@@ -2104,11 +2126,11 @@ function buildScoreHTML(){
     const dd=new Date();dd.setDate(dd.getDate()-i);
     const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
     const s=calcDayScore(ds);
-    const hex=s>=75?"#00D4A1":s>=50?"#FFB347":"#FF6B6B";
+    const hex=s>=75?"#6FA86B":s>=50?"#E8B54A":"#E85C4A";
     const isSelected=ds===scoreDate;
     h+='<div onclick="scoreDate=\''+ds+'\';renderProductivity()" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer">';
     h+='<div style="font-size:9px;font-weight:700;color:'+(s>0?hex:"var(--muted2)")+'">'+( s>0?s:"")+'</div>';
-    h+='<div style="width:100%;border-radius:4px 4px 0 0;background:'+(s>0?hex:"rgba(255,255,255,0.07)")+';height:'+Math.max(s*0.48,4).toFixed(0)+'px;transition:height 0.3s;border-bottom:2px solid '+(isSelected?hex:"transparent")+'"></div>';
+    h+='<div style="width:100%;border-radius:4px 4px 0 0;background:'+(s>0?hex:"rgba(245,241,232,0.07)")+';height:'+Math.max(s*0.48,4).toFixed(0)+'px;transition:height 0.3s;border-bottom:2px solid '+(isSelected?hex:"transparent")+'"></div>';
     h+='<div style="font-size:9px;color:'+(isSelected?"var(--text)":"var(--muted2)")+';font-weight:'+(isSelected?700:400)+'">'+DAYS[dd.getDay()].slice(0,2)+'</div>';
     h+='</div>';
   }
@@ -2134,7 +2156,7 @@ function buildGoalsHTML(){
     h+='<input type="date" value="'+goalDate+'" onchange="goalDate=this.value;renderProductivity()" class="inp" style="margin-bottom:11px;font-size:12px"/>';
     if(totalSet>0&&goalDate===t){
       h+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:11px">';
-      [["הושלמו",doneCats+"/"+totalSet,"var(--purple)"],["ציון",avgScore||"—",(avgScore>=7?"#00D4A1":avgScore>=5?"#FFB347":"#FF6B6B")]].forEach(([l,v,c])=>{
+      [["הושלמו",doneCats+"/"+totalSet,"var(--purple)"],["ציון",avgScore||"—",(avgScore>=7?"#6FA86B":avgScore>=5?"#E8B54A":"#E85C4A")]].forEach(([l,v,c])=>{
         h+='<div style="background:var(--card);border-radius:12px;padding:11px;text-align:center"><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px">'+l+'</div><div style="font-size:22px;font-weight:900;color:'+c+'">'+v+'</div></div>';
       });
       h+='</div>';
@@ -2142,24 +2164,24 @@ function buildGoalsHTML(){
     const dayData=GOALS[goalDate]||{};
     CATS.forEach(cat=>{
       const d=dayData[cat.id]||{};
-      h+='<div style="background:var(--card);border:1.5px solid '+(d.done?c2r(cat.color,0.4):d.goal?"var(--border2)":"var(--border)")+';border-radius:15px;padding:13px;margin-bottom:9px">';
+      h+='<div style="background:var(--card);border:1.5px solid '+(d.done?c2r(cat.color,0.4):d.goal?"var(--border2)":"var(--border)")+';border-radius:10px;padding:13px;margin-bottom:9px">';
       h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(d.goal?"11px":"0")+'">';
       h+='<div style="width:38px;height:38px;border-radius:11px;background:'+c2r(cat.color,0.18)+';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+cat.icon+'</div>';
       h+='<div style="flex:1"><div style="font-size:13px;font-weight:700;color:'+(d.goal?cat.color:"var(--muted)")+'">'+cat.label+'</div>'+(d.goal?'<div style="font-size:11px;color:var(--muted);margin-top:1px">'+d.goal+'</div>':'<div style="font-size:11px;color:var(--muted2)">לא הוגדר יעד</div>')+'</div>';
       if(d.goal){
         h+='<div style="display:flex;gap:7px;flex-shrink:0">';
-        if(d.score) h+='<div style="font-size:13px;font-weight:800;color:'+(d.score>=7?"#00D4A1":d.score>=5?"#FFB347":"#FF6B6B")+'">'+d.score+'/10</div>';
+        if(d.score) h+='<div style="font-size:13px;font-weight:800;color:'+(d.score>=7?"#6FA86B":d.score>=5?"#E8B54A":"#E85C4A")+'">'+d.score+'/10</div>';
         h+='<div onclick="toggleDone(\''+cat.id+'\',\''+goalDate+'\')" style="width:30px;height:30px;border-radius:50%;border:2px solid '+(d.done?cat.color:"var(--border2)")+';background:'+(d.done?c2r(cat.color,0.2):"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--teal)">'+(d.done?"✓":"")+'</div>';
         h+='</div>';
       }
       h+='</div>';
       if(d.goal){
-        h+='<div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">';
+        h+='<div style="border-top:1px solid rgba(245,241,232,0.05);padding-top:10px">';
         h+='<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">הערכה (1–10)</div>';
         h+='<div style="display:flex;gap:3px;margin-bottom:8px">';
         for(let n=1;n<=10;n++){
           const sel=d.score===n;
-          h+='<button onclick="setScore(\''+cat.id+'\',\''+goalDate+'\','+n+')" style="flex:1;padding:5px 0;border-radius:6px;border:1px solid '+(sel?cat.color:"rgba(255,255,255,0.08)")+';background:'+(sel?c2r(cat.color,0.2):"transparent")+';color:'+(sel?cat.color:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:11px;font-weight:'+(sel?800:500)+';cursor:pointer">'+n+'</button>';
+          h+='<button onclick="setScore(\''+cat.id+'\',\''+goalDate+'\','+n+')" style="flex:1;padding:5px 0;border-radius:6px;border:1px solid '+(sel?cat.color:"rgba(245,241,232,0.08)")+';background:'+(sel?c2r(cat.color,0.2):"transparent")+';color:'+(sel?cat.color:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:11px;font-weight:'+(sel?800:500)+';cursor:pointer">'+n+'</button>';
         }
         h+='</div>';
         h+='<textarea placeholder="רפלקציה..." onchange="setReflection(\''+cat.id+'\',\''+goalDate+'\',this.value)" style="width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:Rubik,sans-serif;font-size:12px;outline:none;direction:rtl;resize:none;height:50px">'+( d.reflection||"")+'</textarea>';
@@ -2172,7 +2194,7 @@ function buildGoalsHTML(){
     const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
     const tStr=tomorrow.toISOString().slice(0,10);
     const existing=GOALS[tStr]||{};
-    h+='<div style="background:rgba(139,127,255,0.08);border:1px solid rgba(139,127,255,0.2);border-radius:11px;padding:10px 13px;margin-bottom:11px;font-size:11px;color:var(--muted)">יעדים ל-<strong style="color:var(--purple)">'+fmtDate(tStr)+'</strong> · יעד ספציפי לכל קטגוריה</div>';
+    h+='<div style="background:rgba(255,122,69,0.08);border:1px solid rgba(255,122,69,0.2);border-radius:11px;padding:10px 13px;margin-bottom:11px;font-size:11px;color:var(--muted)">יעדים ל-<strong style="color:var(--purple)">'+fmtDate(tStr)+'</strong> · יעד ספציפי לכל קטגוריה</div>';
     CATS.forEach(cat=>{
       const cur=existing[cat.id]?.goal||"";
       h+='<div class="card">';
@@ -2194,10 +2216,10 @@ function buildGoalsHTML(){
         const done=cats.filter(c=>d[c.id]?.done).length;
         const sc=cats.filter(c=>d[c.id]?.score);
         const avg=sc.length?Math.round(sc.reduce((s,c)=>s+(d[c.id]?.score||0),0)/sc.length):null;
-        const avgC=avg?(avg>=7?"#00D4A1":avg>=5?"#FFB347":"#FF6B6B"):"var(--muted)";
-        h+='<div onclick="goalDate=\''+date+'\';goalsView=\'today\';renderProductivity()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer">';
+        const avgC=avg?(avg>=7?"#6FA86B":avg>=5?"#E8B54A":"#E85C4A"):"var(--muted)";
+        h+='<div onclick="goalDate=\''+date+'\';goalsView=\'today\';renderProductivity()" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer">';
         h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><div style="font-size:13px;font-weight:700">'+fmtDate(date)+'</div><div style="display:flex;gap:9px">'+(avg!==null?'<span style="font-size:13px;font-weight:800;color:'+avgC+'">'+avg+'/10</span>':"")+'<span style="font-size:12px;color:var(--muted)">'+done+'/'+cats.length+' ✓</span></div></div>';
-        h+='<div style="display:flex;flex-wrap:wrap;gap:5px">'+cats.map(c=>'<span style="font-size:10px;padding:2px 8px;border-radius:18px;background:'+(d[c.id]?.done?c2r(c.color,0.2):"rgba(255,255,255,0.05)")+';color:'+(d[c.id]?.done?c.color:"var(--muted)")+';font-weight:600">'+c.icon+" "+c.label+'</span>').join("")+'</div>';
+        h+='<div style="display:flex;flex-wrap:wrap;gap:5px">'+cats.map(c=>'<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:'+(d[c.id]?.done?c2r(c.color,0.2):"rgba(245,241,232,0.05)")+';color:'+(d[c.id]?.done?c.color:"var(--muted)")+';font-weight:600">'+c.icon+" "+c.label+'</span>').join("")+'</div>';
         h+='</div>';
       });
     }
@@ -2212,17 +2234,17 @@ function buildJournalHTML(){
 
   let h='<input type="date" value="'+journalDate+'" onchange="journalDate=this.value;renderProductivity()" class="inp" style="margin-bottom:12px;font-size:12px"/>';
 
-  h+='<div style="background:var(--card);border:1px solid rgba(255,179,71,0.25);border-radius:15px;padding:13px;margin-bottom:10px">';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="font-size:18px">☀️</span><div style="font-size:13px;font-weight:800">שאלות בוקר</div>'+(entry.morningDone?'<span style="font-size:10px;background:rgba(0,212,161,0.15);color:var(--teal);padding:2px 7px;border-radius:18px;font-weight:700;margin-right:auto">✓</span>':"")+'</div>';
+  h+='<div style="background:var(--card);border:1px solid rgba(232,181,74,0.25);border-radius:10px;padding:13px;margin-bottom:10px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="font-size:18px">☀️</span><div style="font-size:13px;font-weight:800">שאלות בוקר</div>'+(entry.morningDone?'<span style="font-size:10px;background:rgba(111,168,107,0.15);color:var(--teal);padding:2px 7px;border-radius:10px;font-weight:700;margin-right:auto">✓</span>':"")+'</div>';
   MQ.forEach(q=>{
     h+='<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:4px">'+q.q+'</div>';
     h+='<textarea onchange="saveJField(\''+journalDate+'\',\''+q.id+'\',this.value)" style="width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:Rubik,sans-serif;font-size:12px;outline:none;direction:rtl;resize:none;height:58px" placeholder="'+q.p+'">'+( entry[q.id]||"")+'</textarea></div>';
   });
-  h+='<button onclick="markMDone(\''+journalDate+'\')" style="width:100%;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:12px;font-weight:800;background:'+(entry.morningDone?"rgba(0,212,161,0.15)":"linear-gradient(135deg,#FFB347,#FF8C00)")+';color:'+(entry.morningDone?"var(--teal)":"#000")+'">'+(entry.morningDone?"✓ בוקר הושלם":"✓ סיים שאלות בוקר")+'</button>';
+  h+='<button onclick="markMDone(\''+journalDate+'\')" style="width:100%;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:12px;font-weight:800;background:'+(entry.morningDone?"rgba(111,168,107,0.15)":"linear-gradient(135deg,#E8B54A,#FF8C00)")+';color:'+(entry.morningDone?"var(--teal)":"#000")+'">'+(entry.morningDone?"✓ בוקר הושלם":"✓ סיים שאלות בוקר")+'</button>';
   h+='</div>';
 
-  h+='<div style="background:var(--card);border:1px solid rgba(116,185,255,0.25);border-radius:15px;padding:13px;margin-bottom:10px">';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="font-size:18px">🌙</span><div style="font-size:13px;font-weight:800">שאלות ערב</div>'+(entry.eveningDone?'<span style="font-size:10px;background:rgba(0,212,161,0.15);color:var(--teal);padding:2px 7px;border-radius:18px;font-weight:700;margin-right:auto">✓</span>':"")+'</div>';
+  h+='<div style="background:var(--card);border:1px solid rgba(107,143,163,0.25);border-radius:10px;padding:13px;margin-bottom:10px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="font-size:18px">🌙</span><div style="font-size:13px;font-weight:800">שאלות ערב</div>'+(entry.eveningDone?'<span style="font-size:10px;background:rgba(111,168,107,0.15);color:var(--teal);padding:2px 7px;border-radius:10px;font-weight:700;margin-right:auto">✓</span>':"")+'</div>';
   EQ.forEach(q=>{
     h+='<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:var(--blue);margin-bottom:4px">'+q.q+'</div>';
     h+='<textarea onchange="saveJField(\''+journalDate+'\',\''+q.id+'\',this.value)" style="width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:Rubik,sans-serif;font-size:12px;outline:none;direction:rtl;resize:none;height:58px" placeholder="'+q.p+'">'+( entry[q.id]||"")+'</textarea></div>';
@@ -2231,10 +2253,10 @@ function buildJournalHTML(){
   h+='<div style="display:flex;gap:3px">';
   for(let n=1;n<=10;n++){
     const sel=entry.mood===n;
-    h+='<button onclick="saveJField(\''+journalDate+'\',\'mood\','+n+');renderProductivity()" style="flex:1;padding:5px 0;border-radius:6px;border:1px solid '+(sel?"var(--blue)":"rgba(255,255,255,0.08)")+';background:'+(sel?"rgba(116,185,255,0.2)":"transparent")+';color:'+(sel?"var(--blue)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:11px;font-weight:'+(sel?800:500)+';cursor:pointer">'+n+'</button>';
+    h+='<button onclick="saveJField(\''+journalDate+'\',\'mood\','+n+');renderProductivity()" style="flex:1;padding:5px 0;border-radius:6px;border:1px solid '+(sel?"var(--blue)":"rgba(245,241,232,0.08)")+';background:'+(sel?"rgba(107,143,163,0.2)":"transparent")+';color:'+(sel?"var(--blue)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:11px;font-weight:'+(sel?800:500)+';cursor:pointer">'+n+'</button>';
   }
   h+='</div></div>';
-  h+='<button onclick="markEDone(\''+journalDate+'\')" style="width:100%;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:12px;font-weight:800;background:'+(entry.eveningDone?"rgba(0,212,161,0.15)":"linear-gradient(135deg,#74B9FF,#4A90D9)")+';color:'+(entry.eveningDone?"var(--teal)":"#fff")+'">'+(entry.eveningDone?"✓ ערב הושלם":"✓ סיים שאלות ערב")+'</button>';
+  h+='<button onclick="markEDone(\''+journalDate+'\')" style="width:100%;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:12px;font-weight:800;background:'+(entry.eveningDone?"rgba(111,168,107,0.15)":"linear-gradient(135deg,#6B8FA3,#4A90D9)")+';color:'+(entry.eveningDone?"var(--teal)":"#fff")+'">'+(entry.eveningDone?"✓ ערב הושלם":"✓ סיים שאלות ערב")+'</button>';
   h+='</div>';
 
   // History
@@ -2362,7 +2384,7 @@ function openCopyWorkout(day,idx){
     DAYS.forEach(d=>{
       const isSource=d===day;
       const existing=getDayWorkouts(d).length;
-      h+='<button onclick="doCopyWorkout(\''+d+'\')" '+(isSource?"disabled":"")+' style="padding:12px 10px;border-radius:13px;border:1px solid '+(isSource?"transparent":"var(--border2)")+';background:'+(isSource?"rgba(255,255,255,0.04)":"var(--bg3)")+';color:'+(isSource?"var(--muted2)":"var(--text)")+';font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:'+(isSource?"default":"pointer")+';text-align:right;display:flex;justify-content:space-between;align-items:center">';
+      h+='<button onclick="doCopyWorkout(\''+d+'\')" '+(isSource?"disabled":"")+' style="padding:12px 10px;border-radius:10px;border:1px solid '+(isSource?"transparent":"var(--border2)")+';background:'+(isSource?"rgba(245,241,232,0.04)":"var(--bg3)")+';color:'+(isSource?"var(--muted2)":"var(--text)")+';font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:'+(isSource?"default":"pointer")+';text-align:right;display:flex;justify-content:space-between;align-items:center">';
       h+='<span>'+d+'</span>';
       h+=(isSource?'<span style="font-size:10px;color:var(--muted2)">מקור</span>':(existing?'<span style="font-size:10px;color:var(--muted)">+'+existing+'</span>':''));
       h+='</button>';
@@ -2414,7 +2436,7 @@ function renderWorkoutEdit(){
   h+='<div style="display:flex;gap:7px;margin-bottom:14px">';
   [["strength","💪","כוח"],["run","🏃","ריצה"]].forEach(([tp,ic,l])=>{
     const sel=dp.type===tp;
-    h+='<button onclick="setWorkoutType(\''+tp+'\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"rgba(139,127,255,0.12)":"var(--bg3)")+';color:'+(sel?"var(--purple)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
+    h+='<button onclick="setWorkoutType(\''+tp+'\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"rgba(255,122,69,0.12)":"var(--bg3)")+';color:'+(sel?"var(--purple)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
   });
   h+='</div>';
   if(dp.type==="strength"){
@@ -2454,7 +2476,7 @@ function renderWorkoutEdit(){
     h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">';
     [["easy","🚶","קלה"],["tempo","💨","טמפו"],["intervals","⚡","אינטרוולים"],["long","🛣️","ארוכה"]].forEach(([v,ic,l])=>{
       const sel=rt===v;
-      h+='<button onclick="setRunType(\''+v+'\')" style="padding:9px;border-radius:10px;border:1.5px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"rgba(0,212,161,0.1)":"var(--bg3)")+';color:'+(sel?"var(--teal)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
+      h+='<button onclick="setRunType(\''+v+'\')" style="padding:9px;border-radius:10px;border:1.5px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"rgba(111,168,107,0.1)":"var(--bg3)")+';color:'+(sel?"var(--teal)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
     });
     h+='</div>';
     // Segments list
@@ -2465,11 +2487,11 @@ function renderWorkoutEdit(){
     if(totalKm>0)h+='<div style="font-size:11px;font-weight:700;color:var(--teal)">סה"כ ~'+totalKm.toFixed(1)+' ק"מ</div>';
     h+='</div>';
     if(!segs.length){
-      h+='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px dashed rgba(255,255,255,0.1);margin-bottom:10px">הוסף מקטעים למטה כדי לבנות את הריצה</div>';
+      h+='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;background:rgba(245,241,232,0.03);border-radius:10px;border:1px dashed rgba(255,255,255,0.1);margin-bottom:10px">הוסף מקטעים למטה כדי לבנות את הריצה</div>';
     } else {
       segs.forEach((seg,i)=>{
         const si=SEG_LABELS[seg.segType]||{ic:"🏃",l:"מקטע"};
-        const col=SEG_COLORS[seg.segType]||"#00D4A1";
+        const col=SEG_COLORS[seg.segType]||"#6FA86B";
         const distLbl=seg.unit==="m"?seg.dist+' מ\'':(seg.dist+' ק"מ');
         h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:11px;background:'+c2r(col,0.07)+';border:1px solid '+c2r(col,0.22)+';margin-bottom:6px">';
         h+='<div style="width:32px;height:32px;border-radius:8px;background:'+c2r(col,0.18)+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+si.ic+'</div>';
@@ -2487,7 +2509,7 @@ function renderWorkoutEdit(){
     h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
     SEG_TYPES.forEach(([v,ic,l,col])=>{
       const sel=_newSegType===v;
-      h+='<button class="seg-type-btn" data-segtype="'+v+'" onclick="setNewSegType(\''+v+'\')" style="padding:6px 11px;border-radius:18px;border:1px solid '+(sel?col:"var(--border)")+';background:'+(sel?c2r(col,0.18):"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer">'+ic+' '+l+'</button>';
+      h+='<button class="seg-type-btn" data-segtype="'+v+'" onclick="setNewSegType(\''+v+'\')" style="padding:6px 11px;border-radius:10px;border:1px solid '+(sel?col:"var(--border)")+';background:'+(sel?c2r(col,0.18):"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer">'+ic+' '+l+'</button>';
     });
     h+='</div>';
     h+='<div style="display:grid;grid-template-columns:80px 1fr;gap:7px;margin-bottom:7px">';
@@ -2496,7 +2518,7 @@ function renderWorkoutEdit(){
     h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">מרחק</label>';
     h+='<div style="display:flex;gap:5px">';
     h+='<input id="ns-dist" type="text" class="inp" placeholder="400" style="flex:1;font-size:12px;padding:8px"/>';
-    h+='<button id="ns-unit-btn" onclick="toggleSegUnit()" style="padding:0 10px;border-radius:8px;border:1px solid var(--teal);background:rgba(0,212,161,0.1);color:var(--teal);font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;min-width:40px;flex-shrink:0">'+((_newSegUnit==="km")?'ק"מ':"מ'")+' </button>';
+    h+='<button id="ns-unit-btn" onclick="toggleSegUnit()" style="padding:0 10px;border-radius:8px;border:1px solid var(--teal);background:rgba(111,168,107,0.1);color:var(--teal);font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;min-width:40px;flex-shrink:0">'+((_newSegUnit==="km")?'ק"מ':"מ'")+' </button>';
     h+='</div></div>';
     h+='</div>';
     h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">';
@@ -2534,7 +2556,7 @@ function initExerciseTouchDrag(){
       if(found!==tTarget){
         rows.forEach((r,i)=>{
           r.style.borderColor=i===found?'var(--purple)':'transparent';
-          r.style.background=i===found?'rgba(139,127,255,0.08)':'';
+          r.style.background=i===found?'rgba(255,122,69,0.08)':'';
         });
         tTarget=found;
       }
@@ -2584,7 +2606,7 @@ function exDragEnter(e,idx){
   const rows=document.querySelectorAll('.ex-drag-row');
   rows.forEach((r,i)=>{
     r.style.borderColor=i===idx?'var(--purple)':'transparent';
-    r.style.background=i===idx?'rgba(139,127,255,0.08)':'';
+    r.style.background=i===idx?'rgba(255,122,69,0.08)':'';
   });
 }
 function exDragLeave(e,idx){
@@ -2682,7 +2704,7 @@ function renderActiveWorkout(){
     const prev=prevKey&&WORKOUT_HIST[prevKey]?WORKOUT_HIST[prevKey]:null;
     const doneSets=ex.sets.filter(s=>s.done).length;
     const allDone=doneSets===ex.sets.length;
-    h+='<div style="background:var(--card);border:1px solid '+(allDone?"rgba(0,212,161,0.3)":"var(--border)")+';border-radius:16px;padding:13px;margin-bottom:12px">';
+    h+='<div style="background:var(--card);border:1px solid '+(allDone?"rgba(111,168,107,0.3)":"var(--border)")+';border-radius:10px;padding:13px;margin-bottom:12px">';
     h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
     h+='<div style="font-size:15px;font-weight:800;flex:1">'+esc(ex.name||"תרגיל")+'</div>';
     h+='<div style="font-size:11px;color:'+(allDone?"var(--teal)":"var(--muted)")+';font-weight:700">'+doneSets+'/'+ex.sets.length+' סטים</div>';
@@ -2706,10 +2728,10 @@ function renderActiveWorkout(){
     ex.sets.forEach((set,si)=>{
       const done=set.done;
       h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 36px;gap:5px;margin-bottom:5px;align-items:center">';
-      h+='<div style="font-size:12px;font-weight:700;color:'+(done?"var(--teal)":"var(--muted)")+';text-align:center;background:rgba(255,255,255,0.04);border-radius:7px;height:36px;display:flex;align-items:center;justify-content:center">'+(si+1)+'</div>';
-      h+='<input type="number" step="0.5" value="'+(set.weight||"")+'" oninput="updateActiveSet('+ei+','+si+',\'weight\',this.value)" class="inp" placeholder="ק\"ג" style="font-size:13px;padding:8px;text-align:center;height:36px;background:'+(done?"rgba(0,212,161,0.07)":"var(--bg3)")+';border-color:'+(done?"rgba(0,212,161,0.3)":"var(--border2)")+'">';
-      h+='<input type="number" step="1" value="'+(set.reps||"")+'" oninput="updateActiveSet('+ei+','+si+',\'reps\',this.value)" class="inp" placeholder="חזרות" style="font-size:13px;padding:8px;text-align:center;height:36px;background:'+(done?"rgba(0,212,161,0.07)":"var(--bg3)")+';border-color:'+(done?"rgba(0,212,161,0.3)":"var(--border2)")+'">';
-      h+='<button onclick="checkActiveSet('+ei+','+si+')" style="width:36px;height:36px;border-radius:9px;border:2px solid '+(done?"var(--teal)":"rgba(255,255,255,0.2)")+';background:'+(done?"rgba(0,212,161,0.15)":"transparent")+';color:'+(done?"var(--teal)":"var(--muted2)")+';font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center">'+(done?"✓":"○")+'</button>';
+      h+='<div style="font-size:12px;font-weight:700;color:'+(done?"var(--teal)":"var(--muted)")+';text-align:center;background:rgba(245,241,232,0.04);border-radius:7px;height:36px;display:flex;align-items:center;justify-content:center">'+(si+1)+'</div>';
+      h+='<input type="number" step="0.5" value="'+(set.weight||"")+'" oninput="updateActiveSet('+ei+','+si+',\'weight\',this.value)" class="inp" placeholder="ק\"ג" style="font-size:13px;padding:8px;text-align:center;height:36px;background:'+(done?"rgba(111,168,107,0.07)":"var(--bg3)")+';border-color:'+(done?"rgba(111,168,107,0.3)":"var(--border2)")+'">';
+      h+='<input type="number" step="1" value="'+(set.reps||"")+'" oninput="updateActiveSet('+ei+','+si+',\'reps\',this.value)" class="inp" placeholder="חזרות" style="font-size:13px;padding:8px;text-align:center;height:36px;background:'+(done?"rgba(111,168,107,0.07)":"var(--bg3)")+';border-color:'+(done?"rgba(111,168,107,0.3)":"var(--border2)")+'">';
+      h+='<button onclick="checkActiveSet('+ei+','+si+')" style="width:36px;height:36px;border-radius:9px;border:2px solid '+(done?"var(--teal)":"rgba(255,255,255,0.2)")+';background:'+(done?"rgba(111,168,107,0.15)":"transparent")+';color:'+(done?"var(--teal)":"var(--muted2)")+';font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center">'+(done?"✓":"○")+'</button>';
       h+='</div>';
     });
     h+='<button onclick="addActiveSet('+ei+')" style="width:100%;margin-top:6px;padding:7px;border-radius:9px;border:1px dashed rgba(255,255,255,0.15);background:transparent;color:var(--muted);font-family:Rubik,sans-serif;font-size:11px;font-weight:700;cursor:pointer">+ הוסף סט</button>';
@@ -2824,7 +2846,7 @@ function setNewSegType(t){
   document.querySelectorAll('.seg-type-btn').forEach(btn=>{
     const bv=btn.dataset.segtype;
     const sel=bv===t;
-    const col=SEG_COLORS[bv]||"#00D4A1";
+    const col=SEG_COLORS[bv]||"#6FA86B";
     btn.style.background=sel?c2r(col,0.18):"var(--bg3)";
     btn.style.color=sel?col:"var(--muted)";
     btn.style.borderColor=sel?col:"var(--border)";
@@ -2868,7 +2890,7 @@ function removeRunSegment(i){
 // ═══════════════════════════════════════════════
 function getMuscleBodySVG(primaryMuscle){
   const D="rgba(255,255,255,0.1)";
-  const col=m=>m===primaryMuscle?(MUSCLE_COLORS[m]||"#8B7FFF"):D;
+  const col=m=>m===primaryMuscle?(MUSCLE_COLORS[m]||"#FF7A45"):D;
   const chest=col("חזה"),back=col("גב"),shoulders=col("כתפיים"),
         biceps=col("ביצפס"),triceps=col("טריצפס"),legs=col("רגליים"),
         glutes=col("ישבן"),core=col("בטן/ליבה"),calves=col("קאלף"),
@@ -2898,7 +2920,7 @@ function getMuscleBodySVG(primaryMuscle){
     '<rect x="65" y="54" width="6" height="18" rx="3" fill="'+glutes+'"/>'+
     '<rect x="57" y="74" width="6" height="13" rx="3" fill="'+calves+'"/>'+
     '<rect x="65" y="74" width="6" height="13" rx="3" fill="'+calves+'"/>'+
-    '<line x1="44" y1="2" x2="44" y2="93" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>'+
+    '<line x1="44" y1="2" x2="44" y2="93" stroke="rgba(245,241,232,0.05)" stroke-width="1"/>'+
     '</svg>';
 }
 
@@ -2922,11 +2944,11 @@ function renderExPickerFilters(){
   const c=document.getElementById('ex-muscle-filters');
   if(!c)return;
   const muscles=[...new Set(EXERCISE_DB.map(e=>e.muscle))];
-  let h='<button onclick="setExMuscleFilter(null)" style="padding:5px 12px;border-radius:18px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;background:'+(_exMuscleFilter===null?"var(--purple)":"var(--bg3)")+';color:'+(_exMuscleFilter===null?"#fff":"var(--muted)")+'">הכל</button>';
+  let h='<button onclick="setExMuscleFilter(null)" style="padding:5px 12px;border-radius:10px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;background:'+(_exMuscleFilter===null?"var(--purple)":"var(--bg3)")+';color:'+(_exMuscleFilter===null?"#fff":"var(--muted)")+'">הכל</button>';
   muscles.forEach(m=>{
-    const col=MUSCLE_COLORS[m]||"#8B7FFF";
+    const col=MUSCLE_COLORS[m]||"#FF7A45";
     const sel=_exMuscleFilter===m;
-    h+='<button onclick="setExMuscleFilter(\''+m+'\')" style="padding:5px 12px;border-radius:18px;border:1px solid '+(sel?col:"var(--border)")+';cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;background:'+(sel?c2r(col,0.2):"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+'">'+m+'</button>';
+    h+='<button onclick="setExMuscleFilter(\''+m+'\')" style="padding:5px 12px;border-radius:10px;border:1px solid '+(sel?col:"var(--border)")+';cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;background:'+(sel?c2r(col,0.2):"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+'">'+m+'</button>';
   });
   c.innerHTML=h;
 }
@@ -2942,17 +2964,17 @@ function renderExPickerList(){
   exs.forEach(e=>{if(!grouped[e.muscle])grouped[e.muscle]=[];grouped[e.muscle].push(e);});
   let h='';
   Object.keys(grouped).forEach(muscle=>{
-    const col=MUSCLE_COLORS[muscle]||"#8B7FFF";
+    const col=MUSCLE_COLORS[muscle]||"#FF7A45";
     h+='<div style="font-size:11px;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 6px">'+muscle+'</div>';
     grouped[muscle].forEach(ex=>{
       const idx=EXERCISE_DB.indexOf(ex);
-      h+='<div onclick="addFromExPicker('+idx+')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);margin-bottom:6px;cursor:pointer;transition:background 0.15s;active:opacity:0.7">';
+      h+='<div onclick="addFromExPicker('+idx+')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(245,241,232,0.04);border:1px solid rgba(245,241,232,0.07);margin-bottom:6px;cursor:pointer;transition:background 0.15s;active:opacity:0.7">';
       h+=getMuscleBodySVG(ex.muscle);
       h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:13px;font-weight:600;margin-bottom:4px">'+esc(ex.name)+'</div>';
       h+='<div style="display:flex;gap:4px;flex-wrap:wrap">';
       h+='<span style="font-size:10px;background:'+c2r(col,0.2)+';color:'+col+';padding:2px 7px;border-radius:4px;font-weight:700">'+muscle+'</span>';
-      (ex.sec||[]).forEach(s=>{h+='<span style="font-size:9px;background:rgba(255,255,255,0.06);color:var(--muted);padding:2px 6px;border-radius:4px">'+s+'</span>';});
+      (ex.sec||[]).forEach(s=>{h+='<span style="font-size:9px;background:rgba(245,241,232,0.06);color:var(--muted);padding:2px 6px;border-radius:4px">'+s+'</span>';});
       h+='</div></div>';
       h+='<div style="font-size:20px;color:var(--purple);font-weight:800;flex-shrink:0">+</div>';
       h+='</div>';
@@ -3015,8 +3037,8 @@ function buildPs1(){
   h+='<input id="ps-age" type="number" class="inp" placeholder="25" value="'+(psData.age||"")+'"/></div>';
   h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">מין</label>';
   h+='<div style="display:flex;gap:6px">';
-  h+='<button onclick="psData.gender=\'male\';renderPsStep()" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(g==="male"?"var(--purple)":"var(--border)")+';background:'+(g==="male"?"rgba(139,127,255,0.15)":"var(--bg3)")+';color:'+(g==="male"?"var(--purple)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">זכר</button>';
-  h+='<button onclick="psData.gender=\'female\';renderPsStep()" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(g==="female"?"var(--pink)":"var(--border)")+';background:'+(g==="female"?"rgba(255,121,198,0.15)":"var(--bg3)")+';color:'+(g==="female"?"var(--pink)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">נקבה</button>';
+  h+='<button onclick="psData.gender=\'male\';renderPsStep()" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(g==="male"?"var(--purple)":"var(--border)")+';background:'+(g==="male"?"rgba(255,122,69,0.15)":"var(--bg3)")+';color:'+(g==="male"?"var(--purple)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">זכר</button>';
+  h+='<button onclick="psData.gender=\'female\';renderPsStep()" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(g==="female"?"var(--pink)":"var(--border)")+';background:'+(g==="female"?"rgba(217,136,120,0.15)":"var(--bg3)")+';color:'+(g==="female"?"var(--pink)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">נקבה</button>';
   h+='</div></div></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px">';
   h+='<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">משקל (ק"ג)</label>';
@@ -3038,7 +3060,7 @@ function buildPs2(){
   h+='<div style="font-size:12px;font-weight:700;margin-bottom:10px">רמת פעילות שבועית</div>';
   [[1.2,"🛋️","יושבני","מינימום תנועה"],[1.375,"🚶","קל","1-2 אימונים"],[1.55,"🏃","בינוני","3-4 אימונים"],[1.725,"💪","גבוה","5-6 אימונים"]].forEach(([v,ic,l,s])=>{
     const sel=act===v;
-    h+='<div onclick="psData.activityLevel='+v+';renderPsStep()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"rgba(139,127,255,0.1)":"var(--card)")+';cursor:pointer;margin-bottom:8px">';
+    h+='<div onclick="psData.activityLevel='+v+';renderPsStep()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"rgba(255,122,69,0.1)":"var(--card)")+';cursor:pointer;margin-bottom:8px">';
     h+='<span style="font-size:22px">'+ic+'</span>';
     h+='<div><div style="font-size:13px;font-weight:700;color:'+(sel?"var(--purple)":"var(--text)")+'">'+l+'</div><div style="font-size:11px;color:var(--muted)">'+s+'</div></div>';
     h+='<div style="margin-right:auto;width:18px;height:18px;border-radius:50%;border:2px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"var(--purple)":"transparent")+'"></div>';
@@ -3047,7 +3069,7 @@ function buildPs2(){
   h+='<div style="font-size:12px;font-weight:700;margin-top:18px;margin-bottom:10px">מה המטרה שלך?</div>';
   [["loss","🔥","ירידה בשומן","גירעון קלורי"],["muscle","💪","בניית שריר","עודף קלורי"],["fitness","⚡","כושר כללי","תחזוקה"]].forEach(([v,ic,l,s])=>{
     const sel=goa===v;
-    h+='<div onclick="psData.goal=\''+v+'\';psData.calorieAdjust=null;renderPsStep()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"rgba(0,212,161,0.08)":"var(--card)")+';cursor:pointer;margin-bottom:8px">';
+    h+='<div onclick="psData.goal=\''+v+'\';psData.calorieAdjust=null;renderPsStep()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"rgba(111,168,107,0.08)":"var(--card)")+';cursor:pointer;margin-bottom:8px">';
     h+='<span style="font-size:22px">'+ic+'</span>';
     h+='<div><div style="font-size:13px;font-weight:700;color:'+(sel?"var(--teal)":"var(--text)")+'">'+l+'</div><div style="font-size:11px;color:var(--muted)">'+s+'</div></div>';
     h+='<div style="margin-right:auto;width:18px;height:18px;border-radius:50%;border:2px solid '+(sel?"var(--teal)":"var(--border)")+';background:'+(sel?"var(--teal)":"transparent")+'"></div>';
@@ -3055,7 +3077,7 @@ function buildPs2(){
   });
   if(goa!=="fitness"){
     const isLoss=goa==="loss";
-    const rgbStr=isLoss?"255,107,107":"0,212,161";
+    const rgbStr=isLoss?"232,92,74":"111,168,107";
     const colVar=isLoss?"coral":"teal";
     const defaultAdj=isLoss?500:200;
     const adj=psData.calorieAdjust!=null?Math.abs(psData.calorieAdjust):defaultAdj;
@@ -3064,7 +3086,7 @@ function buildPs2(){
     const pbmr=psData.gender==="male"?(10*pw+6.25*ph2-5*pa+5):(10*pw+6.25*ph2-5*pa-161);
     const ptdee=Math.round(pbmr*psData.activityLevel);
     const tgtCal=isLoss?ptdee-adj:ptdee+adj;
-    h+='<div style="background:rgba('+rgbStr+',0.07);border:1px solid rgba('+rgbStr+',0.3);border-radius:14px;padding:16px;margin-top:6px">';
+    h+='<div style="background:rgba('+rgbStr+',0.07);border:1px solid rgba('+rgbStr+',0.3);border-radius:10px;padding:16px;margin-top:6px">';
     h+='<div style="font-size:12px;font-weight:700;color:var(--'+colVar+');margin-bottom:12px">'+(isLoss?"🔻 גירעון קלורי יומי":"📈 עודף קלורי יומי")+'</div>';
     h+='<div style="text-align:center;margin-bottom:12px">';
     h+='<span style="font-size:40px;font-weight:900;color:var(--'+colVar+')" id="ps-cal-disp">'+adj+'</span>';
@@ -3105,7 +3127,7 @@ function buildPs3(){
     types.forEach(([v,ic,l])=>{
       const sel=cur===v;
       const col=v==="strength"?"var(--purple)":v==="run"?"var(--teal)":"var(--muted)";
-      h+='<button onclick="psData.plan[\''+day+'\']=\''+v+'\';renderPsStep()" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid '+(sel?col:"var(--border)")+';background:'+(sel?"rgba(139,127,255,0.12)":"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px">';
+      h+='<button onclick="psData.plan[\''+day+'\']=\''+v+'\';renderPsStep()" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid '+(sel?col:"var(--border)")+';background:'+(sel?"rgba(255,122,69,0.12)":"var(--bg3)")+';color:'+(sel?col:"var(--muted)")+';font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px">';
       h+='<span style="font-size:16px">'+ic+'</span>'+l+'</button>';
     });
     h+='</div></div>';
@@ -3122,13 +3144,13 @@ function buildPs4(){
   let h='<div style="font-size:32px;margin-bottom:8px">🚀</div>';
   h+='<div style="font-size:22px;font-weight:900;margin-bottom:4px">הכל מוכן, '+(psData.name||"")+'!</div>';
   h+='<div style="font-size:13px;color:var(--muted);margin-bottom:24px">הנה הפרופיל שחושב עבורך</div>';
-  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px">';
+  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">';
   h+='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px">📊 יעדים יומיים</div>';
   [["קלוריות TDEE",p.tdee+"","var(--muted)"],["יעד קלוריות",p.target+"","var(--coral)"],["חלבון",p.protein+'ג\'','var(--purple)'],["פחמימות",p.carbs+'ג\'','var(--teal)'],["שומן",p.fat+'ג\'','var(--amber)']].forEach(([l,v,c])=>{
-    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:13px;color:var(--muted)">'+l+'</span><span style="font-size:14px;font-weight:800;color:'+c+'">'+v+'</span></div>';
+    h+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(245,241,232,0.05)"><span style="font-size:13px;color:var(--muted)">'+l+'</span><span style="font-size:14px;font-weight:800;color:'+c+'">'+v+'</span></div>';
   });
   h+='</div>';
-  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:24px">';
+  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:24px">';
   h+='<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px">📅 תוכנית שבועית</div>';
   DAYS.forEach(d=>{
     const t=psData.plan[d];
@@ -3283,7 +3305,7 @@ document.addEventListener('click',function(e){
 
 // ── CONFETTI ──
 function launchConfetti(){
-  const cols=['#8B7FFF','#00D4A1','#FFB347','#FF6B6B','#74B9FF','#FF79C6','#A29BFE'];
+  const cols=['#FF7A45','#6FA86B','#E8B54A','#E85C4A','#6B8FA3','#D98878','#A29BFE'];
   for(let i=0;i<70;i++){
     const el=document.createElement('div');
     const size=5+Math.random()*8;
