@@ -1056,7 +1056,7 @@ function renderDash(){
       const done=todayHabits[hb.id];
       h+='<div onclick="toggleHabit(\''+hb.id+'\',\''+t+'\')" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:11px;background:'+(done?"rgba(111,168,107,0.07)":"rgba(245,241,232,0.03)")+';cursor:pointer;margin-bottom:6px;transition:all 0.15s">';
       h+='<div style="width:26px;height:26px;border-radius:8px;background:'+(done?"rgba(111,168,107,0.15)":"rgba(245,241,232,0.06)")+';display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">'+hb.icon+'</div>';
-      h+='<span style="flex:1;min-width:0;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+(done?"text-decoration:line-through;color:var(--muted)":"")+'">'+esc(hb.label)+'</span>';
+      h+='<span style="flex:1;min-width:0;font-size:12px;font-weight:600;overflow-wrap:break-word;'+(done?"text-decoration:line-through;color:var(--muted)":"")+'">'+esc(hb.label)+'</span>';
       h+='<div style="width:20px;height:20px;border-radius:50%;border:2px solid '+(done?"var(--teal)":"rgba(255,255,255,0.15)")+';background:'+(done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:900;flex-shrink:0">'+(done?"✓":"")+'</div>';
       h+='</div>';
     });
