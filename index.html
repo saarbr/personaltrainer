@@ -19,16 +19,6 @@
   --nav-h:80px;--radius:12px;--radius-sm:8px;
   --ink:#17140F;
 }
-body.light{
-  --bg:#EFEAE1;--bg2:#E5DFD3;--bg3:#DAD2C2;--card:#FAF7F2;
-  --border:rgba(26,24,21,0.08);--border2:rgba(26,24,21,0.14);
-  --text:#1A1815;--muted:rgba(26,24,21,0.5);--muted2:rgba(26,24,21,0.24);
-}
-body.light .header{background:rgba(239,234,225,0.9);border-bottom-color:rgba(255,122,69,0.2);}
-body.light .logo-text{background:linear-gradient(120deg,#1A1815 40%,rgba(255,122,69,0.9));-webkit-background-clip:text;background-clip:text;}
-body.light .card{box-shadow:0 2px 14px rgba(0,0,0,0.05);}
-body.light .inp{background:#fff;border-color:rgba(0,0,0,0.1);color:var(--text);}
-body.light #signin-screen{background:var(--bg);}
 body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direction:rtl;
   min-height:100vh;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));
   padding-top:env(safe-area-inset-top);overflow-x:hidden;}
@@ -145,7 +135,6 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<script>if(localStorage.getItem('theme')==='light')document.body.classList.add('light');</script>
 <div id="signin-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto">
   <div style="font-size:64px;margin-bottom:20px;filter:drop-shadow(0 0 20px rgba(255,122,69,0.5))">🏃</div>
   <div style="font-size:36px;font-weight:900;letter-spacing:-1px;background:linear-gradient(120deg,#fff 40%,rgba(255,122,69,0.85));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">MyWay</div>
@@ -180,7 +169,6 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   <div style="flex:1;text-align:center">
     <div id="page-title" style="font-size:22px;font-weight:900;letter-spacing:-0.5px">Dashboard</div>
   </div>
-  <button id="theme-btn" onclick="toggleTheme()" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center"></button>
   <div id="user-avatar" style="position:absolute;left:16px;top:50%;transform:translateY(-50%)"></div>
 </div>
 
@@ -236,8 +224,8 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
-<div id="workout-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:flex-end;justify-content:center;">
-  <div style="background:#12122A;border-radius:10px 20px 0 0;padding:20px;width:100%;max-width:600px;border-top:1px solid rgba(255,122,69,0.3);max-height:88vh;overflow-y:auto">
+<div id="workout-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#12122A;border-radius:16px;padding:20px;width:100%;max-width:600px;border:1px solid rgba(255,122,69,0.3);max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div id="we-title" style="font-size:16px;font-weight:800"></div>
       <button onclick="closeWorkoutEdit()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer">✕</button>
@@ -256,16 +244,18 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   </div>
 </div>
 
-<div id="ex-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:700;flex-direction:column;">
-  <div style="padding:calc(16px + env(safe-area-inset-top)) 16px 16px;background:#12122A;border-bottom:1px solid rgba(255,122,69,0.2);flex-shrink:0">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <div style="font-size:16px;font-weight:800;flex:1">💪 בחר תרגיל</div>
-      <button onclick="closeExPicker()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0">✕</button>
+<div id="ex-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:700;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#0E0E22;border-radius:16px;width:100%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,122,69,0.25)">
+    <div style="padding:16px 16px 12px;background:#12122A;border-bottom:1px solid rgba(255,122,69,0.2);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:16px;font-weight:800;flex:1">💪 בחר תרגיל</div>
+        <button onclick="closeExPicker()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0">✕</button>
+      </div>
+      <input id="ex-search" type="text" class="inp" placeholder="🔍 חפש תרגיל..." oninput="renderExPickerList()" style="margin-bottom:10px;font-size:13px"/>
+      <div id="ex-muscle-filters" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
     </div>
-    <input id="ex-search" type="text" class="inp" placeholder="🔍 חפש תרגיל..." oninput="renderExPickerList()" style="margin-bottom:10px;font-size:13px"/>
-    <div id="ex-muscle-filters" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
+    <div id="ex-list" style="flex:1;overflow-y:auto;padding:12px 16px;background:#0E0E22"></div>
   </div>
-  <div id="ex-list" style="flex:1;overflow-y:auto;padding:12px 16px;background:#0E0E22"></div>
 </div>
 
 <div id="active-workout-modal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:800;flex-direction:column;overflow:hidden">
@@ -332,6 +322,7 @@ let currentUser=null;
 // ═══════════════════════════════════════════════
 let PROFILE=load("profile",{weight:75,tdee:2500,target:2300,protein:150,carbs:220,fat:70});
 let USER_PLAN=load("user_plan",null);
+let WEEK_PLAN=load("week_plan",{});
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
 const RUN_TAGS={
   easy:{label:"קלה",color:"#6B8FA3"},
@@ -535,7 +526,7 @@ async function loadFromFirestore(uid){
     HABIT_LOG=load("habit_log",{});NOTES=load("quick_notes",[]);
     JOURNALS=load("journals",{});HABITS_DEF=load("habits_def",[]);
     WORKOUT_HIST=load("workout_hist",{});DEBRIEF=load("debrief",{});
-    PROFILE=load("profile",PROFILE);USER_PLAN=load("user_plan",null);
+    PROFILE=load("profile",PROFILE);USER_PLAN=load("user_plan",null);WEEK_PLAN=load("week_plan",{});
     if(d.displayName&&!PROFILE.name){PROFILE.name=d.displayName;save("profile",PROFILE);}
     return !d.profile && !d.visited; // show onboarding only if neither profile nor visited flag exists
   }catch(e){console.error("load error:",e);return true;}
@@ -619,57 +610,6 @@ function signOutUser(){
   if(confirm("להתנתק?"))auth.signOut();
 }
 
-let authMode='login';
-function switchAuthMode(mode){
-  authMode=mode;
-  const loginTab=document.getElementById("auth-tab-login");
-  const registerTab=document.getElementById("auth-tab-register");
-  const confirmWrap=document.getElementById("auth-confirm-wrap");
-  const submitBtn=document.getElementById("auth-submit");
-  if(loginTab){loginTab.style.background=mode==='login'?"var(--purple)":"transparent";loginTab.style.color=mode==='login'?"#fff":"var(--muted)";}
-  if(registerTab){registerTab.style.background=mode==='register'?"var(--purple)":"transparent";registerTab.style.color=mode==='register'?"#fff":"var(--muted)";}
-  if(confirmWrap)confirmWrap.style.display=mode==='register'?"block":"none";
-  if(submitBtn)submitBtn.textContent=mode==='login'?"כניסה":"הרשמה";
-  const err=document.getElementById("auth-err");
-  if(err)err.style.display="none";
-}
-async function submitEmailAuth(){
-  const email=document.getElementById("auth-email")?.value?.trim();
-  const pass=document.getElementById("auth-pass")?.value;
-  const confirm=document.getElementById("auth-confirm")?.value;
-  const errEl=document.getElementById("auth-err");
-  if(errEl)errEl.style.display="none";
-  if(!email||!pass){
-    if(errEl){errEl.textContent="נא למלא אימייל וסיסמה";errEl.style.display="block";}
-    return;
-  }
-  if(authMode==='register'){
-    if(pass.length<6){if(errEl){errEl.textContent="הסיסמה חייבת להיות לפחות 6 תווים";errEl.style.display="block";}return;}
-    if(pass!==confirm){if(errEl){errEl.textContent="הסיסמאות אינן תואמות";errEl.style.display="block";}return;}
-  }
-  const btn=document.getElementById("auth-submit");
-  if(btn){btn.textContent="...";btn.disabled=true;}
-  try{
-    if(authMode==='login'){
-      await auth.signInWithEmailAndPassword(email,pass);
-    } else {
-      await auth.createUserWithEmailAndPassword(email,pass);
-    }
-  }catch(e){
-    const msgs={
-      'auth/user-not-found':'משתמש לא נמצא',
-      'auth/wrong-password':'סיסמה שגויה',
-      'auth/invalid-credential':'אימייל או סיסמה שגויים',
-      'auth/email-already-in-use':'אימייל כבר רשום, נסה להתחבר',
-      'auth/invalid-email':'אימייל לא תקין',
-      'auth/weak-password':'הסיסמה חלשה מדי (לפחות 6 תווים)',
-      'auth/too-many-requests':'יותר מדי נסיונות, נסה מאוחר יותר',
-      'auth/network-request-failed':'בעיית תקשורת, בדוק חיבור לאינטרנט',
-    };
-    if(errEl){errEl.textContent=msgs[e.code]||e.message;errEl.style.display="block";}
-  }
-  if(btn){btn.textContent=authMode==='login'?"כניסה":"הרשמה";btn.disabled=false;}
-}
 function updateUserUI(user){
   const el=document.getElementById("user-avatar");
   if(!el)return;
@@ -782,13 +722,16 @@ const fmtDate=d=>{try{return new Date(d).toLocaleDateString("he-IL",{weekday:"sh
 const c2r=(h,a)=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return "rgba("+r+","+g+","+b+","+a+")";};
 function arcGauge(pct,w,h,accentHex,n,pw,pl,opts){
   n=n||8;pw=pw||6;pl=pl||17;opts=opts||{};
+  const spanDeg=opts.spanDeg!=null?opts.spanDeg:180;
+  const full=spanDeg>=360;
   const angleOffset=opts.angleOffset||0;
-  const cx=opts.cx!=null?opts.cx:w/2,cy=opts.cy!=null?opts.cy:h-2;
+  const cx=opts.cx!=null?opts.cx:w/2,cy=opts.cy!=null?opts.cy:(full?h/2:h-2);
   const radiusRef=opts.radiusRef!=null?opts.radiusRef:w;
   const filled=Math.round(Math.max(0,Math.min(1,pct))*n);
+  const divisor=full?n:(n-1);
   let petals='';
   for(let i=0;i<n;i++){
-    const angle=-90+(i/(n-1))*180+angleOffset;
+    const angle=-90+(i/divisor)*spanDeg+angleOffset;
     const fill=i<filled?accentHex:"var(--border2)";
     petals+='<rect x="'+(cx-pw/2).toFixed(1)+'" y="'+(cy-radiusRef/2).toFixed(1)+'" width="'+pw+'" height="'+pl+'" rx="'+(pw/2)+'" fill="'+fill+'" transform="rotate('+angle.toFixed(1)+' '+cx+' '+cy+')"/>';
   }
@@ -796,15 +739,6 @@ function arcGauge(pct,w,h,accentHex,n,pw,pl,opts){
 }
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
-function toggleTheme(){
-  const light=document.body.classList.toggle('light');
-  localStorage.setItem('theme',light?'light':'dark');
-  updateThemeBtn();
-}
-function updateThemeBtn(){
-  const btn=document.getElementById('theme-btn');
-  if(btn)btn.textContent=document.body.classList.contains('light')?'🌙':'☀️';
-}
 function getUserFirstName(){if(PROFILE&&PROFILE.name)return esc(PROFILE.name.split(" ")[0]);if(!currentUser)return"";if(currentUser.displayName)return esc(currentUser.displayName.split(" ")[0]);return esc(currentUser.email.split("@")[0]);}
 function getDailyQuote(){const d=new Date();const day=Math.floor((d-new Date(d.getFullYear(),0,0))/(1000*60*60*24));return QUOTES[day%QUOTES.length];}
 
@@ -874,6 +808,8 @@ let _newSegType="warmup";
 let _newSegUnit="km";
 let selectedDay=null;
 let weWorkoutIdx=0;
+let fitWeekKey=null;
+let weWeekKey=null;
 let activeWorkout=null;
 let _workoutTimerInterval=null;
 let _restTimerInterval=null;
@@ -963,7 +899,7 @@ function renderDash(){
   const t=todayStr();
   const dayName=todayDay();
   const hour=new Date().getHours();
-  const _dws=getDayWorkouts(dayName);
+  const _dws=getEffectiveWorkouts(weekKeyOf(t),dayName);
   const todayWorkout=_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#FF7A45":"#6FA86B",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":({"easy":"ריצה קלה","tempo":"ריצת טמפו","intervals":"ריצת אינטרוולים","long":"ריצה ארוכה"}[_dws[0].runType]||"ריצה")}:null;
   const workKey=t+"-"+dayName;
   const workDone=COMP[workKey];
@@ -1000,9 +936,9 @@ function renderDash(){
   const tasksDoneToday=(TASKS[t]||[]).filter(tk=>tk.done).length;
   const tasksTotalToday=(TASKS[t]||[]).length;
   h+='<div style="text-align:center;padding:10px 2px 18px">';
-  h+='<div style="position:relative;width:280px;max-width:100%;aspect-ratio:280/160;margin:0 auto">';
-  h+=arcGauge(dayScore/100,280,160,scoreHex,13,11,30);
-  h+='<div style="position:absolute;left:0;right:0;bottom:8px;display:flex;flex-direction:column;align-items:center">';
+  h+='<div style="position:relative;width:220px;max-width:100%;aspect-ratio:1/1;margin:0 auto">';
+  h+=arcGauge(dayScore/100,220,220,scoreHex,100,4.5,24,{spanDeg:360,angleOffset:90});
+  h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">';
   h+='<div id="score-num" class="num" style="font-size:40px;font-weight:800;color:'+scoreColor+';line-height:1.1">0</div>';
   h+='</div></div>';
   h+='<div style="text-align:center;font-size:14px;font-weight:800;color:'+scoreColor+';margin-top:6px;margin-bottom:12px">'+scoreLabel+'</div>';
@@ -1044,25 +980,25 @@ function renderDash(){
   // ── STATS ROW ──
   h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
   // Calories
-  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer">';
-  h+='<div style="font-size:18px;margin-bottom:4px">🍽️</div>';
+  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center">';
+  h+='<div style="font-size:13px;font-weight:800;color:var(--coral);letter-spacing:0.2px;margin-bottom:4px">קלוריות</div>';
   h+='<div style="font-size:18px;font-weight:900;color:var(--coral);line-height:1">'+Math.round(nutTot.cal)+'</div>';
-  h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">קל\' מתוך '+PROFILE.target+'</div>';
+  h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">מתוך '+PROFILE.target+'</div>';
   h+='<div style="height:4px;background:rgba(245,241,232,0.07);border-radius:4px"><div style="height:4px;width:'+calPct+'%;background:var(--coral);border-radius:4px;transition:width 0.4s"></div></div>';
   h+='</div>';
   // Protein
-  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer">';
-  h+='<div style="font-size:18px;margin-bottom:4px">💪</div>';
+  h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center">';
+  h+='<div style="font-size:13px;font-weight:800;color:var(--purple);letter-spacing:0.2px;margin-bottom:4px">חלבון</div>';
   h+='<div style="font-size:18px;font-weight:900;color:var(--purple);line-height:1">'+Math.round(nutTot.p)+'g</div>';
-  h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">חלבון מתוך '+PROFILE.protein+'g</div>';
+  h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">מתוך '+PROFILE.protein+'g</div>';
   h+='<div style="height:4px;background:rgba(245,241,232,0.07);border-radius:4px"><div style="height:4px;width:'+protPct+'%;background:var(--purple);border-radius:4px;transition:width 0.4s"></div></div>';
   h+='</div>';
   // Habits
   const habPct=HABITS_DEF.length?Math.round((habitsDone/HABITS_DEF.length)*100):0;
-  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px">';
-  h+='<div style="font-size:18px;margin-bottom:4px">✅</div>';
+  h+='<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center">';
+  h+='<div style="font-size:13px;font-weight:800;color:var(--teal);letter-spacing:0.2px;margin-bottom:4px">הרגלים</div>';
   h+='<div style="font-size:18px;font-weight:900;color:var(--teal);line-height:1">'+habitsDone+'/'+HABITS_DEF.length+'</div>';
-  h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">הרגלים</div>';
+  h+='<div style="font-size:9px;color:var(--muted);margin-bottom:6px">היום</div>';
   h+='<div style="height:4px;background:rgba(245,241,232,0.07);border-radius:4px"><div style="height:4px;width:'+habPct+'%;background:var(--teal);border-radius:4px;transition:width 0.4s"></div></div>';
   h+='</div>';
   h+='</div>';
@@ -1137,7 +1073,7 @@ function renderDash(){
     todayTasks.forEach((task,i)=>{
       h+='<div style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:11px;background:'+(task.done?"rgba(111,168,107,0.06)":"rgba(245,241,232,0.03)")+';margin-bottom:6px">';
       h+='<div onclick="toggleTask(\''+t+'\','+i+')" style="width:20px;height:20px;border-radius:50%;border:2px solid '+(task.done?"var(--teal)":"rgba(255,255,255,0.15)")+';background:'+(task.done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:900;flex-shrink:0;cursor:pointer">'+(task.done?"✓":"")+'</div>';
-      h+='<span style="flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+(task.done?"text-decoration:line-through;color:var(--muted)":"font-weight:500")+'">'+esc(task.text)+'</span>';
+      h+='<span style="flex:1;min-width:0;font-size:12px;overflow-wrap:break-word;'+(task.done?"text-decoration:line-through;color:var(--muted)":"font-weight:500")+'">'+esc(task.text)+'</span>';
       h+='<button onclick="delTask(\''+t+'\','+i+')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0;flex-shrink:0">✕</button>';
       h+='</div>';
     });
@@ -1207,10 +1143,10 @@ function toggleHabit(id,date){
 // ═══════════════════════════════════════════════
 function renderFitness(){
   const el=document.getElementById("pg-fitness");
-  const tabs=[["plan","📋 תוכנית"],["add","➕ הוסף ריצה"],["history","🕐 היסטוריה"]];
+  const tabs=[["plan","תוכנית"],["add","הוסף ריצה"]];
   let h='<div class="subtabs">';
   tabs.forEach(([k,l])=>{
-    h+='<button class="stb'+(fitTab===k?" on":"")+'" onclick="fitTab=\''+k+'\';renderFitness()" style="background:'+(fitTab===k?"var(--purple-g)":"var(--bg2)")+'">';
+    h+='<button class="stb'+(fitTab===k?" on":"")+'" onclick="fitTab=\''+k+'\';renderFitness()" style="background:'+(fitTab===k?"var(--purple-g)":"var(--bg2)")+';font-size:13px">';
     h+=l+'</button>';
   });
   h+='</div>';
@@ -1272,99 +1208,6 @@ function renderFitness(){
     h+='<button onclick="submitRun()" class="btn btn-p" style="width:100%;margin-top:10px;font-size:14px">🏃 שמור ריצה</button>';
     h+='</div>';
     h+='</div>';
-  }
-  else {
-    const allEntries=[
-      ...RUNS.map(r=>({...r,_type:"run"})),
-      ...STR_LOG.map(s=>({...s,_type:"strength"}))
-    ].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id-a.id);
-    if(!allEntries.length){
-      h+='<div class="empty"><div class="ei">🏋️</div><div class="et">עדיין אין אימונים</div><div class="es">סיים אימון כדי לראות אותו כאן</div></div>';
-    } else {
-      h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">היסטוריה · '+allEntries.length+' אימונים</div>';
-      allEntries.forEach(entry=>{
-        if(entry._type==="run"){
-          const run=entry;
-          const tag=run.type&&RUN_TAGS[run.type];
-          const tagColor=tag?tag.color:"#6FA86B";
-          h+='<div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;gap:9px;align-items:flex-start;border:1px solid '+c2r(tagColor,0.25)+'">';
-          h+='<div style="width:3px;border-radius:2px;background:'+tagColor+';min-height:45px;flex-shrink:0;margin-top:2px"></div>';
-          h+='<div style="flex:1">';
-          h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">';
-          if(tag)h+='<span style="font-size:12px;font-weight:700;color:'+tagColor+'">'+tag.label+'</span>';
-          h+='<span style="font-size:10px;color:var(--muted)">'+run.date+'</span>';
-          h+='</div>';
-          h+='<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px">';
-          h+='<span class="num" style="font-size:18px;font-weight:700">'+run.km+'</span><span style="font-size:12px;color:var(--muted)">ק"מ</span>';
-          h+='<span class="num" style="font-size:12px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
-          if(run.avgHr) h+='<span class="num" style="font-size:12px;font-weight:600;color:var(--muted)">♥ '+run.avgHr+'</span>';
-          h+='</div>';
-          if(run.notes) h+='<div style="font-size:11px;color:var(--muted2);font-style:italic;margin-top:2px">'+esc(run.notes)+'</div>';
-          if(run.splits&&run.splits.length){
-            h+='<div style="margin-top:8px;border-top:1px solid rgba(245,241,232,0.06);padding-top:8px">';
-            h+='<div style="font-size:10px;font-weight:700;color:'+tagColor+';text-transform:uppercase;margin-bottom:5px">Splits · '+run.splits.length+' מקטעים</div>';
-            h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr;gap:2px 6px;font-size:10px">';
-            h+='<span style="color:var(--muted2)">#</span><span style="color:var(--muted2)">מרחק</span><span style="color:var(--muted2)">קצב</span><span style="color:var(--muted2)">דופק</span>';
-            run.splits.forEach(s=>{
-              h+='<span class="num" style="color:var(--muted)">'+s.lap+'</span>';
-              h+='<span class="num" style="color:var(--teal);">'+(s.dist?s.dist+' ק"מ':'—')+'</span>';
-              h+='<span class="num" style="color:var(--purple)">'+(s.pace||'—')+'</span>';
-              h+='<span class="num" style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'—')+'</span>';
-            });
-            h+='</div></div>';
-          }
-          h+='</div>';
-          h+='<button onclick="delRun('+run.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px">✕</button>';
-          h+='</div>';
-        } else {
-          const s=entry;
-          const expanded=_strExpandId===s.id;
-          const mins=Math.floor((s.duration||0)/60);
-          const totalSets=s.exercises.reduce((a,ex)=>a+ex.sets.length,0);
-          const doneSets=s.exercises.reduce((a,ex)=>a+ex.sets.filter(st=>st.done).length,0);
-          h+='<div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,122,69,0.25)">';
-          h+='<div style="display:flex;gap:9px;align-items:flex-start">';
-          h+='<div style="width:3px;border-radius:2px;background:var(--purple);min-height:45px;flex-shrink:0;margin-top:2px"></div>';
-          h+='<div style="flex:1">';
-          h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap">';
-          h+='<span style="font-size:12px;font-weight:700;color:var(--purple)">💪 אימון כוח</span>';
-          h+='<span style="font-size:10px;color:var(--muted)">'+s.day+'</span>';
-          h+='<span style="font-size:10px;color:var(--muted)">'+s.date+'</span>';
-          h+='</div>';
-          h+='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">';
-          h+='<span style="font-size:15px;font-weight:800">'+s.exercises.length+'</span><span style="font-size:11px;color:var(--muted)">תרגילים</span>';
-          h+='<span style="font-size:15px;font-weight:800">'+doneSets+'/'+totalSets+'</span><span style="font-size:11px;color:var(--muted)">סטים</span>';
-          if(mins>0)h+='<span style="font-size:11px;color:var(--muted)">⏱ '+mins+' דק\'</span>';
-          h+='</div>';
-          h+='</div>';
-          h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">';
-          h+='<button onclick="delStrLog('+s.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:13px;padding:2px">✕</button>';
-          h+='<button onclick="_strExpandId=(_strExpandId==='+s.id+'?null:'+s.id+');renderFitness()" style="background:rgba(255,122,69,0.12);border:1px solid rgba(255,122,69,0.3);color:var(--purple);border-radius:8px;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:4px 10px">'+(expanded?"▲ סגור":"▼ פירוט")+'</button>';
-          h+='</div>';
-          h+='</div>';
-          if(expanded){
-            h+='<div style="margin-top:10px;border-top:1px solid rgba(245,241,232,0.06);padding-top:10px">';
-            s.exercises.forEach(ex=>{
-              const exDone=ex.sets.filter(st=>st.done).length;
-              h+='<div style="margin-bottom:10px">';
-              h+='<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">'+esc(ex.name||"תרגיל")+'</div>';
-              h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr;gap:3px 8px;font-size:10px;color:var(--muted2)">';
-              h+='<span>#</span><span>חזרות</span><span>משקל</span><span>בוצע</span>';
-              ex.sets.forEach((st,si)=>{
-                h+='<span style="color:var(--muted)">'+(si+1)+'</span>';
-                h+='<span style="color:var(--text)">'+(st.reps||'—')+'</span>';
-                h+='<span style="color:var(--teal)">'+(st.weight?st.weight+' ק"ג':'—')+'</span>';
-                h+='<span>'+(st.done?'<span style="color:#6FA86B">✓</span>':'<span style="color:var(--muted2)">✗</span>')+'</span>';
-              });
-              h+='</div>';
-              h+='</div>';
-            });
-            h+='</div>';
-          }
-          h+='</div>';
-        }
-      });
-    }
   }
   el.innerHTML=h;
 }
@@ -1602,57 +1445,157 @@ function goToTodayWorkout(){fitTab="plan";goTo("fitness");setTimeout(()=>{const 
 function setSelectedDay(day){selectedDay=day;renderFitness();}
 
 function addWorkoutToDay(day){
+  if(!USER_PLAN)USER_PLAN={};
   normalizePlan();
   if(!Array.isArray(USER_PLAN[day]))USER_PLAN[day]=[];
-  USER_PLAN[day].push({type:"strength",exercises:[]});
+  USER_PLAN[day].push({type:"strength",exercises:[],fixed:true});
+  normalizePlan();
   save("user_plan",USER_PLAN);
   const idx=USER_PLAN[day].length-1;
   renderFitness();
-  openWorkoutEdit(day,idx);
+  openWorkoutEdit(fitWeekKey||weekKeyOf(todayStr()),day,idx);
 }
 
 function removeWorkoutFromDay(day,idx){
   if(!USER_PLAN||!Array.isArray(USER_PLAN[day]))return;
+  const slot=USER_PLAN[day][idx];
+  if(slot&&slot.id){
+    Object.keys(WEEK_PLAN).forEach(wk=>{
+      if(WEEK_PLAN[wk][day])delete WEEK_PLAN[wk][day][slot.id];
+    });
+    save("week_plan",WEEK_PLAN);
+  }
   USER_PLAN[day].splice(idx,1);
   save("user_plan",USER_PLAN);
   renderFitness();
 }
 
-function toggleWorkoutDone(day,idx){
-  const key=idx===0?(todayStr()+"-"+day):(todayStr()+"-"+day+"-"+idx);
+function toggleWorkoutDone(weekKey,day,idx){
+  const dateStr=addDaysStr(weekKey,DAYS.indexOf(day));
+  const key=idx===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+idx);
   COMP[key]=!COMP[key];
   save("comp",COMP);
   renderFitness();
 }
 
+function renderHistRunCard(run){
+  const tag=run.type&&RUN_TAGS[run.type];
+  const tagColor=tag?tag.color:"#6FA86B";
+  let h='<div style="background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start;border:1px solid '+c2r(tagColor,0.25)+'">';
+  h+='<div style="width:3px;border-radius:2px;background:'+tagColor+';min-height:36px;flex-shrink:0;margin-top:2px"></div>';
+  h+='<div style="flex:1;min-width:0">';
+  if(tag)h+='<div style="font-size:11px;font-weight:700;color:'+tagColor+';margin-bottom:3px">'+tag.label+'</div>';
+  h+='<div style="display:flex;gap:6px;align-items:baseline;flex-wrap:wrap">';
+  h+='<span class="num" style="font-size:14px;font-weight:700">'+run.km+'</span><span style="font-size:10px;color:var(--muted)">ק"מ</span>';
+  h+='<span class="num" style="font-size:10px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
+  if(run.avgHr) h+='<span class="num" style="font-size:10px;font-weight:600;color:var(--muted)">♥ '+run.avgHr+'</span>';
+  h+='</div>';
+  if(run.notes) h+='<div style="font-size:10px;color:var(--muted2);font-style:italic;margin-top:2px">'+esc(run.notes)+'</div>';
+  h+='</div>';
+  h+='<button onclick="delRun('+run.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:12px;padding:2px">✕</button>';
+  h+='</div>';
+  return h;
+}
+function renderHistStrengthCard(s){
+  const expanded=_strExpandId===s.id;
+  const mins=Math.floor((s.duration||0)/60);
+  const totalSets=s.exercises.reduce((a,ex)=>a+ex.sets.length,0);
+  const doneSets=s.exercises.reduce((a,ex)=>a+ex.sets.filter(st=>st.done).length,0);
+  let h='<div style="background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;border:1px solid rgba(255,122,69,0.25)">';
+  h+='<div style="display:flex;gap:8px;align-items:flex-start">';
+  h+='<div style="width:3px;border-radius:2px;background:var(--purple);min-height:36px;flex-shrink:0;margin-top:2px"></div>';
+  h+='<div style="flex:1;min-width:0">';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:3px">💪 אימון כוח</div>';
+  h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+  h+='<span style="font-size:12px;font-weight:800">'+s.exercises.length+'</span><span style="font-size:10px;color:var(--muted)">תרגילים</span>';
+  h+='<span style="font-size:12px;font-weight:800">'+doneSets+'/'+totalSets+'</span><span style="font-size:10px;color:var(--muted)">סטים</span>';
+  if(mins>0)h+='<span style="font-size:10px;color:var(--muted)">⏱ '+mins+' דק\'</span>';
+  h+='</div>';
+  h+='</div>';
+  h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">';
+  h+='<button onclick="delStrLog('+s.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:12px;padding:2px">✕</button>';
+  h+='<button onclick="_strExpandId=(_strExpandId==='+s.id+'?null:'+s.id+');renderFitness()" style="background:rgba(255,122,69,0.12);border:1px solid rgba(255,122,69,0.3);color:var(--purple);border-radius:7px;font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer;padding:3px 8px">'+(expanded?"▲":"▼")+'</button>';
+  h+='</div>';
+  h+='</div>';
+  if(expanded){
+    h+='<div style="margin-top:8px;border-top:1px solid rgba(245,241,232,0.06);padding-top:8px">';
+    s.exercises.forEach(ex=>{
+      h+='<div style="margin-bottom:8px">';
+      h+='<div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">'+esc(ex.name||"תרגיל")+'</div>';
+      h+='<div style="display:grid;grid-template-columns:24px 1fr 1fr 1fr;gap:2px 6px;font-size:9px;color:var(--muted2)">';
+      h+='<span>#</span><span>חז\'</span><span>ק"ג</span><span>בוצע</span>';
+      ex.sets.forEach((st,si)=>{
+        h+='<span style="color:var(--muted)">'+(si+1)+'</span>';
+        h+='<span style="color:var(--text)">'+(st.reps||'—')+'</span>';
+        h+='<span style="color:var(--teal)">'+(st.weight||'—')+'</span>';
+        h+='<span>'+(st.done?'<span style="color:#6FA86B">✓</span>':'<span style="color:var(--muted2)">✗</span>')+'</span>';
+      });
+      h+='</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+function renderDayHistory(dateStr){
+  const dayRuns=RUNS.filter(r=>r.date===dateStr);
+  const dayStr=STR_LOG.filter(s=>s.date===dateStr);
+  if(!dayRuns.length&&!dayStr.length){
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;color:var(--muted)"><span style="font-size:22px">😴</span><span style="font-size:10px">מנוחה</span></div>';
+  }
+  let h='';
+  dayRuns.forEach(r=>{h+=renderHistRunCard(r);});
+  dayStr.forEach(s=>{h+=renderHistStrengthCard(s);});
+  return h;
+}
+
 function buildFitnessCalendar(){
   normalizePlan();
-  const t=todayStr();
-  const today=todayDay();
+  if(!fitWeekKey)fitWeekKey=weekKeyOf(todayStr());
+  const weekKey=fitWeekKey;
+  const curWeekKey=weekKeyOf(todayStr());
+  const isCurWeek=weekKey===curWeekKey;
+  const maxWeek=addDaysStr(curWeekKey,28);
+  const atMax=weekKey>=maxWeek;
+  const fmtShort=ds=>new Date(ds+'T12:00:00').toLocaleDateString("he-IL",{day:"numeric",month:"numeric"});
+
+  let h='';
+  // Week nav
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  h+='<button onclick="fitWeekChange(-1)" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>';
+  h+='<div style="text-align:center"><div style="font-size:13px;font-weight:800">'+fmtShort(weekKey)+' – '+fmtShort(addDaysStr(weekKey,6))+'</div>'+(isCurWeek?'<div style="font-size:10px;color:var(--muted)">השבוע הנוכחי</div>':'<div style="font-size:10px;color:var(--muted2)">&nbsp;</div>')+'</div>';
+  h+='<button onclick="fitWeekChange(1)" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:'+(atMax?"0.3":"1")+';pointer-events:'+(atMax?"none":"auto")+'">›</button>';
+  h+='</div>';
 
   // outer scroll wrapper
-  let h='<div style="overflow-x:auto;margin:0 -16px;padding:0 16px 6px">';
+  h+='<div style="overflow-x:auto;margin:0 -16px;padding:0 16px 6px">';
   h+='<div style="display:flex;gap:8px;width:max-content">';
 
-  DAYS.forEach(day=>{
-    const workouts=getDayWorkouts(day);
-    const isToday=day===today;
-    const hasDone=workouts.length&&workouts.some((_,i)=>!!COMP[i===0?(t+"-"+day):(t+"-"+day+"-"+i)]);
+  DAYS.forEach((day,dayIdx)=>{
+    const dateStr=addDaysStr(weekKey,dayIdx);
+    const isToday=dateStr===todayStr();
+    const isPast=dateStr<todayStr();
+    const workouts=isPast?[]:getEffectiveWorkouts(weekKey,day);
+    const hasDone=workouts.length&&workouts.some((_,i)=>!!COMP[i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i)]);
 
     h+=(isToday?'<div id="fitness-today-col"':'<div')+' style="width:calc(50vw - 22px);min-width:160px;max-width:260px;flex-shrink:0;background:var(--card);border:1.5px solid '+(isToday?"rgba(255,122,69,0.5)":"var(--border)")+';border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:0'+(isToday?';box-shadow:0 0 0 3px rgba(255,122,69,0.08)':'')+'">';
 
     // Day header
     h+='<div style="margin-bottom:8px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">';
-    h+='<div style="font-size:13px;font-weight:900;color:'+(isToday?"var(--purple)":"var(--text)")+'">'+day+'</div>';
-    h+='<button onclick="addWorkoutToDay(\''+day+'\')" style="padding:2px 7px;border-radius:5px;border:none;background:rgba(255,122,69,0.13);color:var(--purple);font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">+</button>';
+    h+='<div style="font-size:13px;font-weight:900;color:'+(isToday?"var(--purple)":"var(--text)")+'">'+day+' <span style="font-size:10px;font-weight:700;color:var(--muted)">'+fmtShort(dateStr)+'</span></div>';
+    if(!isPast)h+='<button onclick="addWorkoutToDay(\''+day+'\')" style="padding:2px 7px;border-radius:5px;border:none;background:rgba(255,122,69,0.13);color:var(--purple);font-family:Rubik,sans-serif;font-size:10px;font-weight:700;cursor:pointer">+</button>';
     h+='</div>';
     if(isToday)h+='<span style="font-size:8px;background:var(--purple);color:#fff;padding:1px 6px;border-radius:3px;font-weight:700">היום</span>';
+    else if(isPast)h+='<span style="font-size:8px;color:var(--muted2);font-weight:700">היסטוריה</span>';
     else if(hasDone)h+='<span style="font-size:8px;color:#6FA86B;font-weight:700">✓ בוצע</span>';
     h+='</div>';
     h+='<div style="height:1px;background:var(--border);margin-bottom:8px"></div>';
 
-    if(!workouts.length){
+    if(isPast){
+      h+=renderDayHistory(dateStr);
+    } else if(!workouts.length){
       h+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;color:var(--muted)">';
       h+='<span style="font-size:22px">😴</span>';
       h+='<span style="font-size:10px">מנוחה</span>';
@@ -1663,8 +1606,9 @@ function buildFitnessCalendar(){
         const icon=w.type==="strength"?"💪":w.type==="run"?"🏃":"🏖️";
         const runLbl={"easy":"קלה","tempo":"טמפו","intervals":"אינטרוולים","long":"ארוכה"}[w.runType]||"";
         const typeLabel=w.type==="strength"?"אימון כוח":"ריצה"+(runLbl?" "+runLbl:"");
-        const compKey=i===0?(t+"-"+day):(t+"-"+day+"-"+i);
+        const compKey=i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i);
         const done=!!COMP[compKey];
+        const fixedBadge=w.fixed===false?'<span title="משתנה כל שבוע" style="font-size:9px;color:var(--blue)">🔀</span>':'<span title="קבוע כל שבוע" style="font-size:9px;color:var(--muted2)">🔁</span>';
 
         if(i>0)h+='<div style="height:1px;background:var(--border);margin:7px 0"></div>';
 
@@ -1672,15 +1616,16 @@ function buildFitnessCalendar(){
         h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">';
         h+='<span style="font-size:14px">'+icon+'</span>';
         h+='<span style="font-size:11px;font-weight:700;color:'+color+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+typeLabel+'</span>';
-        h+='<button onclick="toggleWorkoutDone(\''+day+'\','+i+')" style="width:20px;height:20px;border-radius:50%;border:1.5px solid '+(done?color:"rgba(255,255,255,0.2)")+';background:'+(done?c2r(color,0.2):"transparent")+';cursor:pointer;font-size:10px;font-weight:800;color:'+(done?color:"transparent")+';flex-shrink:0">'+(done?"✓":"")+'</button>';
+        h+=fixedBadge;
+        h+='<button onclick="toggleWorkoutDone(\''+weekKey+'\',\''+day+'\','+i+')" style="width:20px;height:20px;border-radius:50%;border:1.5px solid '+(done?color:"rgba(255,255,255,0.2)")+';background:'+(done?c2r(color,0.2):"transparent")+';cursor:pointer;font-size:10px;font-weight:800;color:'+(done?color:"transparent")+';flex-shrink:0">'+(done?"✓":"")+'</button>';
         h+='</div>';
 
 
         // Action buttons
         h+='<div style="display:flex;gap:4px;margin-bottom:7px">';
-        if(w.type==="strength") h+='<button onclick="startWorkout(\''+day+'\','+i+')" style="flex:1;padding:4px 5px;border-radius:6px;border:none;background:var(--teal);color:#0E1220;font-family:Rubik,sans-serif;font-size:9px;font-weight:800;cursor:pointer">▶ התחל</button>';
-        h+='<button onclick="openWorkoutEdit(\''+day+'\','+i+')" style="flex:1;padding:4px;border-radius:6px;border:1px solid rgba(255,122,69,0.25);background:transparent;color:var(--purple);font-family:Rubik,sans-serif;font-size:9px;font-weight:700;cursor:pointer">✏️ ערוך</button>';
-        h+='<button onclick="openCopyWorkout(\''+day+'\','+i+')" style="padding:4px 7px;border-radius:6px;border:1px solid rgba(107,143,163,0.25);background:transparent;color:var(--blue);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer" title="העתק ליום אחר">📋</button>';
+        if(w.type==="strength"&&isToday) h+='<button onclick="startWorkout(\''+weekKey+'\',\''+day+'\','+i+')" style="flex:1;padding:4px 5px;border-radius:6px;border:none;background:var(--teal);color:#0E1220;font-family:Rubik,sans-serif;font-size:9px;font-weight:800;cursor:pointer">▶ התחל</button>';
+        h+='<button onclick="openWorkoutEdit(\''+weekKey+'\',\''+day+'\','+i+')" style="flex:1;padding:4px;border-radius:6px;border:1px solid rgba(255,122,69,0.25);background:transparent;color:var(--purple);font-family:Rubik,sans-serif;font-size:9px;font-weight:700;cursor:pointer">✏️ ערוך</button>';
+        h+='<button onclick="openCopyWorkout(\''+weekKey+'\',\''+day+'\','+i+')" style="padding:4px 7px;border-radius:6px;border:1px solid rgba(107,143,163,0.25);background:transparent;color:var(--blue);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer" title="העתק ליום אחר">📋</button>';
         h+='<button onclick="removeWorkoutFromDay(\''+day+'\','+i+')" style="padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--muted2);font-family:Rubik,sans-serif;font-size:10px;cursor:pointer">✕</button>';
         h+='</div>';
 
@@ -2197,7 +2142,7 @@ function buildGoalsHTML(){
       const cur=existing[cat.id]?.goal||"";
       h+='<div class="card">';
       h+='<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><div style="width:34px;height:34px;border-radius:10px;background:'+c2r(cat.color,0.18)+';display:flex;align-items:center;justify-content:center;font-size:17px">'+cat.icon+'</div><div style="font-size:13px;font-weight:700;color:'+cat.color+'">'+cat.label+'</div></div>';
-      h+='<input type="text" value="'+cur+'" placeholder="יעד ספציפי..." onchange="setGoal(\''+cat.id+'\',\''+tStr+'\',this.value)" class="inp" style="font-size:13px"/>';
+      h+='<input type="text" value="'+esc(cur)+'" placeholder="יעד ספציפי..." onchange="setGoal(\''+cat.id+'\',\''+tStr+'\',this.value)" class="inp" style="font-size:13px"/>';
       h+='</div>';
     });
     h+='<button onclick="saveNewGoals(\''+tStr+'\')" class="btn btn-p" style="width:100%;font-size:14px;margin-top:4px">💾 שמור יעדים למחר</button>';
@@ -2364,15 +2309,83 @@ function normalizePlan(){
     if(!USER_PLAN[d]||USER_PLAN[d]==="rest"){USER_PLAN[d]=[];}
     else if(typeof USER_PLAN[d]==="string"){USER_PLAN[d]=[{type:USER_PLAN[d]}];}
     else if(!Array.isArray(USER_PLAN[d])){USER_PLAN[d]=USER_PLAN[d].type==="rest"?[]:[USER_PLAN[d]];}
+    USER_PLAN[d].forEach(w=>{
+      if(!w.id)w.id="w"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+      if(w.fixed===undefined)w.fixed=true;
+    });
   });
+}
+
+// ── WEEKLY PLAN (fixed vs. variable-per-week workouts) ──
+function addDaysStr(dateStr,days){
+  const d=new Date(dateStr+'T12:00:00');
+  d.setDate(d.getDate()+days);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function weekKeyOf(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return addDaysStr(dateStr,-d.getDay());
+}
+function fitWeekChange(delta){
+  if(!fitWeekKey)fitWeekKey=weekKeyOf(todayStr());
+  const next=addDaysStr(fitWeekKey,delta*7);
+  const maxWeek=addDaysStr(weekKeyOf(todayStr()),28);
+  if(next<=maxWeek){fitWeekKey=next;renderFitness();}
+}
+function resolveWorkout(weekKey,day,idx){
+  const slot=getDayWorkouts(day)[idx];
+  if(!slot)return null;
+  if(slot.fixed===false){
+    const ov=(WEEK_PLAN[weekKey]&&WEEK_PLAN[weekKey][day]&&WEEK_PLAN[weekKey][day][slot.id])||{};
+    return Object.assign({},slot,ov);
+  }
+  return slot;
+}
+function getEffectiveWorkouts(weekKey,day){
+  return getDayWorkouts(day).map((slot,i)=>resolveWorkout(weekKey,day,i));
+}
+function getEditingSlot(){
+  return USER_PLAN&&USER_PLAN[weDay]&&USER_PLAN[weDay][weWorkoutIdx];
+}
+function getEditingWorkout(){
+  const slot=getEditingSlot();
+  if(!slot)return null;
+  if(slot.fixed===false){
+    if(!WEEK_PLAN[weWeekKey])WEEK_PLAN[weWeekKey]={};
+    if(!WEEK_PLAN[weWeekKey][weDay])WEEK_PLAN[weWeekKey][weDay]={};
+    if(!WEEK_PLAN[weWeekKey][weDay][slot.id])WEEK_PLAN[weWeekKey][weDay][slot.id]={exercises:[],segments:[]};
+    return WEEK_PLAN[weWeekKey][weDay][slot.id];
+  }
+  return slot;
+}
+function setSlotFixed(fixedVal){
+  normalizePlan();
+  const slot=getEditingSlot();
+  if(!slot||slot.fixed===fixedVal)return;
+  const cur=getEditingWorkout();
+  if(fixedVal===true){
+    slot.exercises=cur.exercises||[];
+    slot.segments=cur.segments||[];
+    slot.fixed=true;
+  } else {
+    if(!WEEK_PLAN[weWeekKey])WEEK_PLAN[weWeekKey]={};
+    if(!WEEK_PLAN[weWeekKey][weDay])WEEK_PLAN[weWeekKey][weDay]={};
+    WEEK_PLAN[weWeekKey][weDay][slot.id]={exercises:slot.exercises||[],segments:slot.segments||[]};
+    save("week_plan",WEEK_PLAN);
+    delete slot.exercises;
+    delete slot.segments;
+    slot.fixed=false;
+  }
+  save("user_plan",USER_PLAN);
+  renderWorkoutEdit();
 }
 
 let copySource=null;
 let exDragIdx=null;
-function openCopyWorkout(day,idx){
+function openCopyWorkout(weekKey,day,idx){
   if(!USER_PLAN){toast("אין תוכנית אימונים מוגדרת");return;}
-  copySource={day,idx};
-  const src=getDayWorkouts(day)[idx];
+  copySource={weekKey,day,idx};
+  const src=resolveWorkout(weekKey,day,idx);
   const icon=src?.type==="strength"?"💪":"🏃";
   const label=src?.type==="strength"?"אימון כוח":"ריצה";
   const el=document.getElementById("copy-modal-days");
@@ -2399,11 +2412,14 @@ function closeCopyWorkout(){
 function doCopyWorkout(targetDay){
   if(!copySource||!USER_PLAN)return;
   normalizePlan();
-  const src=getDayWorkouts(copySource.day)[copySource.idx];
+  const src=resolveWorkout(copySource.weekKey,copySource.day,copySource.idx);
   if(!src){closeCopyWorkout();return;}
   const copy=JSON.parse(JSON.stringify(src));
+  delete copy.id;
+  copy.fixed=true;
   if(!Array.isArray(USER_PLAN[targetDay]))USER_PLAN[targetDay]=[];
   USER_PLAN[targetDay].push(copy);
+  normalizePlan();
   save("user_plan",USER_PLAN);
   closeCopyWorkout();
   toast("✓ אימון הועתק ל"+targetDay+"!");
@@ -2411,8 +2427,9 @@ function doCopyWorkout(targetDay){
 }
 
 let weDay=null;
-function openWorkoutEdit(day,workoutIdx){
+function openWorkoutEdit(weekKey,day,workoutIdx){
   normalizePlan();
+  weWeekKey=weekKey;
   weDay=day;
   weWorkoutIdx=workoutIdx||0;
   _newSegType="warmup";
@@ -2426,11 +2443,21 @@ function openWorkoutEdit(day,workoutIdx){
 function closeWorkoutEdit(){
   document.getElementById("workout-edit-modal").style.display="none";
   weDay=null;
+  weWeekKey=null;
 }
 function renderWorkoutEdit(){
-  const dp=(USER_PLAN&&USER_PLAN[weDay]&&USER_PLAN[weDay][weWorkoutIdx])||{type:"strength"};
+  const slot=getEditingSlot()||{type:"strength",fixed:true};
+  const dp=Object.assign({},getEditingWorkout(),{type:slot.type});
+  const isFixed=slot.fixed!==false;
   const tc=dp.type==="strength"?"var(--purple)":"var(--teal)";
   let h="";
+  h+='<div style="display:flex;gap:7px;margin-bottom:8px">';
+  [[true,"🔁","קבוע כל שבוע"],[false,"🔀","משתנה כל שבוע"]].forEach(([val,ic,l])=>{
+    const sel=isFixed===val;
+    h+='<button onclick="setSlotFixed('+val+')" style="flex:1;padding:8px;border-radius:10px;border:1.5px solid '+(sel?"var(--blue)":"var(--border)")+';background:'+(sel?"rgba(107,143,163,0.12)":"var(--bg3)")+';color:'+(sel?"var(--blue)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
+  });
+  h+='</div>';
+  if(!isFixed)h+='<div style="font-size:10px;color:var(--muted);margin-bottom:10px">התוכן שתזין כאן ישמר רק לשבוע הזה</div>';
   h+='<div style="display:flex;gap:7px;margin-bottom:14px">';
   [["strength","💪","כוח"],["run","🏃","ריצה"]].forEach(([tp,ic,l])=>{
     const sel=dp.type===tp;
@@ -2446,7 +2473,7 @@ function renderWorkoutEdit(){
       h+='<div class="ex-drag-row" draggable="true" ondragstart="exDragStart(event,'+i+')" ondragover="exDragOver(event,'+i+')" ondragenter="exDragEnter(event,'+i+')" ondragleave="exDragLeave(event,'+i+')" ondrop="exDrop(event,'+i+')" ondragend="exDragEnd()" style="margin-bottom:6px;border:1.5px solid transparent;border-radius:11px;padding:3px 2px;transition:background 0.15s,border-color 0.15s">';
       h+='<div style="display:flex;align-items:center;gap:5px">';
       h+='<span class="ex-drag-handle" style="cursor:grab;color:var(--muted2);font-size:18px;padding:4px 6px;flex-shrink:0;line-height:1;user-select:none;touch-action:none">⠿</span>';
-      h+='<input type="text" value="'+ex.name+'" oninput="updateExercise('+i+',\'name\',this.value)" class="inp" placeholder="שם תרגיל" style="flex:2;font-size:12px;padding:7px 8px"/>';
+      h+='<input type="text" value="'+esc(ex.name||"")+'" oninput="updateExercise('+i+',\'name\',this.value)" class="inp" placeholder="שם תרגיל" style="flex:2;font-size:12px;padding:7px 8px"/>';
       h+='<input type="text" value="'+(ex.sets||"")+'" oninput="updateExercise('+i+',\'sets\',this.value)" class="inp" placeholder="סטים" style="width:44px;font-size:12px;padding:7px 6px;text-align:center"/>';
       h+='<input type="text" value="'+(ex.reps||"")+'" oninput="updateExercise('+i+',\'reps\',this.value)" class="inp" placeholder="חז\'" style="width:44px;font-size:12px;padding:7px 6px;text-align:center"/>';
       h+='<input type="text" value="'+(ex.weight||"")+'" oninput="updateExercise('+i+',\'weight\',this.value)" class="inp" placeholder="ק\"ג" style="width:48px;font-size:12px;padding:7px 6px;text-align:center"/>';
@@ -2528,7 +2555,7 @@ function renderWorkoutEdit(){
     h+='<button onclick="addRunSegment()" class="btn btn-p" style="width:100%;font-size:13px;padding:10px">+ הוסף מקטע</button>';
     h+='</div>';
   }
-  h+='<button onclick="saveWorkoutDay()" class="btn btn-p" style="width:100%;padding:13px;font-size:14px">💾 שמור</button>';
+  h+='<button onclick="saveWorkoutDay()" class="btn btn-p" style="width:100%;padding:13px;font-size:14px">שמור</button>';
   document.getElementById("we-content").innerHTML=h;
   initExerciseTouchDrag();
 }
@@ -2569,19 +2596,19 @@ function initExerciseTouchDrag(){
 }
 function addExercise(){
   normalizePlan();
-  const w=USER_PLAN[weDay][weWorkoutIdx];
+  const w=getEditingWorkout();
   if(!w.exercises) w.exercises=[];
   w.exercises.push({name:"",sets:"3",reps:"10",weight:""});
   renderWorkoutEdit();
 }
 function removeExercise(idx){
   normalizePlan();
-  USER_PLAN[weDay][weWorkoutIdx].exercises.splice(idx,1);
+  getEditingWorkout().exercises.splice(idx,1);
   renderWorkoutEdit();
 }
 function moveExercise(from,to){
   normalizePlan();
-  const exs=USER_PLAN[weDay][weWorkoutIdx].exercises;
+  const exs=getEditingWorkout().exercises;
   if(!exs||from<0||to<0||from>=exs.length||to>=exs.length)return;
   const[moved]=exs.splice(from,1);
   exs.splice(to,0,moved);
@@ -2626,28 +2653,31 @@ function exDragEnd(){
 }
 function updateExercise(idx,field,val){
   normalizePlan();
-  const w=USER_PLAN[weDay][weWorkoutIdx];
+  const w=getEditingWorkout();
   if(!w||!w.exercises) return;
   w.exercises[idx][field]=val;
 }
 function setRunType(val){
   normalizePlan();
-  USER_PLAN[weDay][weWorkoutIdx].runType=val;
+  getEditingWorkout().runType=val;
   renderWorkoutEdit();
 }
 function setWorkoutType(type){
   normalizePlan();
-  const w=USER_PLAN[weDay][weWorkoutIdx];
-  if(!w) return;
-  w.type=type;
+  const slot=getEditingSlot();
+  if(!slot) return;
+  slot.type=type;
+  const w=getEditingWorkout();
   if(type==="strength"&&!w.exercises) w.exercises=[];
   if(type==="run"&&!w.segments) w.segments=[];
+  save("user_plan",USER_PLAN);
   renderWorkoutEdit();
 }
 function saveWorkoutDay(){
   normalizePlan();
-  const w=USER_PLAN[weDay]&&USER_PLAN[weDay][weWorkoutIdx];
-  if(w&&w.type==="strength"&&w.exercises){
+  const slot=getEditingSlot();
+  const w=getEditingWorkout();
+  if(w&&slot&&slot.type==="strength"&&w.exercises){
     w.exercises.forEach(ex=>{
       const k=(ex.name||"").trim().toLowerCase();
       if(k&&(ex.sets||ex.reps||ex.weight)){
@@ -2657,6 +2687,7 @@ function saveWorkoutDay(){
     save("workout_hist",WORKOUT_HIST);
   }
   save("user_plan",USER_PLAN);
+  if(slot&&slot.fixed===false)save("week_plan",WEEK_PLAN);
   closeWorkoutEdit();
   toast("✓ "+weDay+" נשמר!");
   renderFitness();
@@ -2665,9 +2696,9 @@ function saveWorkoutDay(){
 // ═══════════════════════════════════════════════
 // ACTIVE WORKOUT SESSION
 // ═══════════════════════════════════════════════
-function startWorkout(day,idx){
+function startWorkout(weekKey,day,idx){
   normalizePlan();
-  const w=USER_PLAN&&USER_PLAN[day]&&USER_PLAN[day][idx];
+  const w=resolveWorkout(weekKey,day,idx);
   if(!w||w.type!=="strength")return;
   const exs=(w.exercises||[]).map(ex=>({
     name:ex.name||"",
@@ -2865,7 +2896,7 @@ function toggleSegUnit(){
 }
 function addRunSegment(){
   normalizePlan();
-  const w=USER_PLAN[weDay][weWorkoutIdx];
+  const w=getEditingWorkout();
   if(!w.segments) w.segments=[];
   const reps=parseInt(document.getElementById('ns-reps')?.value)||1;
   const dist=(document.getElementById('ns-dist')?.value||"").trim();
@@ -2878,7 +2909,7 @@ function addRunSegment(){
 }
 function removeRunSegment(i){
   normalizePlan();
-  const w=USER_PLAN[weDay][weWorkoutIdx];
+  const w=getEditingWorkout();
   if(w&&w.segments) w.segments.splice(i,1);
   renderWorkoutEdit();
 }
@@ -2984,7 +3015,7 @@ function addFromExPicker(idx){
   const ex=EXERCISE_DB[idx];
   if(!ex)return;
   normalizePlan();
-  const _wpick=USER_PLAN[weDay][weWorkoutIdx];
+  const _wpick=getEditingWorkout();
   if(!_wpick.exercises)_wpick.exercises=[];
   _wpick.exercises.push({name:ex.name,sets:"3",reps:"10"});
   closeExPicker();
@@ -3261,7 +3292,6 @@ showLoading();
       const isNew=await loadFromFirestore(user.uid);
       hideLoading();
       updateUserUI(user);
-      updateThemeBtn();
       renderDash();
       if(isNew && !load("visited",false)){
         obStep=0;
