@@ -133,6 +133,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="planner.css">
 </head>
 <body>
 <div id="signin-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto">
@@ -167,7 +168,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 
 <div class="header">
   <div style="flex:1;text-align:center">
-    <div id="page-title" style="font-size:22px;font-weight:900;letter-spacing:-0.5px">Dashboard</div>
+    <div id="page-title" style="font-size:22px;font-weight:900;letter-spacing:-0.5px">היום שלי</div>
   </div>
   <div id="user-avatar" style="position:absolute;left:16px;top:50%;transform:translateY(-50%)"></div>
 </div>
@@ -178,16 +179,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <div id="pg-productivity" class="page"></div>
 
 <nav class="nav">
-  <button class="nb active" data-pg="dash">
+  <button class="nb active" data-pg="dash" aria-label="היום שלי" title="היום שלי">
     <svg class="ni" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nb-label">לוח</span>
   </button>
-  <button class="nb" data-pg="fitness">
+  <button class="nb" data-pg="fitness" aria-label="כושר" title="כושר">
     <svg class="ni" viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 10h18M3 14h18"/><circle cx="3" cy="10" r="1.5"/><circle cx="21" cy="10" r="1.5"/><circle cx="3" cy="14" r="1.5"/><circle cx="21" cy="14" r="1.5"/></svg><span class="nb-label">כושר</span>
   </button>
-  <button class="nb" data-pg="nutrition">
+  <button class="nb" data-pg="nutrition" aria-label="תזונה" title="תזונה">
     <svg class="ni" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg><span class="nb-label">תזונה</span>
   </button>
-  <button class="nb" data-pg="productivity">
+  <button class="nb" data-pg="productivity" aria-label="הרגלים" title="הרגלים">
     <svg class="ni" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="nb-label">פרוד'</span>
   </button>
 </nav>
@@ -516,16 +517,17 @@ function save(k,v){
 async function loadFromFirestore(uid){
   try{
     const snap=await db.collection("users").doc(uid).get();
-    if(!snap.exists)return true; // brand new user
+    if(!snap.exists){localStorage.setItem("tr_life_planner","{}");return true;} // brand new user
     const d=snap.data();
-    ["runs","comp","nut","burns","goals","tasks","habit_log","quick_notes","journals","habits_def","visited","profile","user_plan","debrief"].forEach(k=>{
+    localStorage.setItem("tr_life_planner",JSON.stringify(d.life_planner||{}));
+    ["runs","comp","nut","burns","goals","tasks","habit_log","quick_notes","journals","habits_def","visited","profile","user_plan","debrief","week_plan","workout_hist","str_log"].forEach(k=>{
       if(d[k]!==undefined)try{localStorage.setItem("tr_"+k,JSON.stringify(d[k]));}catch(e){}
     });
     RUNS=load("runs",[]);COMP=load("comp",{});NUT=load("nut",{});
     BURNS=load("burns",{});GOALS=load("goals",{});TASKS=load("tasks",{});
     HABIT_LOG=load("habit_log",{});NOTES=load("quick_notes",[]);
     JOURNALS=load("journals",{});HABITS_DEF=load("habits_def",[]);
-    WORKOUT_HIST=load("workout_hist",{});DEBRIEF=load("debrief",{});
+    WORKOUT_HIST=load("workout_hist",{});STR_LOG=load("str_log",[]);DEBRIEF=load("debrief",{});
     PROFILE=load("profile",PROFILE);USER_PLAN=load("user_plan",null);WEEK_PLAN=load("week_plan",{});
     if(d.displayName&&!PROFILE.name){PROFILE.name=d.displayName;save("profile",PROFILE);}
     return !d.profile && !d.visited; // show onboarding only if neither profile nor visited flag exists
@@ -830,6 +832,7 @@ document.querySelectorAll(".nb").forEach(btn=>{
   });
 });
 function renderPage(p){
+const title=document.getElementById("page-title");if(title)title.textContent=PAGE_TITLES[p]||"MyWay";
   const fab=document.getElementById("qcbtn");
   if(fab)fab.style.display=(p==="fitness"||p==="nutrition")?"none":"flex";
   if(p==="dash")renderDash();
@@ -837,7 +840,7 @@ function renderPage(p){
   else if(p==="nutrition")renderNut();
   else if(p==="productivity")renderProductivity();
 }
-const PAGE_TITLES={dash:"Dashboard",fitness:"Fitness",nutrition:"Nutrition",productivity:"Productivity"};
+const PAGE_TITLES={dash:"היום שלי",fitness:"הכושר שלי",nutrition:"התזונה שלי",productivity:"ההרגלים שלי"};
 function goTo(pg){
   document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -894,7 +897,7 @@ function removeHabit(idx){
 // ═══════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════
-function renderDash(){
+function renderLegacyDash(){
   const el=document.getElementById("pg-dash");
   const t=todayStr();
   const dayName=todayDay();
@@ -3358,5 +3361,6 @@ function animCount(el,target,dur=900){
   })();
 }
 </script>
+<script src="planner.js"></script>
 </body>
 </html>
