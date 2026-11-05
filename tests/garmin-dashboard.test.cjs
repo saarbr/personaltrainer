@@ -1,0 +1,18 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+test('wellness dashboard distinguishes zeros, missing data, failures and escapes provider text',()=>{
+  const el={innerHTML:'',replaceChildren(){this.innerHTML='';}};
+  const context=vm.createContext({document:{getElementById:()=>el},currentUser:{uid:'owner'},currentPg:'garmin',todayStr:()=> '2026-11-05',esc:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),AbortSignal,Date,console});
+  vm.runInContext(fs.readFileSync(require.resolve('../garmin-dashboard.js'),'utf8'),context);
+  vm.runInContext(`garminView={date:'2026-11-05',uid:'owner',loading:false,error:'',requestId:1,result:{date:'2026-11-05',fetchedAt:'2026-11-05T10:00:00Z',sections:{sleep:{status:'ok',data:{dailySleepDTO:{sleepTimeSeconds:28800,deepSleepSeconds:0}}},summary:{status:'ok',data:{data:[{totalSteps:0}]}},hrv:{status:'error',httpStatus:503},bodyBattery:{status:'ok',data:[{bodyBatteryValuesArray:[[1,'MEASURED',40],[2,'MEASURED',0]]}]},activities:{status:'ok',data:[{activityName:'<img onerror=alert(1)>',distance:5000,duration:1500}]}}}};renderGarmin();`,context);
+  assert.ok(el.innerHTML.includes('8 ש׳ 0 דק׳'));
+  assert.ok(el.innerHTML.includes('0 ש׳ 0 דק׳'));
+  assert.ok(el.innerHTML.includes('אין נתון'));
+  assert.ok(el.innerHTML.includes('503'));
+  assert.ok(el.innerHTML.includes('&lt;img'));
+  assert.ok(!el.innerHTML.includes('<img onerror'));
+  vm.runInContext('clearGarminData()',context);
+  assert.equal(el.innerHTML,'');
+});

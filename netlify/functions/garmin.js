@@ -1,6 +1,6 @@
 const BASE = 'https://personal.connectapi.garmin.com';
 let cachedToken = null;
-const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Garmin-Connector-Version': '2' };
+const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Garmin-Connector-Version': '3' };
 const reply = (statusCode, body) => ({ statusCode, headers, body: JSON.stringify(body) });
 async function request(url, options = {}) {
   return fetch(url, { ...options, signal: AbortSignal.timeout(10000), redirect: 'error' });
@@ -24,6 +24,9 @@ exports.handler = async (event) => {
     if (account.users?.[0]?.localId !== GARMIN_ALLOWED_UID) return reply(403, { error: 'חיבור Garmin אינו מוגדר לחשבון הזה.' });
     let body;
     try { body = JSON.parse(event.body || '{}'); } catch { return reply(400, { error: 'Invalid request' }); }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return reply(400, { error: 'Invalid request' });
+    if (body.action && !['wellness','runs'].includes(body.action)) return reply(400, { error: 'Invalid action' });
+    if (body.action === 'wellness' && (!/^\d{4}-\d{2}-\d{2}$/.test(body.date || '') || !Number.isFinite(Date.parse(body.date)) || new Date(body.date).toISOString().slice(0,10) !== body.date)) return reply(400, { error: 'Invalid date' });
     const start = body.start ?? 0;
     if (!Number.isInteger(start) || start < 0 || start > 10000) return reply(400, { error: 'Invalid page' });
     // Tokens and the personal key never leave the server. Cache only in process memory.
@@ -43,6 +46,31 @@ exports.handler = async (event) => {
         return reply(502, { error: 'התקבלה תשובת הזדהות לא תקינה מ־Garmin. נסה שוב מאוחר יותר.' });
       }
       cachedToken = { value: token, key: GARMIN_PERSONAL_API_KEY, expires: expires - 60000 };
+    }
+    if (body.action === 'wellness') {
+      const date = body.date;
+      // Fixed endpoint allowlist; never accept arbitrary provider URLs from callers.
+      const paths = {
+        sleep: `/sleep-service/sleep/dailySleep?date=${date}`,
+        summary: `/usersummary-service/v2/dailysummaries?startDate=${date}&endDate=${date}`,
+        hrv: `/hrv-service/hrv/${date}`,
+        bodyBattery: `/wellness-service/wellness/bodyBattery/reports/daily?startDate=${date}&endDate=${date}`,
+        heartRate: `/wellness-service/wellness/dailyHeartRate?date=${date}`,
+        activities: `/activitylist-service/activities/search/activities?start=0&limit=20&startDate=${date}&endDate=${date}`
+      };
+      const sections = await Promise.all(Object.entries(paths).map(async ([name,path]) => {
+        try {
+          const response = await request(BASE + path, { headers: { Authorization: `Bearer ${cachedToken.value}`, Accept: 'application/json' } });
+          if (!response.ok) {
+            if (response.status === 401) cachedToken = null;
+            return [name, { status: response.status === 404 || response.status === 204 ? 'empty' : 'error', httpStatus: response.status }];
+          }
+          const text = await response.text();
+          const data = text.trim() ? JSON.parse(text) : null;
+          return [name, { status: data === null || (Array.isArray(data) && !data.length) ? 'empty' : 'ok', data }];
+        } catch { return [name, { status: 'error' }]; }
+      }));
+      return reply(200, { date, fetchedAt: new Date().toISOString(), source: 'Garmin', sections: Object.fromEntries(sections) });
     }
     const response = await request(`${BASE}/activitylist-service/activities/search/activities?start=${start}&limit=50&activityType=running`, {
       headers: { Authorization: `Bearer ${cachedToken.value}`, Accept: 'application/json' }

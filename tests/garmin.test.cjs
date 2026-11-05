@@ -33,6 +33,21 @@ test('owner-only Garmin import preserves provider speed and never returns creden
   assert.equal(data.runs[0].garminId,'12');
   assert.equal(data.skipped,1);
   assert.equal(data.nextStart,null);
+  const lastRunFetch=global.fetch;
+  global.fetch=async(url,options)=>{
+    if(url.includes('accounts:lookup'))return {ok:true,json:async()=>({users:[{localId:'owner'}]})};
+    if(url.includes('/hrv-service/'))return {ok:false,status:503};
+    return {ok:true,text:async()=>JSON.stringify(url.includes('dailySleep?')?{dailySleepDTO:{sleepTimeSeconds:28800}}:{data:[]})};
+  };
+  const wellness=await handler({...event,body:JSON.stringify({action:'wellness',date:'2026-11-05'})});
+  assert.equal(wellness.statusCode,200);
+  const health=JSON.parse(wellness.body);
+  assert.equal(health.sections.sleep.data.dailySleepDTO.sleepTimeSeconds,28800);
+  assert.equal(health.sections.hrv.status,'error');
+  assert.equal(Object.keys(health.sections).length,6);
+  assert.equal((await handler({...event,body:JSON.stringify({action:'wellness',date:'2026-02-30'})})).statusCode,400);
+  assert.equal((await handler({...event,body:JSON.stringify({action:'anything'})})).statusCode,400);
+  global.fetch=lastRunFetch;
   assert.ok(!result.body.includes('secret-'));
   global.fetch=async()=>{throw Error('secret-test-key');};
   assert.ok(!(await handler(event)).body.includes('secret-'));

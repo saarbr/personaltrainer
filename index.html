@@ -176,6 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <div id="pg-fitness" class="page"></div>
 <div id="pg-nutrition" class="page"></div>
 <div id="pg-productivity" class="page"></div>
+<div id="pg-garmin" class="page"></div>
 
 <nav class="nav">
   <button class="nb active" data-pg="dash">
@@ -190,6 +191,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   <button class="nb" data-pg="productivity">
     <svg class="ni" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="nb-label">פרוד'</span>
   </button>
+  <button class="nb" data-pg="garmin" aria-label="נתוני Garmin"><svg class="ni" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span class="nb-label">Garmin</span></button>
 </nav>
 
 <button id="qcbtn" onclick="openQC()">+</button>
@@ -873,13 +875,14 @@ document.querySelectorAll(".nb").forEach(btn=>{
 });
 function renderPage(p){
   const fab=document.getElementById("qcbtn");
-  if(fab)fab.style.display=(p==="fitness"||p==="nutrition")?"none":"flex";
+  if(fab)fab.style.display=(p==="fitness"||p==="nutrition"||p==="garmin")?"none":"flex";
   if(p==="dash")renderDash();
   else if(p==="fitness")renderFitness();
   else if(p==="nutrition")renderNut();
   else if(p==="productivity")renderProductivity();
+  else if(p==="garmin"){renderGarmin();if(garminView.result&&!garminView.loading)loadGarminWellness();}
 }
-const PAGE_TITLES={dash:"Dashboard",fitness:"Fitness",nutrition:"Nutrition",productivity:"Productivity"};
+const PAGE_TITLES={dash:"Dashboard",fitness:"Fitness",nutrition:"Nutrition",productivity:"Productivity",garmin:"Garmin"};
 function goTo(pg){
   document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -3328,6 +3331,7 @@ showLoading();
   }
 
   auth.onAuthStateChanged(async(user)=>{
+    if(typeof clearGarminData==='function')clearGarminData();
     if(user){
       currentUser=user;
       document.getElementById("signin-screen").style.display="none";
@@ -3401,5 +3405,6 @@ function animCount(el,target,dur=900){
   })();
 }
 </script>
+<script src="/garmin-dashboard.js"></script>
 </body>
 </html>
