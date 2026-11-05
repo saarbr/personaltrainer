@@ -6,7 +6,19 @@ function clearGarminData(){
 }
 function garminNumber(value){return typeof value==='number'&&Number.isFinite(value)&&value>=0?value:null;}
 function garminAt(object,path){return path.split('.').reduce((v,k)=>v?.[k],object);}
-function garminPick(object,paths){for(const path of paths){const n=garminNumber(garminAt(object,path));if(n!==null)return n;}return null;}
+function garminPick(object,paths){
+  const number=v=>garminNumber(v)??garminNumber(v?.value);
+  for(const path of paths){const n=number(garminAt(object,path));if(n!==null)return n;}
+  // Daily-summary responses can wrap their records inside data/date/value maps.
+  // Match named provider fields only; never substitute unrelated numeric samples.
+  const search=(value,depth)=>{
+    if(!value||typeof value!=='object'||depth>6)return null;
+    for(const path of paths){const n=number(garminAt(value,path));if(n!==null)return n;}
+    for(const child of Object.values(value)){if(child&&typeof child==='object'){const n=search(child,depth+1);if(n!==null)return n;}}
+    return null;
+  };
+  return search(object,0);
+}
 function garminFirst(data){if(Array.isArray(data))return data[0]||{};if(Array.isArray(data?.data))return data.data[0]||{};return data||{};}
 function garminDuration(seconds){const n=garminNumber(seconds);return n===null?'אין נתון':Math.floor(n/3600)+' ש׳ '+Math.floor((n%3600)/60)+' דק׳';}
 function garminCard(label,value,unit=''){
@@ -41,7 +53,7 @@ function renderGarmin(){
       garminCard('שנת REM',garminPick(sleep,['remSleepSeconds'])===null?null:garminDuration(sleep.remSleepSeconds)),
       garminCard('זמן ערות',garminPick(sleep,['awakeSleepSeconds'])===null?null:garminDuration(sleep.awakeSleepSeconds))
     ]);
-    const summary=s.summary?.status==='ok'?garminFirst(s.summary.data):{};
+    const summary=s.summary?.status==='ok'?(s.summary.data||{}):{};
     const hr=s.heartRate?.status==='ok'?(s.heartRate.data||{}):{};
     const hrv=s.hrv?.status==='ok'?(s.hrv.data?.hrvSummary||s.hrv.data||{}):{};
     const battery=s.bodyBattery?.status==='ok'?garminFirst(s.bodyBattery.data):{};
