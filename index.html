@@ -2,7 +2,8 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1019">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>MyWay</title>
@@ -130,6 +131,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   width:100%;max-width:600px;border-top:1px solid rgba(255,122,69,0.22);
   box-shadow:0 -8px 40px rgba(0,0,0,0.4);}
 </style>
+<link rel="stylesheet" href="/myway-glass.css">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -166,9 +168,8 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div class="header">
-  <div style="flex:1;text-align:center">
-    <div id="page-title" style="font-size:22px;font-weight:900;letter-spacing:-0.5px">Dashboard</div>
-  </div>
+  <a href="#" class="mw-brand" onclick="goTo('dash');return false" aria-label="My Way — מסך הבית"><span class="mw-brand-mark" aria-hidden="true">w</span>myway<span style="color:var(--teal)">.</span></a>
+  <div class="mw-header-context"><span id="page-title">המקום שלך להתקדם</span></div>
   <div id="user-avatar" style="position:absolute;left:16px;top:50%;transform:translateY(-50%)"></div>
 </div>
 
@@ -292,6 +293,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 </div>
 
 <div id="profile-setup" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1050;flex-direction:column;overflow-y:auto;">
+  <button class="btn" onclick="document.getElementById('profile-setup').style.display='none'" style="position:absolute;top:16px;left:16px;background:transparent;color:var(--muted);z-index:1">אחר כך</button>
   <div id="ps-content" style="padding:28px 24px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;width:100%"></div>
 </div>
 
@@ -874,6 +876,7 @@ document.querySelectorAll(".nb").forEach(btn=>{
   });
 });
 function renderPage(p){
+  const title=document.getElementById('page-title');if(title)title.textContent=PAGE_TITLES[p]||'My Way';
   const fab=document.getElementById("qcbtn");
   if(fab)fab.style.display=(p==="fitness"||p==="nutrition"||p==="garmin")?"none":"flex";
   if(p==="dash")renderDash();
@@ -882,7 +885,7 @@ function renderPage(p){
   else if(p==="productivity")renderProductivity();
   else if(p==="garmin"){renderGarmin();if(garminView.result&&!garminView.loading)loadGarminWellness();}
 }
-const PAGE_TITLES={dash:"Dashboard",fitness:"Fitness",nutrition:"Nutrition",productivity:"Productivity",garmin:"Garmin"};
+const PAGE_TITLES={dash:"היום שלי",fitness:"תנועה ואימונים",nutrition:"תזונה ואנרגיה",productivity:"מיקוד והתקדמות",garmin:"הגוף שלי · Garmin"};
 function goTo(pg){
   document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -967,9 +970,9 @@ function renderDash(){
   const calPct=Math.min(100,Math.round((nutTot.cal/PROFILE.target)*100));
   const protPct=Math.min(100,Math.round((nutTot.p/PROFILE.protein)*100));
 
-  let h="";
+  let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">YOUR OWN PACE</div><h1>'+esc(greetWord)+', '+esc(firstName)+'.</h1><p>קצת תנועה, קצת מיקוד. המקום שבו היום שלך מתחבר.</p></div><div class="mw-date-pill">'+esc(new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'}))+'</div></div><button class="mw-garmin-shortcut" onclick="goTo(\'garmin\')"><div><b>מה הגוף שלך מספר היום?</b><span>שינה, התאוששות ותנועה · הנתונים שלך מ־Garmin</span></div><span class="mw-arrow" aria-hidden="true">↖</span></button><div class="mw-overview-top">';
 
-  // ── DAILY SCORE (no card frame — plain bar) ──
+  // ── DAILY SCORE ──
   const dayScore=calcDayScore(t);
   const scoreHex=dayScore>=75?"#6FA86B":dayScore>=50?"#E8B54A":"#E85C4A";
   const scoreColor=dayScore>=75?"var(--teal)":dayScore>=50?"var(--amber)":"var(--coral)";
@@ -980,7 +983,7 @@ function renderDash(){
   const habDone=HABITS_DEF.filter(h=>habLog[h.id]).length;
   const tasksDoneToday=(TASKS[t]||[]).filter(tk=>tk.done).length;
   const tasksTotalToday=(TASKS[t]||[]).length;
-  h+='<div style="text-align:center;padding:10px 2px 18px">';
+  h+='<div class="mw-score-panel" style="text-align:center;padding:10px 2px 18px"><div class="mw-score-label">ההתקדמות שלי היום</div>';
   h+='<div style="position:relative;width:220px;max-width:100%;aspect-ratio:1/1;margin:0 auto">';
   h+=arcGauge(dayScore/100,220,220,scoreHex,100,4.5,24,{spanDeg:360,angleOffset:90});
   h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">';
@@ -1023,7 +1026,7 @@ function renderDash(){
   }
 
   // ── STATS ROW ──
-  h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+  h+='<div class="mw-stat-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
   // Calories
   h+='<div onclick="goTo(\'nutrition\')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center">';
   h+='<div style="font-size:13px;font-weight:800;color:var(--coral);letter-spacing:0.2px;margin-bottom:4px">קלוריות</div>';
@@ -1048,6 +1051,7 @@ function renderDash(){
   h+='</div>';
   h+='</div>';
 
+  h+='</div>';
   // ── TODAY'S WORKOUT ──
   if(todayWorkout){
     const tc=todayWorkout.color;
@@ -1079,7 +1083,7 @@ function renderDash(){
   const totalItems=HABITS_DEF.length+todayTasks.length;
   const doneItemsCombined=habitsDone+doneCnt;
   const combinedPct=totalItems?Math.round((doneItemsCombined/totalItems)*100):0;
-  h+='<div class="card" style="border-radius:10px;margin-bottom:12px">';
+  h+='<div class="card mw-checklist" style="border-radius:10px;margin-bottom:12px">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
   h+='<div style="font-size:14px;font-weight:800">היום</div>';
   h+='<div style="font-size:11px;font-weight:700;color:'+(totalItems>0&&doneItemsCombined===totalItems?"var(--teal)":"var(--muted)")+'">'+doneItemsCombined+'/'+totalItems+'</div>';
@@ -1189,7 +1193,7 @@ function toggleHabit(id,date){
 function renderFitness(){
   const el=document.getElementById("pg-fitness");
   const tabs=[["plan","תוכנית"],["add","הוסף ריצה"]];
-  let h='<div class="subtabs">';
+  let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">MOVE WITH INTENTION</div><h1>התנועה שלך.</h1><p>תוכנית, ביצוע והתקדמות. אימון אחד בכל פעם.</p></div></div><div class="subtabs">';
   tabs.forEach(([k,l])=>{
     h+='<button class="stb'+(fitTab===k?" on":"")+'" onclick="fitTab=\''+k+'\';renderFitness()" style="background:'+(fitTab===k?"var(--purple-g)":"var(--bg2)")+';font-size:13px">';
     h+=l+'</button>';
@@ -1733,7 +1737,7 @@ function renderNut(){
   const defOk=def>=300&&def<=600,defBig=def>600;
   const defColor=defOk?"#6FA86B":defBig?"#E8B54A":"#E85C4A";
 
-  let h='<div style="display:flex;gap:5px;margin-bottom:12px">';
+  let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">FUEL YOUR DAY</div><h1>אנרגיה ליום שלך.</h1><p>מה אכלת, מה חסר ואיך ממשיכים. התמונה היומית במקום אחד.</p></div></div><div style="display:flex;gap:5px;margin-bottom:12px">';
   [["log","📝 יומן"],["history","📊 היסטוריה"],["plan","🥗 תפריט"]].forEach(([k,l])=>{
     h+='<button onclick="nutView=\''+k+'\';renderNut()" style="flex:1;padding:8px 5px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:700;background:'+(nutView===k?"var(--coral)":"var(--bg2)")+';color:'+(nutView===k?"#fff":"var(--muted)")+'">'+l+'</button>';
   });
@@ -1982,7 +1986,7 @@ function nutChangeDay(delta){
 // ═══════════════════════════════════════════════
 function renderProductivity(){
   const el=document.getElementById("pg-productivity");
-  let h='<div class="subtabs">';
+  let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">MAKE ROOM FOR WHAT MATTERS</div><h1>מרחב למיקוד.</h1><p>הרגלים קטנים, מחשבות ותכנון שמפנה מקום למה שחשוב.</p></div></div><div class="subtabs">';
   [["score","📊 ציון"],["notes","📝 הערות"]].forEach(([k,l])=>{
     h+='<button class="stb'+(prodTab===k?" on":"")+'" onclick="prodTab=\''+k+'\';renderProductivity()" style="background:'+(prodTab===k?"var(--pink)":"var(--bg2)")+'">';
     h+=l+'</button>';
@@ -3406,5 +3410,6 @@ function animCount(el,target,dur=900){
 }
 </script>
 <script src="/garmin-dashboard.js"></script>
+<script src="/garmin-visual.js"></script>
 </body>
 </html>
