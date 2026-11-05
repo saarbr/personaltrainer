@@ -1,6 +1,6 @@
 const BASE = 'https://personal.connectapi.garmin.com';
 let cachedToken = null;
-const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
+const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Garmin-Connector-Version': '2' };
 const reply = (statusCode, body) => ({ statusCode, headers, body: JSON.stringify(body) });
 async function request(url, options = {}) {
   return fetch(url, { ...options, signal: AbortSignal.timeout(10000), redirect: 'error' });
