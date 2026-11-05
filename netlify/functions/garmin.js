@@ -32,9 +32,17 @@ exports.handler = async (event) => {
         method: 'POST', headers: { Authorization: `ApiKey ${GARMIN_PERSONAL_API_KEY}` }
       });
       if (!tokenResponse.ok) return reply(502, { error: 'Garmin לא אישר את המפתח. בדוק את תוקפו בהגדרות השרת.' });
-      const token = await tokenResponse.json();
-      if (typeof token.access_token !== 'string' || !token.access_token) throw new Error('Invalid token response');
-      cachedToken = { value: token.access_token, key: GARMIN_PERSONAL_API_KEY, expires: Date.now() + 3600000 };
+      // Garmin's official endpoint returns a plain-text JWT, not OAuth JSON.
+      const token = (await tokenResponse.text()).trim();
+      let expires;
+      try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+        expires = Number(payload.exp) * 1000;
+      } catch { /* Reject an unexpected response without exposing it. */ }
+      if (!Number.isFinite(expires) || expires <= Date.now() + 60000) {
+        return reply(502, { error: 'התקבלה תשובת הזדהות לא תקינה מ־Garmin. נסה שוב מאוחר יותר.' });
+      }
+      cachedToken = { value: token, key: GARMIN_PERSONAL_API_KEY, expires: expires - 60000 };
     }
     const response = await request(`${BASE}/activitylist-service/activities/search/activities?start=${start}&limit=50&activityType=running`, {
       headers: { Authorization: `Bearer ${cachedToken.value}`, Accept: 'application/json' }

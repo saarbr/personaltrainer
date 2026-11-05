@@ -18,7 +18,7 @@ test('owner-only Garmin import preserves provider speed and never returns creden
   global.fetch=async(url,options)=>{
     calls.push({url,options});
     if(url.includes('accounts:lookup'))return {ok:true,json:async()=>({users:[{localId:'owner'}]})};
-    if(url.includes('personal-api-key/token'))return {ok:true,json:async()=>({access_token:'secret-bearer'})};
+    if(url.includes('personal-api-key/token'))return {ok:true,text:async()=> 'header.'+Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+86400})).toString('base64url')+'.secret-signature\n'};
     return {ok:true,json:async()=>[
       {activityId:12,distance:5000,averageSpeed:4,averageHR:145,startTimeLocal:'2026-11-05 07:30:00',activityName:'Run'},
       {activityId:13,distance:5000,averageSpeed:null,startTimeLocal:'2026-11-05'}
