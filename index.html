@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -673,12 +673,54 @@ function renderProfileModal(){
   });
   h+='</div></div>';
 
+  // Garmin data belongs only to the server-configured account.
+  h+='<div class="card" style="margin-bottom:11px"><div style="font-size:13px;font-weight:800;margin-bottom:8px">Garmin</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">ייבוא ריצות לפי בקשה. המפתח מוגדר בשרת בלבד. ייתכנו כפילויות מול ריצות שהוזנו ידנית.</div><button id="garmin-import-btn" onclick="importGarminRuns()" class="btn btn-p" style="width:100%">ייבוא ריצות מ־Garmin</button><div id="garmin-status" role="status" style="font-size:12px;margin-top:8px"></div></div>';
+
   // Actions
   h+='<button onclick="saveProfileChanges()" class="btn btn-p" style="width:100%;padding:14px;font-size:14px;margin-bottom:10px">💾 שמור שינויים</button>';
   h+='<button onclick="signOutFromProfile()" style="width:100%;padding:13px;border-radius:11px;border:1px solid rgba(232,92,74,0.3);background:rgba(232,92,74,0.06);color:var(--coral);font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🚪 התנתק</button>';
 
   document.getElementById("profile-modal-content").innerHTML=h;
 }
+let garminImportBusy=false;
+async function importGarminRuns(start=0){
+  if(garminImportBusy||!currentUser)return;
+  const user=currentUser;
+  const status=document.getElementById('garmin-status');
+  const button=document.getElementById('garmin-import-btn');
+  garminImportBusy=true;
+  if(button)button.disabled=true;
+  if(status)status.textContent='טוען ריצות מ־Garmin…';
+  let nextStart=null;
+  try{
+    const token=await user.getIdToken();
+    const response=await fetch('/.netlify/functions/garmin',{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({start})
+    });
+    const result=await response.json();
+    if(!response.ok)throw new Error(result.error||'לא ניתן לייבא ריצות כרגע.');
+    if(currentUser?.uid!==user.uid)return;
+    const known=new Set(RUNS.filter(r=>r.garminId).map(r=>String(r.garminId)));
+    const fresh=[];
+    for(const run of result.runs){
+      if(!known.has(run.garminId)){known.add(run.garminId);fresh.push(run);}
+    }
+    if(fresh.length&&confirm('נמצאו '+fresh.length+' ריצות חדשות מ־Garmin. להוסיף להיסטוריה? ריצות ידניות לא יימחקו ולא יסומנו אימונים מתוכננים.')){
+      if(currentUser?.uid!==user.uid)return;
+      let id=Math.max(Date.now(),...RUNS.map(r=>Number(r.id)||0));
+      for(const run of fresh)RUNS.push({...run,id:++id,type:null,effort:null,notes:'Garmin'+(run.device?' · '+run.device:'')+(run.name?' · '+run.name:''),splits:null});
+      RUNS.sort((a,b)=>b.date.localeCompare(a.date));
+      save('runs',RUNS);
+      if(status)status.textContent='נוספו '+fresh.length+' ריצות. מקור: Garmin.';
+    }else if(status){status.textContent=fresh.length?'הייבוא בוטל.':'אין ריצות חדשות בעמוד הזה.';}
+    if(result.skipped&&status)status.textContent+=' דולגו '+result.skipped+' רשומות עם נתונים חסרים.';
+    nextStart=result.nextStart;
+  }catch(error){if(status)status.textContent=error.message||'תקלה בייבוא.';}
+  finally{garminImportBusy=false;if(button)button.disabled=false;}
+  if(nextStart!==null&&currentUser?.uid===user.uid&&confirm('לבדוק עוד ריצות ישנות יותר?'))return importGarminRuns(nextStart);
+}
+
 function saveProfileChanges(){
   const name=document.getElementById("pf-name").value.trim();
   const weight=parseFloat(document.getElementById("pf-weight").value)||PROFILE.weight;
@@ -1484,6 +1526,7 @@ function renderHistRunCard(run){
   let h='<div style="background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start;border:1px solid '+c2r(tagColor,0.25)+'">';
   h+='<div style="width:3px;border-radius:2px;background:'+tagColor+';min-height:36px;flex-shrink:0;margin-top:2px"></div>';
   h+='<div style="flex:1;min-width:0">';
+  if(run.source==='Garmin')h+='<div style="font-size:10px;color:var(--muted);margin-bottom:3px">מקור: Garmin'+(run.device?' · '+esc(run.device):'')+'</div>';
   if(tag)h+='<div style="font-size:11px;font-weight:700;color:'+tagColor+';margin-bottom:3px">'+tag.label+'</div>';
   h+='<div style="display:flex;gap:6px;align-items:baseline;flex-wrap:wrap">';
   h+='<span class="num" style="font-size:14px;font-weight:700">'+run.km+'</span><span style="font-size:10px;color:var(--muted)">ק"מ</span>';
