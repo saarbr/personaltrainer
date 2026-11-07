@@ -136,6 +136,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <link rel="stylesheet" href="/google-week-glass.css">
 <link rel="stylesheet" href="/google-timeline.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/myway-neumorphic.css">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -979,7 +980,11 @@ function renderDash(){
 
   let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">YOUR OWN PACE</div><h1>'+esc(greetWord)+', '+esc(firstName)+'.</h1><p>קצת תנועה, קצת מיקוד. המקום שבו היום שלך מתחבר.</p></div><div class="mw-date-pill">'+esc(new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'}))+'</div></div><button class="mw-garmin-shortcut" onclick="goTo(\'garmin\')"><div><b>מה הגוף שלך מספר היום?</b><span>שינה, התאוששות ותנועה · הנתונים שלך מ־Garmin</span></div><span class="mw-arrow" aria-hidden="true">↖</span></button><div class="mw-overview-top">';
 
-  h=h.replace('<button class="mw-garmin-shortcut"','<div id="google-today"></div><button class="mw-garmin-shortcut"');
+  const shortcutStart=h.indexOf('<button class="mw-garmin-shortcut"'),shortcutEnd=h.indexOf('</button>',shortcutStart)+9;
+  const dailyShortcut=h.slice(shortcutStart,shortcutEnd);
+  let dateStrip='<div class="neo-week-strip" role="group" aria-label="ימי השבוע — מעבר לנתוני היום">';
+  for(let i=0;i<7;i++){const date=addDaysStr(weekKeyOf(t),i);dateStrip+='<button class="neo-date '+(date===t?'neo-today':'')+'" onclick="scoreDate=\''+date+'\';prodTab=\'score\';goTo(\'productivity\')" aria-label="נתוני '+DAYS[i]+' '+date+'" '+(date===t?'aria-current="date"':'')+'><span>'+DAYS[i]+'</span><b>'+Number(date.slice(8))+'</b></button>';}
+  h=h.slice(0,shortcutStart)+dateStrip+'</div>'+h.slice(shortcutEnd);
   // ── DAILY SCORE ──
   const dayScore=calcDayScore(t);
   const scoreHex=dayScore>=75?"#6FA86B":dayScore>=50?"#E8B54A":"#E85C4A";
@@ -992,10 +997,10 @@ function renderDash(){
   const tasksDoneToday=(TASKS[t]||[]).filter(tk=>tk.done).length;
   const tasksTotalToday=(TASKS[t]||[]).length;
   h+='<div class="mw-score-panel" style="text-align:center;padding:10px 2px 18px"><div class="mw-score-label">ההתקדמות שלי היום</div>';
-  h+='<div style="position:relative;width:220px;max-width:100%;aspect-ratio:1/1;margin:0 auto">';
-  h+=arcGauge(dayScore/100,220,220,scoreHex,100,4.5,24,{spanDeg:360,angleOffset:90});
+  h+='<div class="neo-score-wrap" style="position:relative;width:220px;max-width:100%;aspect-ratio:1/1;margin:20px auto">';
+  h+='<svg class="neo-score-svg" viewBox="0 0 220 220" role="img" aria-label="הציון היומי '+dayScore+' מתוך 100"><circle cx="110" cy="110" r="90" fill="none" stroke="#1f252d" stroke-width="12"/><circle class="neo-score-fill" cx="110" cy="110" r="90" fill="none" stroke="#10bfd6" stroke-width="10" stroke-linecap="round" stroke-dasharray="565.487" stroke-dashoffset="'+(565.487*(1-dayScore/100))+'" transform="rotate(-90 110 110)"/></svg>';
   h+='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">';
-  h+='<div id="score-num" class="num" style="font-size:40px;font-weight:800;color:'+scoreColor+';line-height:1.1">0</div>';
+  h+='<div class="neo-score-caption">הציון היומי</div><div id="score-num" class="num" style="font-size:40px;font-weight:800;color:'+scoreColor+';line-height:1.1">0</div><span style="color:var(--muted);font-size:11px;margin-top:5px">מתוך 100</span>';
   h+='</div></div>';
   h+='<div style="text-align:center;font-size:14px;font-weight:800;color:'+scoreColor+';margin-top:6px;margin-bottom:12px">'+scoreLabel+'</div>';
   h+='<div style="display:flex;gap:18px;justify-content:center">';
@@ -1060,6 +1065,7 @@ function renderDash(){
   h+='</div>';
 
   h+='</div>';
+  h+='<div id="google-today"></div>'+dailyShortcut;
   // ── TODAY'S WORKOUT ──
   if(todayWorkout){
     const tc=todayWorkout.color;
@@ -1111,7 +1117,7 @@ function renderDash(){
   } else {
     HABITS_DEF.forEach(hb=>{
       const done=todayHabits[hb.id];
-      h+='<div onclick="toggleHabit(\''+hb.id+'\',\''+t+'\')" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:11px;background:'+(done?"rgba(111,168,107,0.07)":"rgba(245,241,232,0.03)")+';cursor:pointer;margin-bottom:6px;transition:all 0.15s">';
+      h+='<div class="neo-habit-row '+(done?'neo-habit-done':'')+'" role="checkbox" aria-checked="'+!!done+'" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}" onclick="toggleHabit(\''+hb.id+'\',\''+t+'\')" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:11px;background:'+(done?"rgba(111,168,107,0.07)":"rgba(245,241,232,0.03)")+';cursor:pointer;margin-bottom:6px;transition:all 0.15s">';
       h+='<div style="width:26px;height:26px;border-radius:8px;background:'+(done?"rgba(111,168,107,0.15)":"rgba(245,241,232,0.06)")+';display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">'+hb.icon+'</div>';
       h+='<span style="flex:1;min-width:0;font-size:12px;font-weight:600;overflow-wrap:break-word;'+(done?"text-decoration:line-through;color:var(--muted)":"")+'">'+esc(hb.label)+'</span>';
       h+='<div style="width:20px;height:20px;border-radius:50%;border:2px solid '+(done?"var(--teal)":"rgba(255,255,255,0.15)")+';background:'+(done?"var(--teal)":"transparent")+';display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:900;flex-shrink:0">'+(done?"✓":"")+'</div>';
