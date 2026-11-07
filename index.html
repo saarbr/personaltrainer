@@ -132,6 +132,9 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
   box-shadow:0 -8px 40px rgba(0,0,0,0.4);}
 </style>
 <link rel="stylesheet" href="/myway-glass.css">
+<link rel="stylesheet" href="/google-week.css">
+<link rel="stylesheet" href="/google-week-glass.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -178,6 +181,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <div id="pg-nutrition" class="page"></div>
 <div id="pg-productivity" class="page"></div>
 <div id="pg-garmin" class="page"></div>
+<div id="pg-calendar" class="page"><div id="google-week"></div></div>
 
 <nav class="nav">
   <button class="nb active" data-pg="dash">
@@ -193,6 +197,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
     <svg class="ni" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="nb-label">מיקוד</span>
   </button>
   <button class="nb" data-pg="garmin" aria-label="נתוני Garmin"><svg class="ni" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span class="nb-label">Garmin</span></button>
+  <button class="nb" data-pg="calendar" aria-label="יומן"><svg class="ni" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18"/></svg><span class="nb-label">יומן</span></button>
 </nav>
 
 <button id="qcbtn" onclick="openQC()">+</button>
@@ -878,14 +883,15 @@ document.querySelectorAll(".nb").forEach(btn=>{
 function renderPage(p){
   const title=document.getElementById('page-title');if(title)title.textContent=PAGE_TITLES[p]||'My Way';
   const fab=document.getElementById("qcbtn");
-  if(fab)fab.style.display=(p==="fitness"||p==="nutrition"||p==="garmin")?"none":"flex";
+  if(fab)fab.style.display=(p==="fitness"||p==="nutrition"||p==="garmin"||p==="calendar")?"none":"flex";
   if(p==="dash")renderDash();
   else if(p==="fitness")renderFitness();
   else if(p==="nutrition")renderNut();
   else if(p==="productivity")renderProductivity();
   else if(p==="garmin"){renderGarmin();if(garminView.result&&!garminView.loading)loadGarminWellness();}
+  else if(p==="calendar")gcRender();
 }
-const PAGE_TITLES={dash:"היום שלי",fitness:"תנועה ואימונים",nutrition:"תזונה ואנרגיה",productivity:"מיקוד והתקדמות",garmin:"הגוף שלי · Garmin"};
+const PAGE_TITLES={dash:"היום שלי",fitness:"תנועה ואימונים",nutrition:"תזונה ואנרגיה",productivity:"מיקוד והתקדמות",garmin:"הגוף שלי · Garmin",calendar:"היומן שלי"};
 function goTo(pg){
   document.querySelectorAll(".nb").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -972,6 +978,7 @@ function renderDash(){
 
   let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">YOUR OWN PACE</div><h1>'+esc(greetWord)+', '+esc(firstName)+'.</h1><p>קצת תנועה, קצת מיקוד. המקום שבו היום שלך מתחבר.</p></div><div class="mw-date-pill">'+esc(new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'}))+'</div></div><button class="mw-garmin-shortcut" onclick="goTo(\'garmin\')"><div><b>מה הגוף שלך מספר היום?</b><span>שינה, התאוששות ותנועה · הנתונים שלך מ־Garmin</span></div><span class="mw-arrow" aria-hidden="true">↖</span></button><div class="mw-overview-top">';
 
+  h=h.replace('<button class="mw-garmin-shortcut"','<div id="google-today"></div><button class="mw-garmin-shortcut"');
   // ── DAILY SCORE ──
   const dayScore=calcDayScore(t);
   const scoreHex=dayScore>=75?"#6FA86B":dayScore>=50?"#E8B54A":"#E85C4A";
@@ -1158,6 +1165,7 @@ function renderDash(){
 
   el.innerHTML=h;
   // ── animate score number ──
+  if(typeof gcRenderToday==='function'){gcRenderToday();gcEnsureToday();}
   requestAnimationFrame(()=>{
     const numEl=document.getElementById('score-num');
     if(numEl)animCount(numEl,dayScore);
@@ -3335,6 +3343,7 @@ showLoading();
   }
 
   auth.onAuthStateChanged(async(user)=>{
+    if(typeof gcAuthChanged==='function')gcAuthChanged(user);
     if(typeof clearGarminData==='function')clearGarminData();
     if(user){
       currentUser=user;
@@ -3411,5 +3420,6 @@ function animCount(el,target,dur=900){
 </script>
 <script src="/garmin-dashboard.js"></script>
 <script src="/garmin-visual.js"></script>
+<script src="/google-week.js"></script>
 </body>
 </html>
