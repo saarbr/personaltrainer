@@ -55,6 +55,12 @@ async function gcLoad(){
   const uid=currentUser.uid,token=gc.token,week=gc.week||gcSunday(gcDay()),request=++gc.request;
   gc.loading=true;gc.error='';gc.warnings=[];gc.events=[];gc.fetchedAt=null;gcRender();
   try{
+    let colorWarning='';
+    if(!gc.colors){try{
+      const colors=await gcRead('colors',{},token);
+      if(currentUser?.uid!==uid||gc.request!==request)return;
+      gc.colors=colors;
+    }catch(error){if(error.auth)throw error;colorWarning='צבעי האירועים לא התקבלו; מוצגים צבעי היומנים.';}}
     if(!gc.calendars.length){
       const calendars=await gcPages('users/me/calendarList',{maxResults:250,minAccessRole:'reader'},token);
       if(currentUser?.uid!==uid||gc.request!==request)return;
@@ -63,11 +69,11 @@ async function gcLoad(){
     const calendars=gc.calendars.filter(c=>c.show);
     const results=await Promise.all(calendars.map(async c=>{try{
       const events=await gcPages('calendars/'+encodeURIComponent(c.id)+'/events',{timeMin:gcMidnight(week),timeMax:gcMidnight(gcAdd(week,7)),timeZone:GC_ZONE,singleEvents:true,orderBy:'startTime',maxResults:250},token);
-      return {events:events.filter(e=>e.status!=='cancelled').map(e=>({...e,calendarId:c.id,calendarName:c.summaryOverride||c.summary||'יומן',calendarColor:/^#[0-9a-f]{6}$/i.test(c.backgroundColor||'')?c.backgroundColor:'#9de5d3'}))};
+      return {events:events.filter(e=>e.status!=='cancelled').map(e=>({...e,calendarId:c.id,calendarName:c.summaryOverride||c.summary||'יומן',calendarColor:/^#[0-9a-f]{6}$/i.test(c.backgroundColor||'')?c.backgroundColor:'#9de5d3',eventColor:gcHex(gc.colors?.event?.[e.colorId]?.background)||gcHex(c.backgroundColor)||gcHex(gc.colors?.calendar?.[c.colorId]?.background)||'#9de5d3'}))};
     }catch(error){return {error,calendar:c.summaryOverride||c.summary||'יומן'};}}));
     if(currentUser?.uid!==uid||gc.request!==request)return;
     if(results.some(r=>r.error?.auth)){gc.token=null;gc.events=[];gc.error='החיבור פג. התחבר שוב ל־Google.';return;}
-    gc.events=results.flatMap(r=>r.events||[]);gc.warnings=results.filter(r=>r.error).map(r=>'לא ניתן לקרוא את '+r.calendar+'.');gc.fetchedAt=new Date().toISOString();
+    gc.events=results.flatMap(r=>r.events||[]);gc.warnings=[...(colorWarning?[colorWarning]:[]),...results.filter(r=>r.error).map(r=>'לא ניתן לקרוא את '+r.calendar+'.')];gc.fetchedAt=new Date().toISOString();
     if(!gc.weeks)gc.weeks={};gc.weeks[week]={events:gc.events,warnings:gc.warnings,fetchedAt:gc.fetchedAt};
   }catch(error){if(currentUser?.uid===uid&&gc.request===request){if(error.auth)gc.token=null;gc.error=error.message;}}
   finally{if(currentUser?.uid===uid&&gc.request===request){gc.loading=false;gcRender();}}
@@ -91,25 +97,13 @@ function gcRender(){
     h+='<details class="gc-sources"><summary>יומנים מוצגים ('+gc.calendars.filter(c=>c.show).length+')</summary><div class="gc-source-list">';
     gc.calendars.forEach((c,i)=>{h+='<label><input type="checkbox" '+(c.show?'checked ':'')+(gc.loading?'disabled ':'')+'onchange="gcToggle('+i+',this.checked)"/><i style="background:'+(/^#[0-9a-f]{6}$/i.test(c.backgroundColor||'')?c.backgroundColor:'#9de5d3')+'"></i>'+esc(c.summaryOverride||c.summary||'יומן')+'</label>';});h+='</div></details>';
     if(gc.loading)h+='<p class="gc-message" role="status">טוען את אירועי השבוע…</p>';
-    else if(!gc.error){
-      h+='<div class="gc-days">';
-      for(let i=0;i<7;i++){
-        const day=gcAdd(week,i),events=gc.events.filter(e=>gcEventDays(e,week).includes(day)).sort((a,b)=>Number(!a.start?.date)-Number(!b.start?.date)||(a.start.dateTime||a.start.date).localeCompare(b.start.dateTime||b.start.date));
-        h+='<section class="gc-day '+(day===today?'gc-today':'')+'"><header><span>'+['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'][i]+'</span><b>'+Number(day.slice(8))+'</b>'+(day===today?'<small>היום</small>':'')+'</header><div class="gc-events">';
-        if(!events.length)h+='<p class="gc-day-empty">'+(gc.warnings.length?'אין אירועים שהתקבלו':'אין אירועים ביומנים שנבחרו')+'</p>';
-        for(const event of events){
-          const allDay=!!event.start.date;const label=allDay?'כל היום':(gcDay(event.start.dateTime)<day?'מהיום הקודם':gcTime(event.start.dateTime))+'–'+(gcDay(new Date(Date.parse(event.end.dateTime)-1))>day?'למחרת':gcTime(event.end.dateTime));
-          const url=gcSafeUrl(event.htmlLink);h+='<'+(url?'a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"':'div')+' class="gc-event '+(allDay?'gc-allday':'')+'" style="--event-color:'+event.calendarColor+'"><time>'+esc(label)+'</time><b>'+esc(event.summary||'אירוע ללא כותרת')+'</b><small>'+esc(event.calendarName)+(event.transparency==='transparent'?' · פנוי':'')+'</small></'+(url?'a':'div')+'>';
-        }
-        h+='</div></section>';
-      }
-      h+='</div>';
-    }
+    else if(!gc.error){h+=gcTimeline(gc.events,week,7);}
     if(gc.fetchedAt)h+='<div class="gc-foot"><span>עודכן '+esc(gcTime(gc.fetchedAt))+' · תחילת שבוע: ראשון</span><button onclick="gcDisconnect()">ניתוק התצוגה</button></div>';
   }
   if(gc.error)h+='<p class="gc-message gc-error" role="alert">'+esc(gc.error)+'</p>';
   if(gc.warnings.length)h+='<p class="gc-message gc-error">תצוגה חלקית: '+gc.warnings.map(esc).join(' ')+'</p>';
   el.innerHTML=h+'</section>';
+  gcPositionTimeline(el.id);
 }
 function gcEnsureToday(){
   const week=gcSunday(gcDay());
@@ -126,19 +120,12 @@ function gcRenderToday(){
   else if(gc.loading&&gc.week===week)h+='<p class="gc-message" role="status">טוען את הלו״ז של היום…</p>';
   else if(data){
     const events=data.events.filter(e=>gcEventDays(e,week).includes(today)).sort((a,b)=>Number(!a.start?.date)-Number(!b.start?.date)||(a.start.dateTime||a.start.date).localeCompare(b.start.dateTime||b.start.date));
-    if(!events.length)h+='<div class="gc-today-empty">'+(data.warnings.length?'לא התקבלו אירועים להיום מכל היומנים.':'אין אירועים להיום ביומנים שנבחרו.')+'</div>';
-    h+='<div class="gc-today-list">';
-    for(const event of events){
-      const allDay=!!event.start.date;const now=Date.now();const active=!allDay&&Date.parse(event.start.dateTime)<=now&&Date.parse(event.end.dateTime)>now;
-      const label=allDay?'כל היום':(gcDay(event.start.dateTime)<today?'מאתמול':gcTime(event.start.dateTime))+'–'+(gcDay(new Date(Date.parse(event.end.dateTime)-1))>today?'למחרת':gcTime(event.end.dateTime));
-      const url=gcSafeUrl(event.htmlLink);
-      h+='<'+(url?'a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"':'div')+' class="gc-today-event" style="--event-color:'+event.calendarColor+'"><time>'+esc(label)+'</time><span class="gc-today-marker" aria-hidden="true"></span><div><b>'+esc(event.summary||'אירוע ללא כותרת')+'</b><small>'+esc(event.calendarName)+(event.transparency==='transparent'?' · פנוי':'')+'</small></div>'+(active?'<span class="gc-now">עכשיו</span>':'')+'</'+(url?'a':'div')+'>';
-    }
-    h+='</div>';
+    h+=gcTimeline(events,today,1);
     if(data.warnings.length)h+='<p class="gc-message gc-error">תצוגה חלקית: '+data.warnings.map(esc).join(' ')+'</p>';
     h+='<div class="gc-foot"><span>'+events.length+' אירועים · עודכן '+esc(gcTime(data.fetchedAt))+'</span><button onclick="gcRefreshToday()">רענון ↻</button></div>';
   }else h+='<p class="gc-message">'+esc(gc.error||'נתוני היום עדיין לא נטענו.')+'</p><button class="gc-open" onclick="gcRefreshToday()" '+(gc.loading?'disabled':'')+'>טעינת הלו״ז של היום</button>';
   if(gc.error)h+='<p class="gc-message gc-error" role="alert">'+esc(gc.error)+'</p>';
   el.innerHTML=h+'</section>';
+  gcPositionTimeline(el.id);
 }
 function gcRefreshToday(){if(gc.loading)return;gc.week=gcSunday(gcDay());gcLoad();}

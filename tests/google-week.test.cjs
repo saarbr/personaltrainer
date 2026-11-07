@@ -5,6 +5,7 @@ const vm=require('node:vm');
 function setup(){
   const el={innerHTML:'',replaceChildren(){this.innerHTML='';}};
   const c=vm.createContext({Date,Intl,URL,AbortSignal,console,currentUser:{uid:'owner'},document:{getElementById:()=>el},esc:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')});
+  vm.runInContext(fs.readFileSync(require.resolve('../google-timeline.js'),'utf8'),c);
   vm.runInContext(fs.readFileSync(require.resolve('../google-week.js'),'utf8'),c);return {c,el};
 }
 test('Israel week boundaries include the full DST transition week',()=>{
@@ -23,13 +24,15 @@ test('all-day exclusive ends and overnight events appear on correct days',()=>{
 test('pagination and recurring expansion are read-only; private text is escaped; logout clears data',async()=>{
   const {c,el}=setup();let calls=[];
   c.fetch=async(url,opts)=>{calls.push({url,opts});const u=new URL(url);assert.ok(!opts.method||opts.method==='GET');
+    if(u.pathname.endsWith('colors'))return {ok:true,json:async()=>({event:{'5':{background:'#fbd75b'}}})};
     if(u.pathname.endsWith('calendarList'))return {ok:true,json:async()=>({items:[{id:'owner@example.com',summary:'Main',primary:true,backgroundColor:'#123456'}]})};
     assert.equal(u.searchParams.get('singleEvents'),'true');assert.equal(u.searchParams.get('timeZone'),'Asia/Jerusalem');
-    return {ok:true,json:async()=>u.searchParams.has('pageToken')?{items:[]}:{nextPageToken:'next',items:[{id:'a',summary:'<script>unsafe</script>',start:{date:'2026-11-02'},end:{date:'2026-11-03'},htmlLink:'javascript:alert(1)'}]}};
+    return {ok:true,json:async()=>u.searchParams.has('pageToken')?{items:[]}:{nextPageToken:'next',items:[{id:'a',colorId:'5',summary:'<script>unsafe</script>',start:{date:'2026-11-02'},end:{date:'2026-11-03'},htmlLink:'javascript:alert(1)'}]}};
   };
   vm.runInContext("gc.uid='owner';gc.token='private-token';gc.expires=Date.now()+600000;gc.week='2026-11-01'",c);
   await vm.runInContext('gcLoad()',c);
-  assert.equal(calls.length,3);
+  assert.equal(calls.length,4);
+  assert.equal(vm.runInContext('gc.events[0].eventColor',c),'#fbd75b');
   assert.ok(el.innerHTML.includes('&lt;script&gt;'));
   assert.ok(!el.innerHTML.includes('javascript:'));
   assert.ok(!el.innerHTML.includes('private-token'));
@@ -37,6 +40,20 @@ test('pagination and recurring expansion are read-only; private text is escaped;
   assert.equal(vm.runInContext('gc.events.length',c),0);
   assert.equal(vm.runInContext('gc.token',c),null);
   assert.equal(el.innerHTML,'');
+});
+test('hour grid includes empty hours and overlaps occupy separate columns',()=>{
+  const {c}=setup();
+  const layout=vm.runInContext(`gcTimedLayout([
+    {summary:'a',start:{dateTime:'2026-11-07T09:00:00+02:00'},end:{dateTime:'2026-11-07T11:00:00+02:00'}},
+    {summary:'b',start:{dateTime:'2026-11-07T10:00:00+02:00'},end:{dateTime:'2026-11-07T12:00:00+02:00'}},
+    {summary:'c',start:{dateTime:'2026-11-07T12:00:00+02:00'},end:{dateTime:'2026-11-07T13:00:00+02:00'}}
+  ],'2026-11-07')`,c);
+  assert.equal(layout[0].start,540);assert.equal(layout[0].lanes,2);assert.notEqual(layout[0].lane,layout[1].lane);assert.equal(layout[2].lanes,1);
+  const html=vm.runInContext("gcTimeline([],'2026-11-07',1)",c);
+  assert.ok(html.includes('00:00'));assert.ok(html.includes('23:00'));assert.ok(html.includes('24:00'));
+  assert.equal((html.match(/class="gc-hour-cell"/g)||[]).length,24);
+  assert.equal(vm.runInContext("gcEventColor({eventColor:'#fbd75b',calendarColor:'#123456'})",c),'#fbd75b');
+  assert.equal(vm.runInContext("gcEventColor({calendarColor:'#123456'})",c),'#123456');
 });
 test('home shows only today and keeps its cache when the weekly tab moves',()=>{
   const {c}=setup();const todayEl={innerHTML:'',replaceChildren(){this.innerHTML='';}};const weekEl={innerHTML:'',replaceChildren(){this.innerHTML='';}};
