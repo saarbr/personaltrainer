@@ -1,14 +1,26 @@
-# Google Calendar daily and weekly views
+# Persistent Google Calendar connection
 
-The homepage displays today's events; the Calendar tab displays a selectable full week after the user explicitly connects their Google account. It uses the existing Firebase compat SDK and requests calendar.readonly with reauthenticateWithPopup. No Google API write methods are implemented.
+The Calendar tab and home daily timeline read calendars and events; no calendar writes are implemented. Persistent authorization uses Google's offline authorization-code flow with PKCE. Refresh and access credentials are encrypted with AES-256-GCM in a Secure, HttpOnly, SameSite=Lax cookie scoped to the calendar function. Each API request also verifies Firebase identity and binds the cookie to that user. Events are not persisted in Firestore. This is on-demand synchronization, not background monitoring.
 
-Before live verification:
-1. Enable Google Calendar API in the Google Cloud project associated with the existing Firebase Google sign-in provider.
-2. Configure the OAuth consent screen for the calendar.readonly scope and the intended test users or release status. Reuse the existing authorized domains; for local testing authorize localhost in Firebase Authentication if not already configured.
-3. Use the same Google account as the signed-in My Way user and approve the requested calendar read permission yourself.
+## One-time production setup
 
-Tokens and events remain in browser memory and are cleared on a user change or disconnect. Reloading the page requires connecting again. This implementation does not claim continuous background sync or persistent cross-device Google authorization. Events are not copied to Firestore. Existing application data is unchanged.
+1. In the Google Cloud project used for My Way, enable Google Calendar API. Under Google Auth Platform / Clients create or reuse a **Web application** OAuth client.
+2. Add this exact authorized redirect URI:
+   `https://pesonaltraine.netlify.app/.netlify/functions/google-calendar?action=callback`
+3. Configure consent for `openid`, `email`, and `https://www.googleapis.com/auth/calendar.readonly`. Use the same Google account as My Way sign-in. In external Testing mode Google normally expires refresh authorization after seven days for Calendar scopes. Set the intended publishing status and complete any verification Google requires to avoid that testing limitation; consent can still be revoked or expire under Google's policies.
+4. In Netlify environment variables, set these for **Functions**, production context:
+   - `GOOGLE_CALENDAR_CLIENT_ID`: OAuth Web client ID.
+   - `GOOGLE_CALENDAR_CLIENT_SECRET`: OAuth client secret; mark Secret.
+   - `GOOGLE_CALENDAR_COOKIE_KEY`: random 32-byte encryption key as 64 hex characters; mark Secret. Generate locally using `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Do not commit the generated value or place it in a published file.
+   - Existing `FIREBASE_API_KEY` must remain configured for verifying the My Way login.
+5. Redeploy after setting variables. Open My Way, connect the calendar once and approve Google consent. Later openings use the encrypted cookie and refresh access server-side. Clearing cookies, signing in on another device, changing the encryption key, revoking Google consent or reaching session expiry (up to 180 days) requires reconnecting.
 
-The overview defaults to the primary and selected readable calendars, allows changing displayed calendars, follows pagination, expands recurring occurrences, handles all-day exclusive ends and overnight events, and uses Asia/Jerusalem for week bounds and display. Individual source failures are labeled partial. The full-calendar link opens Google Calendar, where the user controls any edits.
+Until server configuration is complete, the existing Firebase popup still works. Its short-lived access token is saved in sessionStorage, bound to the Firebase UID, so reloading the same tab restores access until it expires (about 50 minutes). This fallback does not provide a long-term connection. Disconnect clears local access and, when active, the encrypted server session. Google account consent itself can be revoked in Google account settings.
 
-Validation: node --test tests/google-week.test.cjs covers time zones, DST, overnight/all-day events, pagination, recurrence query flags, escaping and isolation of today's cache from other weeks. Live OAuth and actual Google data still require the configuration and user consent above. The standalone preview uses explicitly labeled sample events, never production calendar data.
+## Validation
+
+`node --test tests/google-week.test.cjs tests/google-connection.test.cjs`
+
+Tests cover timezone and weekly display behavior, cookie encryption, PKCE/state validation, identity isolation, server-side token refresh, read endpoint restrictions, disconnect, and reload restoration. Live OAuth consent and long-term renewal must also be checked after production configuration; mocked tests cannot establish that those credentials are configured.
+
+Google documentation: https://developers.google.com/identity/protocols/oauth2/web-server and https://developers.google.com/identity/protocols/oauth2#expiration

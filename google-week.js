@@ -1,4 +1,4 @@
-/* Google Calendar weekly overview. Read-only; tokens and events are memory-only. */
+/* Read-only calendar. Persistent credentials stay in a server-encrypted HttpOnly cookie. */
 const GC_ZONE='Asia/Jerusalem';
 let gc={uid:null,token:null,expires:0,week:null,calendars:[],events:[],loading:false,connecting:false,error:'',warnings:[],fetchedAt:null,request:0};
 function gcDay(value=new Date()){const p=new Intl.DateTimeFormat('en-CA',{timeZone:GC_ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(value));return ['year','month','day'].map(k=>p.find(x=>x.type===k).value).join('-');}
@@ -27,21 +27,30 @@ function gcAuthChanged(user){
   if(gc.uid===(user?.uid||null))return;
   gc={uid:user?.uid||null,token:null,expires:0,week:gcSunday(gcDay()),calendars:[],events:[],loading:false,connecting:false,error:'',warnings:[],fetchedAt:null,request:gc.request+1};
   for(const id of ['google-week','google-today']){const el=document.getElementById(id);if(el)el.replaceChildren();}
+  if(user&&typeof gcRestoreConnection==='function')gcRestoreConnection(user);
 }
 async function gcConnect(){
   if(!currentUser||gc.connecting)return;
   const user=currentUser;gcAuthChanged(user);gc.connecting=true;gc.error='';gcRender();
   try{
+    if(typeof gcServer==='function'){
+      let status={};try{status=await gcServer('status',{},user);}catch{}
+      if(currentUser?.uid!==user.uid)return;
+      gc.serverConfigured=status.configured===true;
+      if(gc.serverConfigured){await gcStartPersistent();return;}
+    }
     const provider=new firebase.auth.GoogleAuthProvider();provider.addScope('https://www.googleapis.com/auth/calendar.readonly');provider.setCustomParameters({login_hint:user.email||'',prompt:'consent'});
     const result=await user.reauthenticateWithPopup(provider);
     if(currentUser?.uid!==user.uid)return;
     if(!result.credential?.accessToken)throw Error('לא התקבלה הרשאת קריאה ליומן.');
     gc.token=result.credential.accessToken;gc.expires=Date.now()+50*60*1000;gc.calendars=[];gc.events=[];
+    gc.mode='browser';if(typeof gcRememberBrowser==='function')gcRememberBrowser();
     await gcLoad();
   }catch(error){if(currentUser?.uid===user.uid)gc.error=error.code==='auth/popup-closed-by-user'?'החיבור בוטל. אפשר לנסות שוב.':error.code==='auth/user-mismatch'?'יש לבחור את חשבון Google שאיתו נכנסת ל־My Way.':error.code==='auth/popup-blocked'?'הדפדפן חסם את חלון החיבור. אפשר חלונות קופצים ונסה שוב.':'לא ניתן להשלים את החיבור. ודא ש־Google Calendar API מופעל והרשאת היומן מאושרת בפרויקט Google של האפליקציה.';}
   finally{gc.connecting=false;gcRender();}
 }
 async function gcRead(path,params,token){
+  if(gc.mode==='server'){const result=await gcServer('read',{path,params});return result.data;}
   const url=new URL('https://www.googleapis.com/calendar/v3/'+path);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
   const response=await fetch(url.href,{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(15000)});
   if(response.status===401){const e=Error('החיבור ל־Google פג. התחבר שוב להצגת היומן.');e.auth=true;throw e;}
@@ -51,7 +60,7 @@ async function gcRead(path,params,token){
 async function gcPages(path,params,token){let items=[],pageToken;do{const data=await gcRead(path,{...params,...(pageToken?{pageToken}:{})},token);items.push(...(data.items||[]));pageToken=data.nextPageToken;}while(pageToken);return items;}
 async function gcLoad(){
   if(!currentUser||gc.loading)return;
-  if(!gc.token||gc.expires<=Date.now()){gc.token=null;gc.events=[];gc.fetchedAt=null;gc.error='התחבר ל־Google כדי להציג את השבוע.';gcRender();return;}
+  if(!gc.token||(gc.mode!=='server'&&gc.expires<=Date.now())){gc.token=null;gc.events=[];gc.fetchedAt=null;gc.error='התחבר ל־Google כדי להציג את השבוע.';gcRender();return;}
   const uid=currentUser.uid,token=gc.token,week=gc.week||gcSunday(gcDay()),request=++gc.request;
   gc.loading=true;gc.error='';gc.warnings=[];gc.events=[];gc.fetchedAt=null;gcRender();
   try{
@@ -81,7 +90,11 @@ async function gcLoad(){
 function gcMove(delta){if(gc.loading)return;gc.week=gcAdd(gc.week||gcSunday(gcDay()),delta*7);gcLoad();}
 function gcThisWeek(){if(gc.loading)return;gc.week=gcSunday(gcDay());gcLoad();}
 function gcToggle(index,checked){if(gc.loading||!gc.calendars[index])return;gc.calendars[index].show=checked;gc.weeks={};gcLoad();}
-function gcDisconnect(){gc.token=null;gc.expires=0;gc.events=[];gc.calendars=[];gc.weeks={};gc.error='';gc.fetchedAt=null;gc.request++;gc.loading=false;gcRender();}
+async function gcDisconnect(){
+  if(gc.mode==='server'){try{await gcServer('disconnect');}catch(error){gc.error=error.message;gcRender();return;}}
+  try{sessionStorage.removeItem('myway-calendar-access');}catch{}
+  gc.token=null;gc.expires=0;gc.events=[];gc.calendars=[];gc.weeks={};gc.error='';gc.fetchedAt=null;gc.request++;gc.loading=false;gcRender();
+}
 function gcTime(value){return new Date(value).toLocaleTimeString('he-IL',{timeZone:GC_ZONE,hour:'2-digit',minute:'2-digit'});}
 function gcRender(){
   gcRenderToday();
@@ -98,7 +111,7 @@ function gcRender(){
     gc.calendars.forEach((c,i)=>{h+='<label><input type="checkbox" '+(c.show?'checked ':'')+(gc.loading?'disabled ':'')+'onchange="gcToggle('+i+',this.checked)"/><i style="background:'+(/^#[0-9a-f]{6}$/i.test(c.backgroundColor||'')?c.backgroundColor:'#9de5d3')+'"></i>'+esc(c.summaryOverride||c.summary||'יומן')+'</label>';});h+='</div></details>';
     if(gc.loading)h+='<p class="gc-message" role="status">טוען את אירועי השבוע…</p>';
     else if(!gc.error){h+=gcTimeline(gc.events,week,7);}
-    if(gc.fetchedAt)h+='<div class="gc-foot"><span>עודכן '+esc(gcTime(gc.fetchedAt))+' · תחילת שבוע: ראשון</span><button onclick="gcDisconnect()">ניתוק התצוגה</button></div>';
+    if(gc.fetchedAt)h+='<div class="gc-foot"><span>עודכן '+esc(gcTime(gc.fetchedAt))+' · '+(gc.mode==='server'?'חיבור מתמשך':'חיבור זמני')+'</span>'+(gc.serverConfigured&&gc.mode!=='server'?'<button onclick="gcConnect()">שמירת חיבור מתמשך</button>':'')+'<button onclick="gcDisconnect()">ניתוק התצוגה</button></div>';
   }
   if(gc.error)h+='<p class="gc-message gc-error" role="alert">'+esc(gc.error)+'</p>';
   if(gc.warnings.length)h+='<p class="gc-message gc-error">תצוגה חלקית: '+gc.warnings.map(esc).join(' ')+'</p>';

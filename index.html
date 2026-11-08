@@ -3429,5 +3429,7 @@ function animCount(el,target,dur=900){
 <script src="/garmin-visual.js"></script>
 <script src="/google-timeline.js"></script>
 <script src="/google-week.js"></script>
+<script src="/google-connection.js"></script>
+<script>if(typeof currentUser!=='undefined'&&currentUser){if(gc.uid!==currentUser.uid)gcAuthChanged(currentUser);else gcRestoreConnection(currentUser);}</script>
 </body>
 </html>
