@@ -26,6 +26,14 @@ function click(w, text) {
   const b = [...w.document.querySelectorAll('button')].find(b => b.textContent === text);
   assert.ok(b, text); b.click();
 }
+test('setup failures display the safe diagnostic code in the Hebrew status area', async () => {
+  const { w, dom } = setup(async () => ({ ok: false, json: async () => ({ error: 'חסרה הגדרת שרת.', code: 'JARVIS_PROJECT_MISSING' }) }));
+  try {
+    w.openJarvisMemory(); await settled(w);
+    assert.equal(w.document.querySelector('[role="status"]').textContent, 'חסרה הגדרת שרת. (JARVIS_PROJECT_MISSING)');
+    assert.equal(w.localStorage.length, 0);
+  } finally { dom.window.close(); }
+});
 test('Hebrew memory form previews exact proposal and requires a distinct confirmation', async () => {
   const calls = [], item = { id: 'm1', version: 1, content: '<img src=x onerror=alert(1)>', kind: 'preference', source: 'assistant_inference', sensitivity: 'sensitive' };
   const { w, dom } = setup(async (_, options) => {

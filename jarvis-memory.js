@@ -29,7 +29,8 @@
       body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
     const data = await response.json();
     if (owner !== user || version !== generation) return null;
-    if (!response.ok) throw Error(data.error || 'לא ניתן להשלים את הבקשה.');
+    if (!response.ok) throw Error((data.error || 'לא ניתן להשלים את הבקשה.') +
+      (/^JARVIS_[A-Z_]+$/.test(data.code || '') ? ' (' + data.code + ')' : ''));
     return data;
   }
   async function run(fn) {

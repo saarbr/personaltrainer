@@ -2,11 +2,11 @@
 let cached;
 function runtime() {
   if (cached) return cached;
+  const { readConfiguration } = require('./jarvis-diagnostics.cjs');
+  const credentials = readConfiguration(process.env);
   const { initializeApp, cert } = require('firebase-admin/app');
   const { getAuth } = require('firebase-admin/auth');
   const { getFirestore, FieldPath } = require('firebase-admin/firestore');
-  const credentials = JSON.parse(process.env.JARVIS_FIREBASE_SERVICE_ACCOUNT || 'null');
-  if (!credentials || credentials.project_id !== process.env.JARVIS_FIREBASE_PROJECT_ID) throw Error('Jarvis configuration');
   const app = initializeApp({ credential: cert(credentials), projectId: credentials.project_id }, 'jarvis');
   const db = getFirestore(app);
   cached = {

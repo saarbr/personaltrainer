@@ -107,6 +107,28 @@ Rollback: להסיר `JARVIS_ENABLED` כדי לחסום את ה־API מיידי�
 בפונקציית Jarvis בפרודקשן. אין להפעיל `npm audit fix --force` שמציע downgrade
 בלי לבדוק תאימות מחדש. יש לבחון את הדוח שוב לפני פריסה.
 
+## אבחון הגדרת שרת בלי חשיפת סודות
+
+השרת מחזיר רק הודעות קבועות וקודי `JARVIS_*` שנבחרו ברשימה סגורה. אין החזרה
+של הודעות SDK גולמיות, stack traces, תוכן משתני סביבה, חשבונות שירות או אסימונים.
+הממשק מציג את הקוד ב־textContent; אפשר להעביר לתמיכה רק את ההודעה והקוד.
+
+| קוד | מה לבדוק |
+|---|---|
+| `JARVIS_PROJECT_MISSING` | `JARVIS_FIREBASE_PROJECT_ID` בהיקף Functions ובהקשר הנכון |
+| `JARVIS_ACCOUNT_MISSING` | `JARVIS_FIREBASE_SERVICE_ACCOUNT` בהיקף Functions ובהקשר הנכון |
+| `JARVIS_ACCOUNT_JSON` / `JARVIS_ACCOUNT_INVALID` | JSON מלא ומפתח RSA תקין, בהדבקה ישירות ל־Netlify |
+| `JARVIS_PROJECT_MISMATCH` | מזהה הפרויקט תואם ל־project_id של חשבון השירות |
+| `JARVIS_AUTH_PERMISSION` | Firebase Authentication Viewer לחשבון השירות |
+| `JARVIS_DB_PERMISSION` | Cloud Datastore User לחשבון השירות בפרויקט הנכון |
+| `JARVIS_DB_QUOTA` | מכסות Spark או מגבלת משאבים; אין צורך לשדרג אוטומטית |
+| `JARVIS_SERVER_DEPENDENCY` | תיקון אריזת תלויות הפריסה |
+
+שינוי משתנים מחייב פריסה מחדש באותו הקשר. אין לשלוח את קובץ המפתח או לוג
+גולמי שמכיל סודות. קוד התקלה מסווג את השגיאה; אינו מחליף בדיקה של הגדרות
+החשבון והרשאותיו בפועל. שגיאות משתמש (אסימון שפג/בוטל וכדומה) נשארות 401;
+הרשאה חסרה לשירות מחזירה 503 עם קוד אבחון קבוע.
+
 ## OpenJarvis והמשך קולי
 
 נבדק [OpenJarvis](https://github.com/open-jarvis/OpenJarvis) ב־8 בנובמבר 2026:
