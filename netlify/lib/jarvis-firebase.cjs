@@ -1,13 +1,24 @@
 'use strict';
+function loadSdk() {
+  return { app: require('firebase-admin/app'), auth: require('firebase-admin/auth'), firestore: require('firebase-admin/firestore') };
+}
+function createRuntime({ env = process.env, sdk = loadSdk } = {}) {
 let cached;
-function runtime() {
+return function runtime() {
   if (cached) return cached;
   const { readConfiguration } = require('./jarvis-diagnostics.cjs');
-  const credentials = readConfiguration(process.env);
-  const { initializeApp, cert } = require('firebase-admin/app');
-  const { getAuth } = require('firebase-admin/auth');
-  const { getFirestore, FieldPath } = require('firebase-admin/firestore');
-  const app = initializeApp({ credential: cert(credentials), projectId: credentials.project_id }, 'jarvis');
+  const credentials = readConfiguration(env);
+  const modules = sdk();
+  const { initializeApp, getApps, cert } = modules.app;
+  const { getAuth } = modules.auth;
+  const { getFirestore, FieldPath } = modules.firestore;
+  // If Firestore initialization fails, retry using the app already created.
+  // Otherwise a duplicate-app error can hide the original startup failure.
+  const app = getApps().find(app => app.name === 'jarvis') || initializeApp({ credential: cert(credentials), projectId: credentials.project_id }, 'jarvis');
+  if (app.options.projectId !== credentials.project_id) {
+    const { SetupError } = require('./jarvis-diagnostics.cjs');
+    throw new SetupError('JARVIS_PROJECT_MISMATCH');
+  }
   const db = getFirestore(app);
   cached = {
     verify: token => getAuth(app).verifyIdToken(token, true),
@@ -30,5 +41,6 @@ function runtime() {
     }
   };
   return cached;
+};
 }
-module.exports = { runtime };
+module.exports = { createRuntime, runtime: createRuntime() };

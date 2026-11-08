@@ -1,10 +1,11 @@
 'use strict';
 const { createService, Problem, exact } = require('../lib/jarvis-policy.cjs');
-const { diagnostic } = require('../lib/jarvis-diagnostics.cjs');
+const { diagnostic, failureRecord } = require('../lib/jarvis-diagnostics.cjs');
 const ORIGIN = 'https://pesonaltraine.netlify.app';
 const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 const reply = (statusCode, body) => ({ statusCode, headers, body: JSON.stringify(body) });
-function createHandler({ runtime = () => require('../lib/jarvis-firebase.cjs').runtime(), env = process.env } = {}) {
+function createHandler({ runtime = () => require('../lib/jarvis-firebase.cjs').runtime(), env = process.env,
+  log = record => console.warn(JSON.stringify(record)) } = {}) {
   return async event => {
     if (event.httpMethod !== 'POST') return reply(405, { error: 'השיטה אינה נתמכת.' });
     const h = Object.fromEntries(Object.entries(event.headers || {}).map(([k, v]) => [k.toLowerCase(), v]));
@@ -43,7 +44,9 @@ function createHandler({ runtime = () => require('../lib/jarvis-firebase.cjs').r
         default: throw new Problem(403, 'הפעולה אינה נתמכת.');
       }
     } catch (error) {
-      return error instanceof Problem ? reply(error.status, { error: error.message }) : reply(503, diagnostic(error, stage));
+      if (error instanceof Problem) return reply(error.status, { error: error.message });
+      try { log(failureRecord(error, stage)); } catch { /* Logging must not bypass sanitized responses. */ }
+      return reply(503, diagnostic(error, stage));
     }
   };
 }
