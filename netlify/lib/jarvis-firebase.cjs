@@ -20,7 +20,11 @@ function runtime() {
       },
       transaction: fn => db.runTransaction(tx => fn({
         async get(path) { const s = await tx.get(db.doc(path)); return s.exists ? s.data() : null; },
-        set: (path, data) => tx.set(db.doc(path), path.includes('/proposals/') ? { ...data, purgeAt: new Date(data.expiresAt) } : data),
+        async expired(path, cutoff, limit) {
+          const query = db.collection(path).where('expiresAt', '<=', cutoff).orderBy('expiresAt').limit(limit);
+          return (await tx.get(query)).docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        },
+        set: (path, data) => tx.set(db.doc(path), data),
         delete: path => tx.delete(db.doc(path))
       }))
     }

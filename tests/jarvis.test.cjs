@@ -13,7 +13,9 @@ function setup() {
     transaction(fn) {
       const result = queue.then(async () => {
         const pending = new Map([...rows].map(([k, v]) => [k, clone(v)]));
-        const result = await fn({ get: async key => clone(pending.get(key)), set: (key, value) => pending.set(key, clone(value)), delete: key => pending.delete(key) });
+        const result = await fn({ get: async key => clone(pending.get(key)),
+          expired: async (path, cutoff, limit) => [...pending].filter(([key, value]) => key.startsWith(path + '/') && value.expiresAt <= cutoff).sort((a, b) => a[1].expiresAt - b[1].expiresAt).slice(0, limit).map(([key, value]) => ({ ...clone(value), id: key.split('/').at(-1) })),
+          set: (key, value) => pending.set(key, clone(value)), delete: key => pending.delete(key) });
         rows = pending; return result;
       });
       queue = result.catch(() => {}); return result;
@@ -94,6 +96,44 @@ test('proposal quota is durable, scoped to owner and resets after an hour', asyn
   await rejects(() => service.propose('alice', 'memory.create', { memory }), 429);
   await service.propose('bob', 'memory.create', { memory });
   tick(3600000); await service.propose('alice', 'memory.create', { memory });
+});
+
+test('Spark cleanup hides expired content on reads and only removes owner proposals on a new write', async () => {
+  const { service, store, tick, rows } = setup();
+  const first = (await service.propose('alice', 'memory.create', { memory })).proposal;
+  await service.decide('alice', first.id, 'confirm', 'human');
+  const pending = (await service.propose('alice', 'memory.update', { id: first.targetId, version: 1, memory: { ...memory, content: 'ערב' } })).proposal;
+  const other = (await service.propose('bob', 'memory.create', { memory })).proposal;
+  await store.transaction(async tx => tx.set('jarvisUsers/alice/proposals/future', {
+    ...pending, id: 'future', expiresAt: 9999999
+  }));
+  tick(600000);
+  const before = JSON.stringify([...rows()]);
+  const preview = (await service.read('alice', 'proposal.list')).items.find(p => p.id === pending.id);
+  assert.equal(preview.state, 'expired'); assert.equal(preview.payload, undefined); assert.equal(preview.before, undefined);
+  assert.equal(JSON.stringify([...rows()]), before, 'read must not perform retention writes');
+  await rejects(() => service.decide('alice', pending.id, 'confirm', 'human'), 409);
+  await service.propose('alice', 'memory.create', { memory });
+  assert.equal(await store.get(`jarvisUsers/alice/proposals/${pending.id}`), null);
+  assert.equal(await store.get(`jarvisUsers/alice/proposals/${first.id}`), null);
+  assert.ok(await store.get('jarvisUsers/alice/proposals/future'));
+  assert.ok(await store.get(`jarvisUsers/bob/proposals/${other.id}`));
+  assert.equal((await store.get(`jarvisUsers/alice/memories/${first.targetId}`)).content, memory.content);
+  assert.equal((await store.get(`jarvisUsers/alice/audit/${first.id}`)).state, 'executed');
+});
+
+test('Spark housekeeping is bounded and rolls back together with failed proposal writes', async () => {
+  const { service, store, tick, rows } = setup();
+  for (let i = 0; i < 30; i++) await service.propose('alice', 'memory.create', { memory });
+  tick(3600000);
+  await service.propose('alice', 'memory.create', { memory });
+  assert.equal([...rows().keys()].filter(k => k.startsWith('jarvisUsers/alice/proposals/')).length, 21);
+  const before = JSON.stringify([...rows()]);
+  const broken = createService({ ...store, transaction: fn => store.transaction(tx => fn({ ...tx,
+    set(path, data) { if (data.state === 'pending') throw Error('simulated write failure'); tx.set(path, data); }
+  })) }, { now: () => 3610000 });
+  await assert.rejects(() => broken.propose('alice', 'memory.create', { memory }), /simulated write failure/);
+  assert.equal(JSON.stringify([...rows()]), before, 'cleanup deletes must roll back');
 });
 
 test('HTTP gateway fails closed, binds identity and never echoes backend secrets', async () => {

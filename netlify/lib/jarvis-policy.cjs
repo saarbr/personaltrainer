@@ -50,7 +50,13 @@ function createService(store, { now = Date.now, uuid = randomUUID } = {}) {
       if (POLICY[action] !== 'read') fail(403, 'נדרש אישור לשינוי נתונים.');
       if (action === 'memory.list' || action === 'proposal.list') {
         const { limit, after } = page(payload);
-        const rows = await store.list(`${root}/${action === 'memory.list' ? 'memories' : 'proposals'}`, limit, after);
+        let rows = await store.list(`${root}/${action === 'memory.list' ? 'memories' : 'proposals'}`, limit, after);
+        if (action === 'proposal.list') rows = rows.map(row => {
+          if (row.state !== 'pending' || row.expiresAt > now()) return row;
+          // Reads remain read-only and never return expired personal payloads.
+          const { payload, before, ...metadata } = row;
+          return { ...metadata, state: 'expired' };
+        });
         return { items: rows, next: rows.length === limit ? rows.at(-1).id : null };
       }
       exact(payload, ['sections']);
@@ -75,6 +81,16 @@ function createService(store, { now = Date.now, uuid = randomUUID } = {}) {
           const before = await tx.get(`${root}/memories/${normalized.id}`);
           if (!before || before.version !== normalized.version) fail(409, 'הזיכרון השתנה. יש לרענן את הרשימה.');
           proposal.before = before;
+        }
+        // Spark-compatible retention housekeeping, only during an already
+        // requested proposal write. Never on autonomous reads, never memories.
+        // Query and deletes share the proposal transaction so a failed cleanup
+        // cannot leave a newly created proposal behind with an error response.
+        const expired = await tx.expired(`${root}/proposals`, time, 10);
+        for (const row of expired) {
+          if (row.uid === uid && Number.isFinite(row.expiresAt) && row.expiresAt <= time) {
+            tx.delete(`${root}/proposals/${id(row.id)}`);
+          }
         }
         tx.set(`${root}/proposals/${proposal.id}`, proposal);
         tx.set(quotaPath, { count: count + 1, until: quota?.until > time ? quota.until : time + 3600000 });
