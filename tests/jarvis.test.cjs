@@ -134,3 +134,20 @@ test('production handler keeps real runtime lazy and requires explicit enablemen
   const { handler } = require('../netlify/functions/jarvis');
   assert.equal((await handler({ httpMethod: 'POST', headers: { origin: 'https://pesonaltraine.netlify.app', 'content-type': 'application/json' }, body: '{}' })).statusCode, 503);
 });
+
+test('preview accepts exactly the configured site origin and fails closed for unsafe settings', async () => {
+  const { store } = setup();
+  const preview = 'https://deploy-preview-3--pesonaltraine.netlify.app';
+  const env = { JARVIS_ENABLED: 'true', JARVIS_RULES_VERSION: '1', JARVIS_ALLOWED_ORIGIN: preview };
+  const handler = createHandler({ env, runtime: () => ({ store, verify: async () => ({ uid: 'alice' }) }) });
+  const request = origin => ({ httpMethod: 'POST', headers: { origin, 'content-type': 'application/json', authorization: 'Bearer valid' }, body: JSON.stringify({ operation: 'read', action: 'memory.list' }) });
+  assert.equal((await handler(request(preview))).statusCode, 200);
+  for (const origin of ['https://pesonaltraine.netlify.app', 'https://deploy-preview-4--pesonaltraine.netlify.app', preview + '.evil.example', preview + '/', undefined]) assert.equal((await handler(request(origin))).statusCode, 403);
+  for (const unsafe of ['*', 'null', '', 'http://deploy-preview-3--pesonaltraine.netlify.app', 'https://evil.example', preview + '.evil.example']) {
+    env.JARVIS_ALLOWED_ORIGIN = unsafe;
+    assert.equal((await handler(request(unsafe))).statusCode, 403);
+  }
+  delete env.JARVIS_ALLOWED_ORIGIN;
+  assert.equal((await handler(request(preview))).statusCode, 403);
+  assert.equal((await handler(request('https://pesonaltraine.netlify.app'))).statusCode, 200);
+});

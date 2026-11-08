@@ -8,7 +8,11 @@ function createHandler({ runtime = () => require('../lib/jarvis-firebase.cjs').r
     if (event.httpMethod !== 'POST') return reply(405, { error: 'השיטה אינה נתמכת.' });
     const h = Object.fromEntries(Object.entries(event.headers || {}).map(([k, v]) => [k.toLowerCase(), v]));
     // Same-origin human API. No wildcard CORS and no model/provider tokens.
-    if (h.origin !== ORIGIN || h['content-type']?.split(';')[0].trim() !== 'application/json') return reply(403, { error: 'מקור הבקשה אינו מורשה.' });
+    // An explicit per-context setting selects ONE origin, never a wildcard.
+    // Preview settings belong in Netlify's Deploy Previews context only.
+    const origin = env.JARVIS_ALLOWED_ORIGIN ?? ORIGIN;
+    const validOrigin = origin === ORIGIN || /^https:\/\/deploy-preview-[1-9]\d*--pesonaltraine\.netlify\.app$/.test(origin);
+    if (!validOrigin || h.origin !== origin || h['content-type']?.split(';')[0].trim() !== 'application/json') return reply(403, { error: 'מקור הבקשה אינו מורשה.' });
     if (env.JARVIS_ENABLED !== 'true' || env.JARVIS_RULES_VERSION !== '1') return reply(503, { error: 'Jarvis עדיין לא הופעל בשרת.' });
     if (!/^Bearer \S+$/.test(h.authorization || '')) return reply(401, { error: 'נדרשת כניסה לחשבון.' });
     if (event.isBase64Encoded || typeof event.body !== 'string' || Buffer.byteLength(event.body) > 8192) return reply(413, { error: 'בקשה גדולה מדי.' });
