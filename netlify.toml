@@ -3,8 +3,9 @@
   publish = "dist"
   functions = "netlify/functions"
 
-# Keep SDK packages intact: Firestore loads implementation files at runtime.
-# Limit this packaging change to Jarvis; existing functions keep their settings.
+# Bundle Firebase Auth and its ESM dependencies for Lambda's CommonJS runtime.
+# Keep the Firestore client external for its runtime-loaded files.
 [functions.jarvis]
   node_bundler = "esbuild"
-  external_node_modules = ["firebase-admin", "@google-cloud/firestore"]
+  external_node_modules = ["@google-cloud/firestore"]
+
