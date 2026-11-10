@@ -19,10 +19,8 @@ class SetupError extends Error {
   constructor(code) { super(messages[code]); this.code = code; }
 }
 function readConfiguration(env) {
-  const useSuffix = env.JARVIS_FIREBASE_PROJECT_ID1 !== undefined ||
-    env.JARVIS_FIREBASE_SERVICE_ACCOUNT1 !== undefined;
-  const projectId = useSuffix ? env.JARVIS_FIREBASE_PROJECT_ID1 : env.JARVIS_FIREBASE_PROJECT_ID;
-  const serviceAccount = useSuffix ? env.JARVIS_FIREBASE_SERVICE_ACCOUNT1 : env.JARVIS_FIREBASE_SERVICE_ACCOUNT;
+  const projectId = env.JARVIS_FIREBASE_PROJECT_ID ?? env.JARVIS_FIREBASE_PROJECT_ID1;
+  const serviceAccount = env.JARVIS_FIREBASE_SERVICE_ACCOUNT1 ?? env.JARVIS_FIREBASE_SERVICE_ACCOUNT;
   if (!projectId) throw new SetupError('JARVIS_PROJECT_MISSING');
   if (!serviceAccount) throw new SetupError('JARVIS_ACCOUNT_MISSING');
   let credentials;
