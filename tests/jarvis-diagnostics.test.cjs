@@ -61,3 +61,13 @@ test('failed Firestore startup reuses its existing app instead of hiding the fai
   const result = runtime(); assert.ok(result.store);
   assert.equal(runtime(), result); assert.equal(initialized, 1); assert.equal(firestoreCalls, 2);
 });
+
+test('suffixed Netlify credentials take precedence as a pair', () => {
+  const suffixed = {
+    JARVIS_FIREBASE_PROJECT_ID1: config.JARVIS_FIREBASE_PROJECT_ID,
+    JARVIS_FIREBASE_SERVICE_ACCOUNT1: config.JARVIS_FIREBASE_SERVICE_ACCOUNT
+  };
+  assert.equal(readConfiguration(suffixed).project_id, 'demo-myway');
+  assert.equal(readConfiguration({ ...suffixed, JARVIS_FIREBASE_PROJECT_ID: 'old-project' }).project_id, 'demo-myway');
+  expected({ ...config, JARVIS_FIREBASE_PROJECT_ID1: 'demo-myway' }, 'JARVIS_ACCOUNT_MISSING');
+});

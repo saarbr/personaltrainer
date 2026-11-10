@@ -1,8 +1,8 @@
 'use strict';
 const { createPrivateKey } = require('node:crypto');
 const messages = Object.freeze({
-  JARVIS_PROJECT_MISSING: 'חסר בשרת המשתנה JARVIS_FIREBASE_PROJECT_ID עבור תצוגת הניסיון.',
-  JARVIS_ACCOUNT_MISSING: 'חסר בשרת המשתנה הסודי JARVIS_FIREBASE_SERVICE_ACCOUNT עבור תצוגת הניסיון.',
+  JARVIS_PROJECT_MISSING: 'חסר בשרת מזהה פרויקט Firebase עבור תצוגת הניסיון.',
+  JARVIS_ACCOUNT_MISSING: 'חסר בשרת חשבון השירות הסודי של Firebase עבור תצוגת הניסיון.',
   JARVIS_ACCOUNT_JSON: 'הגדרת חשבון השירות אינה JSON תקין. יש להדביק ב־Netlify את הקובץ המלא ללא שינוי.',
   JARVIS_PROJECT_MISMATCH: 'מזהה הפרויקט ב־Netlify אינו תואם לפרויקט שבקובץ חשבון השירות.',
   JARVIS_ACCOUNT_INVALID: 'קובץ חשבון השירות חסר או לא תקין. יש לבדוק את ההגדרה הסודית ב־Netlify.',
@@ -19,16 +19,20 @@ class SetupError extends Error {
   constructor(code) { super(messages[code]); this.code = code; }
 }
 function readConfiguration(env) {
-  if (!env.JARVIS_FIREBASE_PROJECT_ID) throw new SetupError('JARVIS_PROJECT_MISSING');
-  if (!env.JARVIS_FIREBASE_SERVICE_ACCOUNT) throw new SetupError('JARVIS_ACCOUNT_MISSING');
+  const useSuffix = env.JARVIS_FIREBASE_PROJECT_ID1 !== undefined ||
+    env.JARVIS_FIREBASE_SERVICE_ACCOUNT1 !== undefined;
+  const projectId = useSuffix ? env.JARVIS_FIREBASE_PROJECT_ID1 : env.JARVIS_FIREBASE_PROJECT_ID;
+  const serviceAccount = useSuffix ? env.JARVIS_FIREBASE_SERVICE_ACCOUNT1 : env.JARVIS_FIREBASE_SERVICE_ACCOUNT;
+  if (!projectId) throw new SetupError('JARVIS_PROJECT_MISSING');
+  if (!serviceAccount) throw new SetupError('JARVIS_ACCOUNT_MISSING');
   let credentials;
-  try { credentials = JSON.parse(env.JARVIS_FIREBASE_SERVICE_ACCOUNT); }
+  try { credentials = JSON.parse(serviceAccount); }
   catch { throw new SetupError('JARVIS_ACCOUNT_JSON'); }
   if (!credentials || typeof credentials !== 'object' || Array.isArray(credentials) ||
       typeof credentials.project_id !== 'string' || typeof credentials.client_email !== 'string' ||
       !/^[^@\s]+@[^@\s]+\.gserviceaccount\.com$/.test(credentials.client_email) ||
       typeof credentials.private_key !== 'string') throw new SetupError('JARVIS_ACCOUNT_INVALID');
-  if (credentials.project_id !== env.JARVIS_FIREBASE_PROJECT_ID) throw new SetupError('JARVIS_PROJECT_MISMATCH');
+  if (credentials.project_id !== projectId) throw new SetupError('JARVIS_PROJECT_MISMATCH');
   try {
     if (createPrivateKey(credentials.private_key).asymmetricKeyType !== 'rsa') throw Error('Invalid key type');
   } catch { throw new SetupError('JARVIS_ACCOUNT_INVALID'); }
