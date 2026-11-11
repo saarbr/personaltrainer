@@ -14,6 +14,12 @@ test('wellness dashboard distinguishes zeros, missing data, failures and escapes
   assert.ok(el.innerHTML.includes('503'));
   assert.ok(el.innerHTML.includes('&lt;img'));
   assert.ok(!el.innerHTML.includes('<img onerror'));
+  vm.runInContext(`garminView.result.sections.steps={status:'ok',data:[{calendarDate:'2026-11-04',totalSteps:9000},{calendarDate:'2026-11-05',totalSteps:4321,stepGoal:8000}]};renderGarmin();`,context);
+  assert.match(el.innerHTML,/4,321/);
+  assert.match(el.innerHTML,/8,000/);
+  assert.doesNotMatch(el.innerHTML,/9,000/);
+  vm.runInContext(`garminView.result.sections.steps={status:'error',httpStatus:503};renderGarmin();`,context);
+  assert.match(el.innerHTML,/gw-big">0<\/div><div class="gw-sub">צעדים/);
   vm.runInContext('clearGarminData()',context);
   assert.equal(el.innerHTML,'');
 });

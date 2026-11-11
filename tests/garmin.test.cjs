@@ -42,6 +42,7 @@ test('owner-only Garmin import preserves provider speed and never returns creden
   global.fetch=async(url,options)=>{
     if(url.includes('accounts:lookup'))return {ok:true,json:async()=>({users:[{localId:'owner'}]})};
     if(url.includes('/hrv-service/'))return {ok:false,status:503};
+    if(url.endsWith('/stats/steps/daily/2026-11-05/2026-11-05'))return {ok:true,text:async()=>JSON.stringify([{calendarDate:'2026-11-05',totalSteps:4321,stepGoal:8000}])};
     return {ok:true,text:async()=>JSON.stringify(url.includes('dailySleep?')?{dailySleepDTO:{sleepTimeSeconds:28800}}:{data:[]})};
   };
   const wellness=await handler({...event,body:JSON.stringify({action:'wellness',date:'2026-11-05'})});
@@ -49,7 +50,8 @@ test('owner-only Garmin import preserves provider speed and never returns creden
   const health=JSON.parse(wellness.body);
   assert.equal(health.sections.sleep.data.dailySleepDTO.sleepTimeSeconds,28800);
   assert.equal(health.sections.hrv.status,'error');
-  assert.equal(Object.keys(health.sections).length,6);
+  assert.equal(health.sections.steps.data[0].totalSteps,4321);
+  assert.equal(Object.keys(health.sections).length,7);
   assert.equal((await handler({...event,body:JSON.stringify({action:'wellness',date:'2026-02-30'})})).statusCode,400);
   assert.equal((await handler({...event,body:JSON.stringify({action:'anything'})})).statusCode,400);
   global.fetch=lastRunFetch;

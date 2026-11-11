@@ -37,6 +37,7 @@ exports.handler = async (event) => {
       const paths = {
         sleep: `/sleep-service/sleep/dailySleep?date=${date}`,
         summary: `/usersummary-service/v2/dailysummaries?startDate=${date}&endDate=${date}`,
+        steps: `/usersummary-service/stats/steps/daily/${date}/${date}`,
         hrv: `/hrv-service/hrv/${date}`,
         bodyBattery: `/wellness-service/wellness/bodyBattery/reports/daily?startDate=${date}&endDate=${date}`,
         heartRate: `/wellness-service/wellness/dailyHeartRate?date=${date}`,
