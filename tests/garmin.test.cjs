@@ -21,22 +21,28 @@ test('owner-only Garmin import preserves provider speed and never returns creden
     if(url.includes('personal-api-key/token'))return {ok:true,text:async()=> 'header.'+Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+86400})).toString('base64url')+'.secret-signature\n'};
     return {ok:true,json:async()=>[
       {activityId:12,distance:5000,averageSpeed:4,averageHR:145,startTimeLocal:'2026-11-05 07:30:00',activityName:'Run'},
-      {activityId:13,distance:5000,averageSpeed:null,startTimeLocal:'2026-11-05'}
+      {activityId:13,distance:5000,averageSpeed:null,duration:1500,startTimeLocal:'2026-11-05'},
+      {activityId:14,distance:5000,startTimeLocal:'2026-11-05'},
+      {activityId:15,distance:5000,startTimeLocal:'2026-02-30'}
     ]};
   };
   assert.equal((await handler({...event,body:'{"start":-1}'})).statusCode,400);
   const result=await handler(event);
   assert.equal(result.statusCode,200);
   const data=JSON.parse(result.body);
-  assert.equal(data.runs.length,1);
+  assert.equal(data.runs.length,3);
   assert.equal(data.runs[0].paceSec,250);
   assert.equal(data.runs[0].garminId,'12');
+  assert.equal(data.runs[1].paceSec,300);
+  assert.equal(data.runs[1].durationSec,1500);
+  assert.equal(data.runs[2].paceSec,null);
   assert.equal(data.skipped,1);
   assert.equal(data.nextStart,null);
   const lastRunFetch=global.fetch;
   global.fetch=async(url,options)=>{
     if(url.includes('accounts:lookup'))return {ok:true,json:async()=>({users:[{localId:'owner'}]})};
     if(url.includes('/hrv-service/'))return {ok:false,status:503};
+    if(url.endsWith('/stats/steps/daily/2026-11-05/2026-11-05'))return {ok:true,text:async()=>JSON.stringify([{calendarDate:'2026-11-05',totalSteps:4321,stepGoal:8000}])};
     return {ok:true,text:async()=>JSON.stringify(url.includes('dailySleep?')?{dailySleepDTO:{sleepTimeSeconds:28800}}:{data:[]})};
   };
   const wellness=await handler({...event,body:JSON.stringify({action:'wellness',date:'2026-11-05'})});
@@ -44,7 +50,8 @@ test('owner-only Garmin import preserves provider speed and never returns creden
   const health=JSON.parse(wellness.body);
   assert.equal(health.sections.sleep.data.dailySleepDTO.sleepTimeSeconds,28800);
   assert.equal(health.sections.hrv.status,'error');
-  assert.equal(Object.keys(health.sections).length,6);
+  assert.equal(health.sections.steps.data[0].totalSteps,4321);
+  assert.equal(Object.keys(health.sections).length,7);
   assert.equal((await handler({...event,body:JSON.stringify({action:'wellness',date:'2026-02-30'})})).statusCode,400);
   assert.equal((await handler({...event,body:JSON.stringify({action:'anything'})})).statusCode,400);
   global.fetch=lastRunFetch;

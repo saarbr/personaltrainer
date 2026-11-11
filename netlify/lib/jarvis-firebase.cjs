@@ -36,6 +36,7 @@ return function runtime() {
           return (await tx.get(query)).docs.map(doc => ({ ...doc.data(), id: doc.id }));
         },
         set: (path, data) => tx.set(db.doc(path), data),
+        merge: (path, data) => tx.set(db.doc(path), data, { merge: true }),
         delete: path => tx.delete(db.doc(path))
       }))
     }

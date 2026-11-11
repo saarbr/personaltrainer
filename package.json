@@ -11,6 +11,8 @@
     "test:rules": "firebase emulators:exec --only firestore --project demo-myway \"node --test tests/firestore.rules.test.cjs tests/jarvis-firestore.test.cjs\""
   },
   "dependencies": {
+    "@garmin/fitsdk": "21.221.0",
+    "fflate": "0.8.3",
     "firebase-admin": "^14.5.0"
   },
   "overrides": {

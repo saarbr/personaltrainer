@@ -20,6 +20,15 @@ function garminPick(object,paths){
   return search(object,0);
 }
 function garminFirst(data){if(Array.isArray(data))return data[0]||{};if(Array.isArray(data?.data))return data.data[0]||{};return data||{};}
+function garminDailySteps(section,date,summary){
+  const data=section?.status==='ok'?section.data:null;
+  const records=Array.isArray(data)?data:Array.isArray(data?.data)?data.data:[data?.data??data];
+  const record=records.find(item=>item?.calendarDate===date)??records.find(item=>item&&!item.calendarDate&&records.length===1);
+  return {
+    steps:garminPick(record,['totalSteps'])??garminPick(summary,['totalSteps']),
+    target:garminPick(record,['stepGoal','dailyStepGoal'])??garminPick(summary,['dailyStepGoal','stepGoal'])
+  };
+}
 function garminDuration(seconds){const n=garminNumber(seconds);return n===null?'אין נתון':Math.floor(n/3600)+' ש׳ '+Math.floor((n%3600)/60)+' דק׳';}
 function garminCard(label,value,unit=''){
   return '<div class="card" style="margin:0;min-width:0;padding:14px"><div style="font-size:11px;color:var(--muted);margin-bottom:8px">'+esc(label)+'</div><div style="font-size:23px;font-weight:800;overflow-wrap:anywhere">'+(value===null?'<span style="font-size:13px;color:var(--muted)">אין נתון</span>':esc(String(value)))+'</div>'+(value===null?'':'<div style="font-size:10px;color:var(--muted);margin-top:3px">'+esc(unit)+'</div>')+'</div>';

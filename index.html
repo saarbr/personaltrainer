@@ -137,9 +137,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <link rel="stylesheet" href="/google-timeline.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/myway-neumorphic.css">
+<link rel="stylesheet" href="/garmin-runs.css">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="/garmin-runs.js"></script>
+<script src="/garmin-route.js"></script>
 </head>
 <body>
 <div id="signin-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto">
@@ -685,7 +688,7 @@ function renderProfileModal(){
   h+='</div></div>';
 
   // Garmin data belongs only to the server-configured account.
-  h+='<div class="card" style="margin-bottom:11px"><div style="font-size:13px;font-weight:800;margin-bottom:8px">Garmin</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">ייבוא ריצות לפי בקשה. המפתח מוגדר בשרת בלבד. ייתכנו כפילויות מול ריצות שהוזנו ידנית.</div><button id="garmin-import-btn" onclick="importGarminRuns()" class="btn btn-p" style="width:100%">ייבוא ריצות מ־Garmin</button><div id="garmin-status" role="status" style="font-size:12px;margin-top:8px"></div></div>';
+  h+='<div class="card" style="margin-bottom:11px"><div style="font-size:13px;font-weight:800;margin-bottom:8px">Garmin</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">ריצות חדשות נבדקות אוטומטית בפתיחת האפליקציה.</div><button id="garmin-import-btn" onclick="refreshGarminRuns(true)" class="btn btn-p" style="width:100%">בדוק ריצות עכשיו</button><div id="garmin-status" role="status" style="font-size:12px;margin-top:8px"></div></div>';
 
   h+='<div class="card"><button type="button" class="btn" onclick="openJarvisMemory()">Jarvis — זיכרון והרשאות</button><p style="font-size:12px;color:var(--muted)">ניהול זיכרונות באישור שלך. שיחה קולית תתווסף בהמשך.</p></div>';
 
@@ -695,45 +698,6 @@ function renderProfileModal(){
 
   document.getElementById("profile-modal-content").innerHTML=h;
 }
-let garminImportBusy=false;
-async function importGarminRuns(start=0){
-  if(garminImportBusy||!currentUser)return;
-  const user=currentUser;
-  const status=document.getElementById('garmin-status');
-  const button=document.getElementById('garmin-import-btn');
-  garminImportBusy=true;
-  if(button)button.disabled=true;
-  if(status)status.textContent='טוען ריצות מ־Garmin…';
-  let nextStart=null;
-  try{
-    const token=await user.getIdToken();
-    const response=await fetch('/.netlify/functions/garmin',{
-      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({start})
-    });
-    const result=await response.json();
-    if(!response.ok)throw new Error(result.error||'לא ניתן לייבא ריצות כרגע.');
-    if(currentUser?.uid!==user.uid)return;
-    const known=new Set(RUNS.filter(r=>r.garminId).map(r=>String(r.garminId)));
-    const fresh=[];
-    for(const run of result.runs){
-      if(!known.has(run.garminId)){known.add(run.garminId);fresh.push(run);}
-    }
-    if(fresh.length&&confirm('נמצאו '+fresh.length+' ריצות חדשות מ־Garmin. להוסיף להיסטוריה? ריצות ידניות לא יימחקו ולא יסומנו אימונים מתוכננים.')){
-      if(currentUser?.uid!==user.uid)return;
-      let id=Math.max(Date.now(),...RUNS.map(r=>Number(r.id)||0));
-      for(const run of fresh)RUNS.push({...run,id:++id,type:null,effort:null,notes:'Garmin'+(run.device?' · '+run.device:'')+(run.name?' · '+run.name:''),splits:null});
-      RUNS.sort((a,b)=>b.date.localeCompare(a.date));
-      save('runs',RUNS);
-      if(status)status.textContent='נוספו '+fresh.length+' ריצות. מקור: Garmin.';
-    }else if(status){status.textContent=fresh.length?'הייבוא בוטל.':'אין ריצות חדשות בעמוד הזה.';}
-    if(result.skipped&&status)status.textContent+=' דולגו '+result.skipped+' רשומות עם נתונים חסרים.';
-    nextStart=result.nextStart;
-  }catch(error){if(status)status.textContent=error.message||'תקלה בייבוא.';}
-  finally{garminImportBusy=false;if(button)button.disabled=false;}
-  if(nextStart!==null&&currentUser?.uid===user.uid&&confirm('לבדוק עוד ריצות ישנות יותר?'))return importGarminRuns(nextStart);
-}
-
 function saveProfileChanges(){
   const name=document.getElementById("pf-name").value.trim();
   const weight=parseFloat(document.getElementById("pf-weight").value)||PROFILE.weight;
@@ -815,7 +779,7 @@ function calcDayScore(dateStr){
   const dayName=DAYS[new Date(t+'T12:00:00').getDay()];
   // Workout
   const hasWorkout=getDayWorkouts(dayName).length>0;
-  const workDone=COMP[t+"-"+dayName]?1:0;
+  const workDone=completedWorkoutOn(t,dayName)?1:0;
   // Habits
   const hl=HABIT_LOG[t]||{};
   const totalH=HABITS_DEF.length;
@@ -960,7 +924,8 @@ function renderDash(){
   const _dws=getEffectiveWorkouts(weekKeyOf(t),dayName);
   const todayWorkout=_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#FF7A45":"#6FA86B",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":({"easy":"ריצה קלה","tempo":"ריצת טמפו","intervals":"ריצת אינטרוולים","long":"ריצה ארוכה"}[_dws[0].runType]||"ריצה")}:null;
   const workKey=t+"-"+dayName;
-  const workDone=COMP[workKey];
+  const garminDone=garminCompletedWorkout(t,_dws,0);
+  const workDone=!!COMP[workKey]||garminDone;
   const todayTasks=TASKS[t]||[];
   const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
   const tStr=tomorrow.toISOString().slice(0,10);
@@ -993,7 +958,7 @@ function renderDash(){
   const scoreColor=dayScore>=75?"var(--teal)":dayScore>=50?"var(--amber)":"var(--coral)";
   const scoreLabel=dayScore>=90?"יום מושלם! ⭐":dayScore>=75?"יום מעולה! 🔥":dayScore>=50?"יום טוב 👍":dayScore>=30?"יום בינוני 🙂":"יש עוד לאן לגדול 💪";
   const hasWorkoutToday=getDayWorkouts(dayName).length>0;
-  const workDoneToday=!!COMP[t+"-"+dayName];
+  const workDoneToday=workDone;
   const habLog=HABIT_LOG[t]||{};
   const habDone=HABITS_DEF.filter(h=>habLog[h.id]).length;
   const tasksDoneToday=(TASKS[t]||[]).filter(tk=>tk.done).length;
@@ -1067,7 +1032,7 @@ function renderDash(){
   h+='</div>';
 
   h+='</div>';
-  h+='<div id="google-today"></div>'+dailyShortcut;
+  h+=renderLatestGarminRun()+'<div id="google-today"></div>'+dailyShortcut;
   // ── TODAY'S WORKOUT ──
   if(todayWorkout){
     const tc=todayWorkout.color;
@@ -1087,7 +1052,8 @@ function renderDash(){
     h+='<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">';
     h+='<div style="width:48px;height:48px;border-radius:10px;background:'+c2r(tc,0.15)+';display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0">'+todayWorkout.icon+'</div>';
     h+='<div style="flex:1;font-size:16px;font-weight:800">'+todayWorkout.title+'</div>';
-    h+='<button onclick="event.stopPropagation();COMP[\''+workKey+'\']=!'+workDone+';save(\'comp\',COMP);renderDash()" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+tc+';background:'+(workDone?tc:"transparent")+';color:'+(workDone?"#06231C":tc)+';font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s">'+(workDone?"✓ בוצע":"סמן")+'</button>';
+    if(garminDone)h+='<span style="color:var(--teal);font-weight:800;font-size:11px">✓ בוצע · Garmin</span>';
+    else h+='<button onclick="event.stopPropagation();COMP[\''+workKey+'\']=!'+workDone+';save(\'comp\',COMP);renderDash()" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+tc+';background:'+(workDone?tc:"transparent")+';color:'+(workDone?"#06231C":tc)+';font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s">'+(workDone?"✓ בוצע":"סמן")+'</button>';
     h+='</div>';
     h+='<div style="display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)">';
     statChips.forEach(([ic,val])=>{h+='<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span>'+ic+'</span><span class="num" style="color:var(--text);font-weight:700">'+val+'</span></div>';});
@@ -1174,6 +1140,8 @@ function renderDash(){
 
   el.innerHTML=h;
   // ── animate score number ──
+  const latestRoute=el.querySelector('details[data-garmin-route][open]');
+  if(latestRoute)loadGarminRoute(latestRoute);
   if(typeof gcRenderToday==='function'){gcRenderToday();gcEnsureToday();}
   requestAnimationFrame(()=>{
     const numEl=document.getElementById('score-num');
@@ -1553,13 +1521,13 @@ function renderHistRunCard(run){
   if(run.source==='Garmin')h+='<div style="font-size:10px;color:var(--muted);margin-bottom:3px">מקור: Garmin'+(run.device?' · '+esc(run.device):'')+'</div>';
   if(tag)h+='<div style="font-size:11px;font-weight:700;color:'+tagColor+';margin-bottom:3px">'+tag.label+'</div>';
   h+='<div style="display:flex;gap:6px;align-items:baseline;flex-wrap:wrap">';
-  h+='<span class="num" style="font-size:14px;font-weight:700">'+run.km+'</span><span style="font-size:10px;color:var(--muted)">ק"מ</span>';
-  h+='<span class="num" style="font-size:10px;color:var(--muted)">'+fmtPace(run.paceSec)+'/ק"מ</span>';
+  h+='<span class="num" style="font-size:14px;font-weight:700">'+Number(run.km).toFixed(2)+'</span><span style="font-size:10px;color:var(--muted)">ק"מ</span>';
+  if(run.paceSec)h+='<span class="num" style="font-size:10px;color:var(--muted)">'+fmtPace(Math.round(run.paceSec))+'/ק"מ</span>';
   if(run.avgHr) h+='<span class="num" style="font-size:10px;font-weight:600;color:var(--muted)">♥ '+run.avgHr+'</span>';
   h+='</div>';
   if(run.notes) h+='<div style="font-size:10px;color:var(--muted2);font-style:italic;margin-top:2px">'+esc(run.notes)+'</div>';
   h+='</div>';
-  h+='<button onclick="delRun('+run.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:12px;padding:2px">✕</button>';
+  if(run.id)h+='<button onclick="delRun('+run.id+')" style="background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:12px;padding:2px">✕</button>';
   h+='</div>';
   return h;
 }
@@ -1606,7 +1574,7 @@ function renderHistStrengthCard(s){
   return h;
 }
 function renderDayHistory(dateStr){
-  const dayRuns=RUNS.filter(r=>r.date===dateStr);
+  const dayRuns=[...recentGarminRuns(),...RUNS.filter(r=>!r.garminId)].filter(r=>r.date===dateStr);
   const dayStr=STR_LOG.filter(s=>s.date===dateStr);
   if(!dayRuns.length&&!dayStr.length){
     return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;color:var(--muted)"><span style="font-size:22px">😴</span><span style="font-size:10px">מנוחה</span></div>';
@@ -1644,7 +1612,7 @@ function buildFitnessCalendar(){
     const isToday=dateStr===todayStr();
     const isPast=dateStr<todayStr();
     const workouts=isPast?[]:getEffectiveWorkouts(weekKey,day);
-    const hasDone=workouts.length&&workouts.some((_,i)=>!!COMP[i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i)]);
+    const hasDone=workouts.some((_,i)=>!!COMP[i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i)]||garminCompletedWorkout(dateStr,workouts,i));
 
     h+=(isToday?'<div id="fitness-today-col"':'<div')+' style="width:calc(50vw - 22px);min-width:160px;max-width:260px;flex-shrink:0;background:var(--card);border:1.5px solid '+(isToday?"rgba(255,122,69,0.5)":"var(--border)")+';border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:0'+(isToday?';box-shadow:0 0 0 3px rgba(255,122,69,0.08)':'')+'">';
 
@@ -1674,7 +1642,8 @@ function buildFitnessCalendar(){
         const runLbl={"easy":"קלה","tempo":"טמפו","intervals":"אינטרוולים","long":"ארוכה"}[w.runType]||"";
         const typeLabel=w.type==="strength"?"אימון כוח":"ריצה"+(runLbl?" "+runLbl:"");
         const compKey=i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i);
-        const done=!!COMP[compKey];
+        const garminDone=garminCompletedWorkout(dateStr,workouts,i);
+        const done=!!COMP[compKey]||garminDone;
         const fixedBadge=w.fixed===false?'<span title="משתנה כל שבוע" style="font-size:9px;color:var(--blue)">🔀</span>':'<span title="קבוע כל שבוע" style="font-size:9px;color:var(--muted2)">🔁</span>';
 
         if(i>0)h+='<div style="height:1px;background:var(--border);margin:7px 0"></div>';
@@ -1684,7 +1653,8 @@ function buildFitnessCalendar(){
         h+='<span style="font-size:14px">'+icon+'</span>';
         h+='<span style="font-size:11px;font-weight:700;color:'+color+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+typeLabel+'</span>';
         h+=fixedBadge;
-        h+='<button onclick="toggleWorkoutDone(\''+weekKey+'\',\''+day+'\','+i+')" style="width:20px;height:20px;border-radius:50%;border:1.5px solid '+(done?color:"rgba(255,255,255,0.2)")+';background:'+(done?c2r(color,0.2):"transparent")+';cursor:pointer;font-size:10px;font-weight:800;color:'+(done?color:"transparent")+';flex-shrink:0">'+(done?"✓":"")+'</button>';
+        if(garminDone)h+='<span title="סונכרן מ־Garmin" aria-label="בוצע לפי Garmin" style="color:var(--teal);font-weight:800">✓</span>';
+        else h+='<button onclick="toggleWorkoutDone(\''+weekKey+'\',\''+day+'\','+i+')" style="width:20px;height:20px;border-radius:50%;border:1.5px solid '+(done?color:"rgba(255,255,255,0.2)")+';background:'+(done?c2r(color,0.2):"transparent")+';cursor:pointer;font-size:10px;font-weight:800;color:'+(done?color:"transparent")+';flex-shrink:0">'+(done?"✓":"")+'</button>';
         h+='</div>';
 
 
@@ -1737,6 +1707,7 @@ function buildFitnessCalendar(){
       });
     }
 
+    if(!isPast)recentGarminRuns().filter(run=>run.date===dateStr).forEach(run=>{h+=renderHistRunCard(run);});
     h+='</div>';
   });
 
@@ -2034,7 +2005,7 @@ function buildScoreHTML(){
 
   // Workout info
   const hasW=getDayWorkouts(dayName).length>0;
-  const workDone=!!COMP[t+"-"+dayName];
+  const workDone=completedWorkoutOn(t,dayName);
 
   // Habits
   const hl=HABIT_LOG[t]||{};
@@ -3354,14 +3325,18 @@ showLoading();
   auth.onAuthStateChanged(async(user)=>{
     if(typeof gcAuthChanged==='function')gcAuthChanged(user);
     if(typeof clearGarminData==='function')clearGarminData();
+    if(typeof stopGarminRunSync==='function')stopGarminRunSync();
+    garminRouteCache.clear();
     if(user){
       currentUser=user;
       document.getElementById("signin-screen").style.display="none";
       showLoading();
       const isNew=await loadFromFirestore(user.uid);
+      if(currentUser?.uid!==user.uid)return;
       hideLoading();
       updateUserUI(user);
       renderDash();
+      startGarminRunSync(user);
       if(isNew && !load("visited",false)){
         obStep=0;
         document.getElementById("onboarding").style.display="flex";

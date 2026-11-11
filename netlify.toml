@@ -9,3 +9,7 @@
   node_bundler = "esbuild"
   external_node_modules = ["@google-cloud/firestore"]
 
+[functions."garmin-run-sync"]
+  node_bundler = "esbuild"
+  external_node_modules = ["@google-cloud/firestore"]
+

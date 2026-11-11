@@ -4,7 +4,8 @@ const vm=require('node:vm');
 const fs=require('node:fs');
 test('wellness dashboard distinguishes zeros, missing data, failures and escapes provider text',()=>{
   const el={innerHTML:'',replaceChildren(){this.innerHTML='';}};
-  const context=vm.createContext({document:{getElementById:()=>el},currentUser:{uid:'owner'},currentPg:'garmin',todayStr:()=> '2026-11-05',esc:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),AbortSignal,Date,console});
+  const context=vm.createContext({document:{getElementById:()=>el,addEventListener(){}},currentUser:{uid:'owner'},currentPg:'garmin',todayStr:()=> '2026-11-05',esc:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),AbortSignal,Date,console});
+  vm.runInContext(fs.readFileSync(require.resolve('../garmin-route.js'),'utf8'),context);
   vm.runInContext(fs.readFileSync(require.resolve('../garmin-dashboard.js'),'utf8'),context);
   vm.runInContext(fs.readFileSync(require.resolve('../garmin-visual.js'),'utf8'),context);
   vm.runInContext(`garminView={date:'2026-11-05',uid:'owner',loading:false,error:'',requestId:1,result:{date:'2026-11-05',fetchedAt:'2026-11-05T10:00:00Z',sections:{sleep:{status:'ok',data:{dailySleepDTO:{sleepTimeSeconds:28800,deepSleepSeconds:0}}},summary:{status:'ok',data:{data:[{totalSteps:0}]}},hrv:{status:'error',httpStatus:503},bodyBattery:{status:'ok',data:[{bodyBatteryValuesArray:[[1,'MEASURED',40],[2,'MEASURED',0]]}]},activities:{status:'ok',data:[{activityName:'<img onerror=alert(1)>',distance:5000,duration:1500}]}}}};renderGarmin();`,context);
@@ -14,6 +15,12 @@ test('wellness dashboard distinguishes zeros, missing data, failures and escapes
   assert.ok(el.innerHTML.includes('503'));
   assert.ok(el.innerHTML.includes('&lt;img'));
   assert.ok(!el.innerHTML.includes('<img onerror'));
+  vm.runInContext(`garminView.result.sections.steps={status:'ok',data:[{calendarDate:'2026-11-04',totalSteps:9000},{calendarDate:'2026-11-05',totalSteps:4321,stepGoal:8000}]};renderGarmin();`,context);
+  assert.match(el.innerHTML,/4,321/);
+  assert.match(el.innerHTML,/8,000/);
+  assert.doesNotMatch(el.innerHTML,/9,000/);
+  vm.runInContext(`garminView.result.sections.steps={status:'error',httpStatus:503};renderGarmin();`,context);
+  assert.match(el.innerHTML,/gw-big">0<\/div><div class="gw-sub">צעדים/);
   vm.runInContext('clearGarminData()',context);
   assert.equal(el.innerHTML,'');
 });
