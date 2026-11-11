@@ -1,3 +1,4 @@
+const { normalizeRuns } = require('../lib/garmin-runs.cjs');
 const BASE = 'https://personal.connectapi.garmin.com';
 let cachedToken = null;
 const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Garmin-Connector-Version': '3' };
@@ -29,24 +30,7 @@ exports.handler = async (event) => {
     if (body.action === 'wellness' && (!/^\d{4}-\d{2}-\d{2}$/.test(body.date || '') || !Number.isFinite(Date.parse(body.date)) || new Date(body.date).toISOString().slice(0,10) !== body.date)) return reply(400, { error: 'Invalid date' });
     const start = body.start ?? 0;
     if (!Number.isInteger(start) || start < 0 || start > 10000) return reply(400, { error: 'Invalid page' });
-    // Tokens and the personal key never leave the server. Cache only in process memory.
-    if (!cachedToken || cachedToken.expires < Date.now() || cachedToken.key !== GARMIN_PERSONAL_API_KEY) {
-      const tokenResponse = await request(`${BASE}/personalapitoken-service/personal-api/personal-api-key/token`, {
-        method: 'POST', headers: { Authorization: `ApiKey ${GARMIN_PERSONAL_API_KEY}` }
-      });
-      if (!tokenResponse.ok) return reply(502, { error: 'Garmin לא אישר את המפתח. בדוק את תוקפו בהגדרות השרת.' });
-      // Garmin's official endpoint returns a plain-text JWT, not OAuth JSON.
-      const token = (await tokenResponse.text()).trim();
-      let expires;
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
-        expires = Number(payload.exp) * 1000;
-      } catch { /* Reject an unexpected response without exposing it. */ }
-      if (!Number.isFinite(expires) || expires <= Date.now() + 60000) {
-        return reply(502, { error: 'התקבלה תשובת הזדהות לא תקינה מ־Garmin. נסה שוב מאוחר יותר.' });
-      }
-      cachedToken = { value: token, key: GARMIN_PERSONAL_API_KEY, expires: expires - 60000 };
-    }
+    const token = await garminToken(GARMIN_PERSONAL_API_KEY);
     if (body.action === 'wellness') {
       const date = body.date;
       // Fixed endpoint allowlist; never accept arbitrary provider URLs from callers.
@@ -60,7 +44,7 @@ exports.handler = async (event) => {
       };
       const sections = await Promise.all(Object.entries(paths).map(async ([name,path]) => {
         try {
-          const response = await request(BASE + path, { headers: { Authorization: `Bearer ${cachedToken.value}`, Accept: 'application/json' } });
+          const response = await request(BASE + path, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
           if (!response.ok) {
             if (response.status === 401) cachedToken = null;
             return [name, { status: response.status === 404 || response.status === 204 ? 'empty' : 'error', httpStatus: response.status }];
@@ -72,25 +56,47 @@ exports.handler = async (event) => {
       }));
       return reply(200, { date, fetchedAt: new Date().toISOString(), source: 'Garmin', sections: Object.fromEntries(sections) });
     }
-    const response = await request(`${BASE}/activitylist-service/activities/search/activities?start=${start}&limit=50&activityType=running`, {
-      headers: { Authorization: `Bearer ${cachedToken.value}`, Accept: 'application/json' }
-    });
-    if (!response.ok) {
-      if (response.status === 401) cachedToken = null;
-      return reply(502, { error: 'לא ניתן לקבל ריצות מ־Garmin כרגע. נסה שוב מאוחר יותר.' });
-    }
-    const activities = await response.json();
-    if (!Array.isArray(activities)) throw new Error('Unexpected activity response');
-    const runs = activities.filter(a => a.activityId && Number.isFinite(a.distance) && a.distance > 0 && Number.isFinite(a.averageSpeed) && a.averageSpeed > 0 && /^\d{4}-\d{2}-\d{2}/.test(a.startTimeLocal || '')).map(a => ({
-      garminId: String(a.activityId), date: a.startTimeLocal.slice(0, 10),
-      km: a.distance / 1000, paceSec: 1000 / a.averageSpeed,
-      avgHr: Number.isFinite(a.averageHR) ? a.averageHR : null,
-      name: typeof a.activityName === 'string' ? a.activityName : '',
-      source: 'Garmin', device: typeof a.deviceName === 'string' ? a.deviceName : null
-    }));
-    return reply(200, { runs, skipped: activities.length - runs.length, nextStart: activities.length === 50 ? start + 50 : null });
-  } catch {
-    // Never echo upstream bodies or credentials into responses/logs.
+    return reply(200, await fetchRuns(GARMIN_PERSONAL_API_KEY, start, token));
+  } catch (error) {
+    if (error instanceof GarminError) return reply(502, { error: error.message });
     return reply(502, { error: 'תקלה בקבלת הנתונים. נסה שוב מאוחר יותר.' });
   }
 };
+
+class GarminError extends Error {}
+async function garminToken(GARMIN_PERSONAL_API_KEY) {
+  // Tokens and the personal key never leave the server. Cache only in process memory.
+  if (!cachedToken || cachedToken.expires < Date.now() || cachedToken.key !== GARMIN_PERSONAL_API_KEY) {
+    const tokenResponse = await request(`${BASE}/personalapitoken-service/personal-api/personal-api-key/token`, {
+      method: 'POST', headers: { Authorization: `ApiKey ${GARMIN_PERSONAL_API_KEY}` }
+    });
+    if (!tokenResponse.ok) throw new GarminError('Garmin לא אישר את המפתח. בדוק את תוקפו בהגדרות השרת.');
+    // Garmin's official endpoint returns a plain-text JWT, not OAuth JSON.
+    const token = (await tokenResponse.text()).trim();
+    let expires;
+    try {
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+      expires = Number(payload.exp) * 1000;
+    } catch { /* Reject an unexpected response without exposing it. */ }
+    if (!Number.isFinite(expires) || expires <= Date.now() + 60000) {
+      throw new GarminError('התקבלה תשובת הזדהות לא תקינה מ־Garmin. נסה שוב מאוחר יותר.');
+    }
+    cachedToken = { value: token, key: GARMIN_PERSONAL_API_KEY, expires: expires - 60000 };
+  }
+  return cachedToken.value;
+}
+async function fetchRuns(key, start = 0, token) {
+  const access = token || await garminToken(key);
+  const params = new URLSearchParams({ start, limit: 50, activityType: "running" });
+  const response = await request(BASE + "/activitylist-service/activities/search/activities?" + params, {
+    headers: { Authorization: "Bearer " + access, Accept: "application/json" }
+  });
+  if (!response.ok) {
+    if (response.status === 401) cachedToken = null;
+    throw new GarminError("לא ניתן לקבל ריצות מ־Garmin כרגע. נסה שוב מאוחר יותר.");
+  }
+  const activities = response.status === 204 ? [] : await response.json();
+  const runs = normalizeRuns(activities);
+  return { runs, skipped: activities.length - runs.length, nextStart: activities.length === 50 ? start + 50 : null };
+}
+exports.fetchRuns = fetchRuns;

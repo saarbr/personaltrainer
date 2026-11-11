@@ -1,0 +1,12 @@
+.garmin-run-summary {
+  margin-block: 14px;
+  padding: 16px;
+  background: radial-gradient(ellipse at top right, rgba(90, 224, 194, .13), transparent 70%), var(--card);
+}
+.garmin-run-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.garmin-run-heading h2 { font-size: 17px; margin: 4px 0 0; overflow-wrap: anywhere; }
+.garmin-run-heading a { color: var(--teal); font-size: 12px; }
+.garmin-run-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 10px; margin-top: 14px; }
+.garmin-run-metrics div { display: grid; gap: 3px; padding: 8px; border-radius: 9px; background: var(--bg2); }
+.garmin-run-metrics strong { font-size: 21px; text-align: right; }
+.garmin-run-metrics span { font-size: 11px; color: var(--muted); }
