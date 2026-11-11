@@ -107,5 +107,5 @@ function renderLatestGarminRun() {
     '" target="_blank" rel="noopener noreferrer">לפרטי הריצה ↗</a></div>' +
     '<div class="garmin-run-metrics">' + metrics.map(([value, label]) =>
       '<div><strong class="num" dir="ltr">' + value + '</strong><span>' + label + '</span></div>'
-    ).join('') + '</div></section>';
+    ).join('') + '</div>' + garminRouteMarkup(run.garminId, true) + '</section>';
 }

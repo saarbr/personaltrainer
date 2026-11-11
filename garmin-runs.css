@@ -10,3 +10,11 @@
 .garmin-run-metrics div { display: grid; gap: 3px; padding: 8px; border-radius: 9px; background: var(--bg2); }
 .garmin-run-metrics strong { font-size: 21px; text-align: right; }
 .garmin-run-metrics span { font-size: 11px; color: var(--muted); }
+.garmin-route { margin-block: 12px 4px; width: 100%; }
+.garmin-route summary { cursor: pointer; color: var(--teal); font-size: 13px; font-weight: 700; padding-block: 6px; }
+.garmin-route-body { padding: 8px; border-radius: 10px; color: #74e2cb; background: var(--bg2); }
+.garmin-route-body svg { display: block; width: 100%; max-height: 190px; }
+.garmin-route-body p { font-size: 12px; color: var(--muted); margin: 4px; }
+.garmin-route-key { display: flex; gap: 12px; justify-content: center; font-size: 11px; color: var(--muted); }
+.garmin-route-key span::before { content: '●'; color: #9ce8cb; margin-inline-end: 4px; }
+.garmin-route-key span:last-child::before { color: #ffa783; }

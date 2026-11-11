@@ -26,11 +26,24 @@ exports.handler = async (event) => {
     let body;
     try { body = JSON.parse(event.body || '{}'); } catch { return reply(400, { error: 'Invalid request' }); }
     if (!body || typeof body !== 'object' || Array.isArray(body)) return reply(400, { error: 'Invalid request' });
-    if (body.action && !['wellness','runs'].includes(body.action)) return reply(400, { error: 'Invalid action' });
+    if (body.action && !['wellness','runs','route'].includes(body.action)) return reply(400, { error: 'Invalid action' });
+    if (body.action === 'route' && (typeof body.activityId !== 'string' || !/^\d{1,20}$/.test(body.activityId))) return reply(400, { error: 'Invalid activity' });
     if (body.action === 'wellness' && (!/^\d{4}-\d{2}-\d{2}$/.test(body.date || '') || !Number.isFinite(Date.parse(body.date)) || new Date(body.date).toISOString().slice(0,10) !== body.date)) return reply(400, { error: 'Invalid date' });
     const start = body.start ?? 0;
     if (!Number.isInteger(start) || start < 0 || start > 10000) return reply(400, { error: 'Invalid page' });
     const token = await garminToken(GARMIN_PERSONAL_API_KEY);
+    if (body.action === 'route') {
+      const response = await request(BASE + '/download-service/files/activity/' + body.activityId, {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      if ([204, 404].includes(response.status)) return reply(200, { points: [] });
+      if (!response.ok) {
+        if (response.status === 401) cachedToken = null;
+        return reply(502, { error: 'Garmin לא הצליחה לספק את המסלול כרגע.' });
+      }
+      const { routeFromActivity } = require('../lib/garmin-route.cjs');
+      return reply(200, { points: await routeFromActivity(response) });
+    }
     if (body.action === 'wellness') {
       const date = body.date;
       // Fixed endpoint allowlist; never accept arbitrary provider URLs from callers.

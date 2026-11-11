@@ -10,6 +10,7 @@ test('same-day Garmin activity completes only an unambiguous run and renders one
     esc: value => String(value).replaceAll('<', '&lt;'),
     fmtPace: seconds => String(seconds)
   });
+  vm.runInContext(fs.readFileSync(require.resolve('../garmin-route.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(require.resolve('../garmin-runs.js'), 'utf8'), context);
   vm.runInContext("garminRunSync.runs = [{garminId:'123',date:'2026-11-11',km:5,name:'<img>',durationSec:1500}]", context);
   assert.equal(context.recentGarminRuns().length, 1);
@@ -22,5 +23,6 @@ test('same-day Garmin activity completes only an unambiguous run and renders one
   assert.match(summary, /&lt;img>/);
   assert.match(summary, /5\.00/);
   assert.match(summary, /activity\/123/);
+  assert.match(summary, /data-garmin-route="123" open/);
   assert.doesNotMatch(summary, /<img>/);
 });

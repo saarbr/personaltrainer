@@ -142,6 +142,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="/garmin-runs.js"></script>
+<script src="/garmin-route.js"></script>
 </head>
 <body>
 <div id="signin-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto">
@@ -1139,6 +1140,8 @@ function renderDash(){
 
   el.innerHTML=h;
   // ── animate score number ──
+  const latestRoute=el.querySelector('details[data-garmin-route][open]');
+  if(latestRoute)loadGarminRoute(latestRoute);
   if(typeof gcRenderToday==='function'){gcRenderToday();gcEnsureToday();}
   requestAnimationFrame(()=>{
     const numEl=document.getElementById('score-num');
@@ -3323,6 +3326,7 @@ showLoading();
     if(typeof gcAuthChanged==='function')gcAuthChanged(user);
     if(typeof clearGarminData==='function')clearGarminData();
     if(typeof stopGarminRunSync==='function')stopGarminRunSync();
+    garminRouteCache.clear();
     if(user){
       currentUser=user;
       document.getElementById("signin-screen").style.display="none";

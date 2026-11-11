@@ -6,7 +6,7 @@ const output = path.join(root, 'dist');
 // Publish browser assets only, excluding dependencies, rules and server source.
 const assets = [
   'index.html', 'logo.mp4', 'myway-neumorphic.css', 'myway-glass.css',
-  'garmin-dashboard.js', 'garmin-visual.js', 'garmin-runs.js', 'garmin-runs.css', 'google-timeline.js',
+  'garmin-dashboard.js', 'garmin-visual.js', 'garmin-runs.js', 'garmin-runs.css', 'garmin-route.js', 'google-timeline.js',
   'google-timeline.css', 'google-week.js', 'google-week.css',
   'google-week-glass.css', 'google-connection.js', 'jarvis-memory.js'
 ];

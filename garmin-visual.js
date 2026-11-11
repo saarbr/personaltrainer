@@ -78,7 +78,11 @@ function renderGarminVisual(){
     h+='<section class="gw-panel gw-panel-wide"><div class="gw-panel-title"><h2>'+gwIcon('activity')+'הפעילויות שלך</h2><span class="gw-kicker">ACTIVITY</span></div>'+gwSectionNote(s.activities);
     const activities=s.activities?.status==='ok'&&Array.isArray(s.activities.data)?s.activities.data:[];
     if(!activities.length&&s.activities?.status!=='error')h+='<div class="gw-chart-empty">אין פעילויות להצגה ביום הזה.</div>';
-    for(const a of activities)h+='<article class="gw-activity">'+gwIcon('activity')+'<div><h3>'+esc(a.activityName||'פעילות')+'</h3><p>מקור: Garmin'+(a.deviceName?' · '+esc(a.deviceName):'')+'</p></div><div class="gw-activity-stats"><div><strong>'+(garminNumber(a.distance)===null?'—':(a.distance/1000).toFixed(2))+'</strong><span>ק״מ</span></div><div><strong style="font-size:15px">'+esc(garminDuration(a.duration))+'</strong><span>משך הפעילות</span></div><div><strong>'+(garminNumber(a.averageHR)??'—')+'</strong><span>דופק ממוצע</span></div></div></article>';
+    for(const a of activities){
+      h+='<article class="gw-activity">'+gwIcon('activity')+'<div><h3>'+esc(a.activityName||'פעילות')+'</h3><p>מקור: Garmin'+(a.deviceName?' · '+esc(a.deviceName):'')+'</p></div><div class="gw-activity-stats"><div><strong>'+(garminNumber(a.distance)===null?'—':(a.distance/1000).toFixed(2))+'</strong><span>ק״מ</span></div><div><strong style="font-size:15px">'+esc(garminDuration(a.duration))+'</strong><span>משך הפעילות</span></div><div><strong>'+(garminNumber(a.averageHR)??'—')+'</strong><span>דופק ממוצע</span></div></div></article>';
+      const type=a.activityType?.typeKey||a.activityName||'';
+      if(/run|ריצ/i.test(type))h+=garminRouteMarkup(a.activityId);
+    }
     if(activities.length===20)h+='<div class="gw-sub">מוצגות עד 20 פעילויות ליום הנבחר.</div>';
     h+='</section></div><div class="gw-footer">עדכון אחרון: '+esc(new Date(result.fetchedAt).toLocaleString('he-IL'))+' · יום מדידה: '+esc(result.date)+'<br>נתון חסר אינו אפס. זמינות המדדים תלויה בשעון ובסנכרון. מדדי Garmin הם הערכות ואינם אבחנה רפואית.</div>';
   }
