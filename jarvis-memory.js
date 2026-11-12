@@ -129,5 +129,22 @@
     const host = el('div', undefined, dialog); host.dataset.content = '';
     document.body.appendChild(dialog); dialog.showModal(); run(list);
   };
-  auth.onAuthStateChanged(next => { clear(); user = next; });
+  const launcher = el('button', undefined, document.body);
+  launcher.type = 'button';
+  launcher.className = 'btn btn-p';
+  launcher.hidden = true;
+  launcher.setAttribute('aria-label', 'פתיחת Jarvis — זיכרון והרשאות');
+  launcher.setAttribute('aria-haspopup', 'dialog');
+  launcher.title = 'Jarvis';
+  launcher.style.cssText = 'position:fixed;inset-inline-end:max(16px,env(safe-area-inset-left));bottom:calc(88px + env(safe-area-inset-bottom));z-index:900;width:52px;height:52px;border-radius:50%;padding:0;font-size:22px';
+  const mark = el('span', 'J', launcher);
+  mark.setAttribute('aria-hidden', 'true');
+  launcher.addEventListener('click', () => {
+    if (user) window.openJarvisMemory();
+  });
+  auth.onAuthStateChanged(next => {
+    clear();
+    user = next;
+    launcher.hidden = !next;
+  });
 })();

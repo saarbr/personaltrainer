@@ -61,3 +61,17 @@ test('failed Firestore startup reuses its existing app instead of hiding the fai
   const result = runtime(); assert.ok(result.store);
   assert.equal(runtime(), result); assert.equal(initialized, 1); assert.equal(firestoreCalls, 2);
 });
+
+test('Netlify credentials support the existing mixed names', () => {
+  const suffixed = {
+    JARVIS_FIREBASE_PROJECT_ID1: config.JARVIS_FIREBASE_PROJECT_ID,
+    JARVIS_FIREBASE_SERVICE_ACCOUNT1: config.JARVIS_FIREBASE_SERVICE_ACCOUNT
+  };
+  assert.equal(readConfiguration(suffixed).project_id, 'demo-myway');
+  const mixed = {
+    JARVIS_FIREBASE_PROJECT_ID: config.JARVIS_FIREBASE_PROJECT_ID,
+    JARVIS_FIREBASE_SERVICE_ACCOUNT1: config.JARVIS_FIREBASE_SERVICE_ACCOUNT,
+    JARVIS_FIREBASE_SERVICE_ACCOUNT: 'old-invalid-value'
+  };
+  assert.equal(readConfiguration(mixed).project_id, 'demo-myway');
+});
