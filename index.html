@@ -47,6 +47,8 @@ body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;direc
 .nb-label{display:none;}
 .page{display:none;padding:14px 16px 10px;animation:fadeIn 0.25s ease}
 .page.active{display:block}
+#pg-productivity > .subtabs,
+.mw-productivity-score{max-width:580px;margin-inline:auto}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes pulse-glow{0%,100%{box-shadow:0 4px 20px rgba(255,122,69,0.6),0 0 0 0 rgba(255,122,69,0.35)}65%{box-shadow:0 4px 20px rgba(255,122,69,0.6),0 0 0 11px rgba(255,122,69,0)}}
@@ -736,7 +738,6 @@ let DEBRIEF=load("debrief",{});
 const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const todayDay=()=>DAYS[new Date().getDay()];
 const fmtPace=s=>{if(!s)return"—";return Math.floor(s/60)+":"+(s%60).toString().padStart(2,"0");};
-const parsePace=s=>{if(!s)return null;const p=s.split(":");return parseInt(p[0])*60+(parseInt(p[1])||0);};
 const fmtDate=d=>{try{return new Date(d).toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"numeric"});}catch(e){return d;}};
 const c2r=(h,a)=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return "rgba("+r+","+g+","+b+","+a+")";};
 function arcGauge(pct,w,h,accentHex,n,pw,pl,opts){
@@ -804,12 +805,9 @@ function calcDayScore(dateStr){
 // STATE
 // ═══════════════════════════════════════════════
 let currentPg="dash";
-let fitTab="plan";
 let planTab="weekly";
 let nutSubTab="macros";
 let openDay=null;
-let addType=null;
-let runDraft=null;
 let prodTab="score";
 let scoreDate=todayStr();
 let goalsView="today";
@@ -819,9 +817,6 @@ let nutView="log";
 let selDate=todayStr();
 let dayType="יום כוח";
 let qcType="today";
-let imgB64=null;
-let imgSplitsB64=null;
-let pendingSplits=null;
 let _exMuscleFilter=null;
 let _newSegType="warmup";
 let _newSegUnit="km";
@@ -922,10 +917,9 @@ function renderDash(){
   const dayName=todayDay();
   const hour=new Date().getHours();
   const _dws=getEffectiveWorkouts(weekKeyOf(t),dayName);
-  const todayWorkout=_dws.length&&_dws[0].type!=="rest"?{day:dayName,type:_dws[0].type,color:_dws[0].type==="strength"?"#FF7A45":"#6FA86B",icon:_dws[0].type==="strength"?"💪":"🏃",title:_dws[0].type==="strength"?"אימון כוח":({"easy":"ריצה קלה","tempo":"ריצת טמפו","intervals":"ריצת אינטרוולים","long":"ריצה ארוכה"}[_dws[0].runType]||"ריצה")}:null;
-  const workKey=t+"-"+dayName;
+  const todayWorkout=_dws.length&&_dws[0].type!=="rest"?workoutDisplay(_dws[0]):null;
   const garminDone=garminCompletedWorkout(t,_dws,0);
-  const workDone=!!COMP[workKey]||garminDone;
+  const workDone=!!COMP[workoutCompletionKey(t,dayName,_dws[0],0)]||garminDone;
   const todayTasks=TASKS[t]||[];
   const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
   const tStr=tomorrow.toISOString().slice(0,10);
@@ -1044,6 +1038,8 @@ function renderDash(){
       statChips.push(["🔀",dw.segments.length+' מקטעים']);
     } else if(dw&&dw.type==='strength'&&dw.exercises&&dw.exercises.length){
       statChips.push(["🏋️",dw.exercises.length+' תרגילים']);
+    } else if(hasWorkoutDetails(dw)&&Number.isFinite(dw.durationMin)&&dw.durationMin>0){
+      statChips.push(["⏱️",dw.durationMin+' דקות']);
     }
     statChips.push(["📅",dayName]);
     h+='<div style="position:relative;margin-top:14px;margin-bottom:16px">';
@@ -1051,9 +1047,9 @@ function renderDash(){
     h+='<div onclick="goToTodayWorkout()" style="cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 15px 14px">';
     h+='<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">';
     h+='<div style="width:48px;height:48px;border-radius:10px;background:'+c2r(tc,0.15)+';display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0">'+todayWorkout.icon+'</div>';
-    h+='<div style="flex:1;font-size:16px;font-weight:800">'+todayWorkout.title+'</div>';
+    h+='<div style="flex:1;font-size:16px;font-weight:800">'+esc(todayWorkout.title)+'</div>';
     if(garminDone)h+='<span style="color:var(--teal);font-weight:800;font-size:11px">✓ בוצע · Garmin</span>';
-    else h+='<button onclick="event.stopPropagation();COMP[\''+workKey+'\']=!'+workDone+';save(\'comp\',COMP);renderDash()" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+tc+';background:'+(workDone?tc:"transparent")+';color:'+(workDone?"#06231C":tc)+';font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s">'+(workDone?"✓ בוצע":"סמן")+'</button>';
+    else h+='<button onclick="event.stopPropagation();toggleWorkoutDone(\''+weekKeyOf(todayStr())+'\',\''+dayName+'\',0)" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+tc+';background:'+(workDone?tc:"transparent")+';color:'+(workDone?"#06231C":tc)+';font-family:Rubik,sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s">'+(workDone?"✓ בוצע":"סמן")+'</button>';
     h+='</div>';
     h+='<div style="display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)">';
     statChips.forEach(([ic,val])=>{h+='<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span>'+ic+'</span><span class="num" style="color:var(--text);font-weight:700">'+val+'</span></div>';});
@@ -1177,183 +1173,8 @@ function toggleHabit(id,date){
 // ═══════════════════════════════════════════════
 function renderFitness(){
   const el=document.getElementById("pg-fitness");
-  const tabs=[["plan","תוכנית"],["add","הוסף ריצה"]];
-  let h='<div class="mw-page-intro"><div><div class="mw-eyebrow">MOVE WITH INTENTION</div><h1>התנועה שלך.</h1><p>תוכנית, ביצוע והתקדמות. אימון אחד בכל פעם.</p></div></div><div class="subtabs">';
-  tabs.forEach(([k,l])=>{
-    h+='<button class="stb'+(fitTab===k?" on":"")+'" onclick="fitTab=\''+k+'\';renderFitness()" style="background:'+(fitTab===k?"var(--purple-g)":"var(--bg2)")+';font-size:13px">';
-    h+=l+'</button>';
-  });
-  h+='</div>';
-
-  if(fitTab==="plan"){
-    h+=buildFitnessCalendar();
-  }
-  else if(fitTab==="add"){
-    h+='<div style="background:rgba(107,143,163,0.08);border:1px solid rgba(107,143,163,0.2);border-radius:12px;padding:11px 13px;margin-bottom:12px">';
-    h+='<div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:2px">💬 פידבק AI</div>';
-    h+='<div style="font-size:10px;color:var(--muted)">שלח לי screenshot מגרמין בצ\'אט ← אני מוציא נתונים ← הזן כאן</div>';
-    h+='</div>';
-    h+='<div class="card">';
-    h+='<div style="font-size:14px;font-weight:800;margin-bottom:3px">📸 תיעוד ריצה מצילום מסך</div>';
-    h+='<div style="font-size:11px;color:var(--muted);margin-bottom:13px">מגרמין, סטראבה או כל אפליקציה אחרת שבה אתה מתעד ריצות</div>';
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
-    // Main image
-    h+='<div>';
-    h+='<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">תמונה ראשית</div>';
-    h+='<label style="display:block;border:2px dashed rgba(255,122,69,0.35);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center">';
-    h+='<img id="img-preview" style="display:none;max-width:100%;max-height:100px;border-radius:7px;margin-bottom:6px;object-fit:contain"/>';
-    h+='<div id="upload-lbl" style="font-size:22px;margin-bottom:3px">📊</div>';
-    h+='<div style="font-size:10px;color:var(--muted)">סיכום ריצה</div>';
-    h+='<input type="file" accept="image/*" style="display:none" onchange="handleImgUpload(this)"/></label>';
-    h+='<button id="analyze-btn" onclick="analyzeGarminImg()" style="display:none;width:100%;margin-top:6px;padding:8px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:800;background:var(--purple-g);color:#fff">🔍 נתח</button>';
-    h+='</div>';
-    // Splits image
-    h+='<div>';
-    h+='<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">תמונת Splits</div>';
-    h+='<label style="display:block;border:2px dashed rgba(111,168,107,0.3);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center">';
-    h+='<img id="splits-preview" style="display:none;max-width:100%;max-height:100px;border-radius:7px;margin-bottom:6px;object-fit:contain"/>';
-    h+='<div id="splits-upload-lbl" style="font-size:22px;margin-bottom:3px">📋</div>';
-    h+='<div style="font-size:10px;color:var(--muted)">Splits / Laps</div>';
-    h+='<input type="file" accept="image/*" style="display:none" onchange="handleSplitsUpload(this)"/></label>';
-    h+='<button id="splits-analyze-btn" onclick="analyzeSplitsImg()" style="display:none;width:100%;margin-top:6px;padding:8px;border-radius:9px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;font-weight:800;background:linear-gradient(135deg,#6FA86B,#00A882);color:#fff">🔍 נתח</button>';
-    h+='</div>';
-    h+='</div>';
-    h+='<div id="analyze-status" style="margin-bottom:6px"></div>';
-    h+='<div id="splits-status" style="margin-bottom:8px"></div>';
-    h+='<div id="run-details-hint" style="display:'+(runDraft?"none":"block")+';text-align:center;padding:14px 10px;color:var(--muted);font-size:12px">📤 העלה למעלה תמונה כדי לזהות את פרטי הריצה</div>';
-    h+='<div id="run-details" style="display:'+(runDraft?"block":"none")+'">';
-    h+='<div style="font-size:13px;font-weight:700;margin-bottom:11px">✏️ אישור פרטי הריצה</div>';
-    h+='<div style="margin-bottom:8px"><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">תאריך</label><input type="date" id="adate" class="inp" value="'+(runDraft?runDraft.date:todayStr())+'"/></div>';
-    h+='<div style="margin-bottom:8px"><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:5px">סוג ריצה (לא חובה)</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">';
-    Object.keys(RUN_TAGS).forEach(v=>{
-      const l=RUN_TAGS[v].label,sc=RUN_TAGS[v].color;
-      const sel=addType===v;
-      h+='<button onclick="addType=(addType===\''+v+'\'?null:\''+v+'\');renderFitness()" style="padding:7px;border-radius:8px;border:none;cursor:pointer;font-family:Rubik,sans-serif;font-size:11px;background:'+(sel?c2r(sc,0.2):"var(--bg3)")+';color:'+(sel?sc:"var(--muted)")+';border:1px solid '+(sel?sc:"transparent")+'">'+l+'</button>';
-    });
-    h+='</div></div>';
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">';
-    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">מרחק (ק"מ)</label><input type="number" id="akm" class="inp" step="0.1" placeholder="7.0" value="'+(runDraft&&runDraft.km?runDraft.km:"")+'"/></div>';
-    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">קצב (MM:SS)</label><input type="text" id="apace" class="inp" placeholder="6:45" value="'+(runDraft&&runDraft.pace?runDraft.pace:"")+'"/></div>';
-    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">דופק ממוצע</label><input type="number" id="ahr" class="inp" placeholder="150" value="'+(runDraft&&runDraft.avgHr?runDraft.avgHr:"")+'"/></div>';
-    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">מאמץ</label><select id="aeff" class="inp"><option>קל</option><option selected>בינוני</option><option>קשה</option><option>מאוד קשה</option></select></div>';
-    h+='</div>';
-    h+='<div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px">הערות</label><textarea id="anotes" class="inp" style="height:52px" placeholder="איך הרגשת..."></textarea></div>';
-    h+='<div id="aerr" style="display:none;padding:8px 11px;border-radius:9px;background:rgba(232,92,74,0.1);border:1px solid rgba(232,92,74,0.3);color:var(--coral);font-size:12px;margin-top:7px">נא למלא מרחק וקצב</div>';
-    h+='<button onclick="submitRun()" class="btn btn-p" style="width:100%;margin-top:10px;font-size:14px">🏃 שמור ריצה</button>';
-    h+='</div>';
-    h+='</div>';
-  }
-  el.innerHTML=h;
-}
-
-function handleImgUpload(input){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const src=e.target.result;
-    const img=new Image();
-    img.onload=()=>{
-      const cv=document.createElement("canvas");
-      cv.width=img.naturalWidth;cv.height=img.naturalHeight;
-      const ctx=cv.getContext("2d");
-      ctx.fillStyle="#fff";ctx.fillRect(0,0,cv.width,cv.height);
-      ctx.drawImage(img,0,0);
-      const jpeg=cv.toDataURL("image/jpeg",0.85);
-      imgB64=jpeg.split(",")[1];
-      const p=document.getElementById("img-preview");
-      if(p){p.src=jpeg;p.style.display="block";}
-      const b=document.getElementById("analyze-btn");
-      if(b)b.style.display="block";
-    };
-    img.src=src;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function analyzeGarminImg(){
-  if(!imgB64)return;
-  const btn=document.getElementById("analyze-btn");
-  const status=document.getElementById("analyze-status");
-  if(btn){btn.textContent="🔍 מנתח...";btn.disabled=true;}
-  try{
-    const token=currentUser?await currentUser.getIdToken():"";
-    const resp=await fetch("/.netlify/functions/analyze",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
-      body:JSON.stringify({image:imgB64,mediaType:"image/jpeg"})
-    });
-    if(!resp.ok){const t=await resp.text();throw new Error("HTTP "+resp.status+": "+t.slice(0,100));}
-    const result=await resp.json();
-    if(result.error)throw new Error(result.error);
-    runDraft={km:result.km||"",pace:result.pace||"",avgHr:result.avgHr||"",date:result.date||todayStr()};
-    document.getElementById("adate").value=runDraft.date;
-    if(result.km)document.getElementById("akm").value=result.km;
-    if(result.pace)document.getElementById("apace").value=result.pace;
-    if(result.avgHr)document.getElementById("ahr").value=result.avgHr;
-    const details=document.getElementById("run-details");if(details)details.style.display="block";
-    const hint=document.getElementById("run-details-hint");if(hint)hint.style.display="none";
-    if(status)status.innerHTML='<div style="background:rgba(111,168,107,0.1);border:1px solid rgba(111,168,107,0.3);border-radius:9px;padding:9px 12px;font-size:12px;color:#6FA86B">✓ זוהה: '+esc(result.km)+' ק"מ · קצב '+esc(result.pace)+' · דופק '+esc(result.avgHr||"—")+'</div>';
-  }catch(e){
-    if(status)status.innerHTML='<div style="background:rgba(232,92,74,0.1);border:1px solid rgba(232,92,74,0.3);border-radius:9px;padding:9px 12px;font-size:11px;color:#E85C4A">שגיאה: '+esc(e.message)+'</div>';
-  }
-  if(btn){btn.textContent="🔍 נתח שוב";btn.disabled=false;}
-}
-
-function handleSplitsUpload(input){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const img=new Image();
-    img.onload=()=>{
-      const cv=document.createElement("canvas");
-      cv.width=img.naturalWidth;cv.height=img.naturalHeight;
-      const ctx=cv.getContext("2d");
-      ctx.fillStyle="#fff";ctx.fillRect(0,0,cv.width,cv.height);
-      ctx.drawImage(img,0,0);
-      const jpeg=cv.toDataURL("image/jpeg",0.85);
-      imgSplitsB64=jpeg.split(",")[1];
-      const p=document.getElementById("splits-preview");
-      if(p){p.src=jpeg;p.style.display="block";}
-      const b=document.getElementById("splits-analyze-btn");
-      if(b)b.style.display="block";
-      const lbl=document.getElementById("splits-upload-lbl");
-      if(lbl)lbl.style.display="none";
-    };
-    img.src=e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function analyzeSplitsImg(){
-  if(!imgSplitsB64)return;
-  const btn=document.getElementById("splits-analyze-btn");
-  const status=document.getElementById("splits-status");
-  if(btn){btn.textContent="🔍 מנתח splits...";btn.disabled=true;}
-  try{
-    const token=currentUser?await currentUser.getIdToken():"";
-    const resp=await fetch("/.netlify/functions/analyze",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
-      body:JSON.stringify({type:"splits",image:imgSplitsB64,mediaType:"image/jpeg"})
-    });
-    if(!resp.ok){const t=await resp.text();throw new Error("HTTP "+resp.status+": "+t.slice(0,100));}
-    const result=await resp.json();
-    if(result.error)throw new Error(result.error);
-    pendingSplits=result.splits||[];
-    if(status){
-      let rows=pendingSplits.map((s,i)=>'<div style="display:flex;gap:8px;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(245,241,232,0.05)">'+
-        '<span style="color:var(--muted);min-width:22px">'+s.lap+'</span>'+
-        '<span style="min-width:50px;color:var(--teal)">'+(s.dist?s.dist+' ק"מ':'')+'</span>'+
-        '<span style="min-width:50px;color:var(--purple)">'+(s.pace?s.pace+'/ק"מ':'')+'</span>'+
-        '<span style="color:var(--amber)">'+(s.hr?'♥'+s.hr:'')+'</span>'+
-        '</div>').join('');
-      status.innerHTML='<div style="background:rgba(111,168,107,0.08);border:1px solid rgba(111,168,107,0.25);border-radius:10px;padding:10px 12px">'+
-        '<div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:7px">✓ זוהו '+pendingSplits.length+' splits</div>'+rows+'</div>';
-    }
-  }catch(e){
-    if(status)status.innerHTML='<div style="background:rgba(232,92,74,0.1);border:1px solid rgba(232,92,74,0.3);border-radius:9px;padding:9px;font-size:11px;color:var(--coral)">שגיאה: '+esc(e.message)+'</div>';
-  }
-  if(btn){btn.textContent="🔍 נתח שוב";btn.disabled=false;}
+  const intro='<div class="mw-page-intro"><div><div class="mw-eyebrow">MOVE WITH INTENTION</div><h1>התנועה שלך.</h1><p>תוכנית, ביצוע והתקדמות. אימון אחד בכל פעם.</p></div></div>';
+  el.innerHTML=intro+buildFitnessCalendar();
 }
 
 function delRun(id){
@@ -1367,28 +1188,7 @@ function delStrLog(id){
   save('str_log',STR_LOG);renderFitness();
 }
 
-function submitRun(){
-  const km=document.getElementById("akm")?.value;
-  const pace=document.getElementById("apace")?.value;
-  const err=document.getElementById("aerr");
-  if(!km||!pace){if(err)err.style.display="block";return;}
-  RUNS.unshift({
-    id:Date.now(),
-    date:document.getElementById("adate")?.value||todayStr(),
-    type:addType,km:parseFloat(km),paceSec:parsePace(pace),
-    avgHr:document.getElementById("ahr")?.value?Number(document.getElementById("ahr").value):null,
-    effort:document.getElementById("aeff")?.value||"בינוני",
-    notes:document.getElementById("anotes")?.value||"",
-    splits:pendingSplits&&pendingSplits.length?pendingSplits:null
-  });
-  const runDate=document.getElementById("adate")?.value||todayStr();
-  const runDay=DAYS[new Date(runDate+'T12:00:00').getDay()];
-  COMP[runDate+"-"+runDay]=true;
-  save("runs",RUNS);save("comp",COMP);
-  imgB64=null;imgSplitsB64=null;pendingSplits=null;runDraft=null;addType=null;
-  toast("✓ ריצה נשמרה ואימון סומן! 🎉");
-  fitTab="history";renderFitness();
-}
+
 
 // ═══════════════════════════════════════════════
 // NUTRITION
@@ -1474,7 +1274,7 @@ function addFoodFromAI(cal, p, c, f, desc){
 // ═══════════════════════════════════════════════
 // FITNESS CALENDAR
 // ═══════════════════════════════════════════════
-function goToTodayWorkout(){fitTab="plan";goTo("fitness");setTimeout(()=>{const el=document.getElementById("fitness-today-col");if(el)el.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});},150);}
+function goToTodayWorkout(){goTo("fitness");setTimeout(()=>{const el=document.getElementById("fitness-today-col");if(el)el.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});},150);}
 
 function setSelectedDay(day){selectedDay=day;renderFitness();}
 
@@ -1506,10 +1306,18 @@ function removeWorkoutFromDay(day,idx){
 
 function toggleWorkoutDone(weekKey,day,idx){
   const dateStr=addDaysStr(weekKey,DAYS.indexOf(day));
-  const key=idx===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+idx);
-  COMP[key]=!COMP[key];
+  const workout=resolveWorkout(weekKey,day,idx);
+  if(!workout)return;
+  const key=workoutCompletionKey(dateStr,day,workout,idx);
+  if(hasWorkoutDetails(workout)){
+    if(COMP[key])delete COMP[key];
+    else COMP[key]={type:workout.type,activityName:workout.activityName||"",durationMin:workout.durationMin||null,activityNotes:workout.activityNotes||""};
+  } else {
+    COMP[key]=!COMP[key];
+  }
   save("comp",COMP);
-  renderFitness();
+  if(currentPg==="dash")renderDash();
+  else renderFitness();
 }
 
 function renderHistRunCard(run){
@@ -1576,12 +1384,18 @@ function renderHistStrengthCard(s){
 function renderDayHistory(dateStr){
   const dayRuns=[...recentGarminRuns(),...RUNS.filter(r=>!r.garminId)].filter(r=>r.date===dateStr);
   const dayStr=STR_LOG.filter(s=>s.date===dateStr);
-  if(!dayRuns.length&&!dayStr.length){
+  const activities=Object.entries(COMP).filter(([key,value])=>key.startsWith(dateStr+"-workout-")&&hasWorkoutDetails(value));
+  if(!dayRuns.length&&!dayStr.length&&!activities.length){
     return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;color:var(--muted)"><span style="font-size:22px">😴</span><span style="font-size:10px">מנוחה</span></div>';
   }
   let h='';
   dayRuns.forEach(r=>{h+=renderHistRunCard(r);});
   dayStr.forEach(s=>{h+=renderHistStrengthCard(s);});
+  activities.forEach(([,workout])=>{
+    const {icon,title,color}=workoutDisplay(workout);
+    h+='<div style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:6px">';
+    h+='<div style="color:'+color+';font-size:12px;font-weight:700">'+icon+' '+esc(title)+'</div>'+renderActivityDetails(workout)+'</div>';
+  });
   return h;
 }
 
@@ -1612,7 +1426,7 @@ function buildFitnessCalendar(){
     const isToday=dateStr===todayStr();
     const isPast=dateStr<todayStr();
     const workouts=isPast?[]:getEffectiveWorkouts(weekKey,day);
-    const hasDone=workouts.some((_,i)=>!!COMP[i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i)]||garminCompletedWorkout(dateStr,workouts,i));
+    const hasDone=workouts.some((w,i)=>!!COMP[workoutCompletionKey(dateStr,day,w,i)]||garminCompletedWorkout(dateStr,workouts,i));
 
     h+=(isToday?'<div id="fitness-today-col"':'<div')+' style="width:calc(50vw - 22px);min-width:160px;max-width:260px;flex-shrink:0;background:var(--card);border:1.5px solid '+(isToday?"rgba(255,122,69,0.5)":"var(--border)")+';border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:0'+(isToday?';box-shadow:0 0 0 3px rgba(255,122,69,0.08)':'')+'">';
 
@@ -1637,21 +1451,19 @@ function buildFitnessCalendar(){
       h+='</div>';
     } else {
       workouts.forEach((w,i)=>{
-        const color=w.type==="strength"?"#FF7A45":"#6FA86B";
-        const icon=w.type==="strength"?"💪":w.type==="run"?"🏃":"🏖️";
-        const runLbl={"easy":"קלה","tempo":"טמפו","intervals":"אינטרוולים","long":"ארוכה"}[w.runType]||"";
-        const typeLabel=w.type==="strength"?"אימון כוח":"ריצה"+(runLbl?" "+runLbl:"");
-        const compKey=i===0?(dateStr+"-"+day):(dateStr+"-"+day+"-"+i);
+        const {color,icon,title:typeLabel}=workoutDisplay(w);
+        const compKey=workoutCompletionKey(dateStr,day,w,i);
         const garminDone=garminCompletedWorkout(dateStr,workouts,i);
         const done=!!COMP[compKey]||garminDone;
-        const fixedBadge=w.fixed===false?'<span title="משתנה כל שבוע" style="font-size:9px;color:var(--blue)">🔀</span>':'<span title="קבוע כל שבוע" style="font-size:9px;color:var(--muted2)">🔁</span>';
+        const fixedBadge=w.rotation?'<span title="חוזר כל שבועיים" style="font-size:9px;color:var(--blue)">'+(rotationWeek(w.rotation,weekKey)?"ב׳":"א׳")+'</span>':
+          w.fixed===false?'<span title="משתנה כל שבוע" style="font-size:9px;color:var(--blue)">🔀</span>':'<span title="קבוע כל שבוע" style="font-size:9px;color:var(--muted2)">🔁</span>';
 
         if(i>0)h+='<div style="height:1px;background:var(--border);margin:7px 0"></div>';
 
         // Workout header
         h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">';
         h+='<span style="font-size:14px">'+icon+'</span>';
-        h+='<span style="font-size:11px;font-weight:700;color:'+color+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+typeLabel+'</span>';
+        h+='<span style="font-size:11px;font-weight:700;color:'+color+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(typeLabel)+'</span>';
         h+=fixedBadge;
         if(garminDone)h+='<span title="סונכרן מ־Garmin" aria-label="בוצע לפי Garmin" style="color:var(--teal);font-weight:800">✓</span>';
         else h+='<button onclick="toggleWorkoutDone(\''+weekKey+'\',\''+day+'\','+i+')" style="width:20px;height:20px;border-radius:50%;border:1.5px solid '+(done?color:"rgba(255,255,255,0.2)")+';background:'+(done?c2r(color,0.2):"transparent")+';cursor:pointer;font-size:10px;font-weight:800;color:'+(done?color:"transparent")+';flex-shrink:0">'+(done?"✓":"")+'</button>';
@@ -1703,6 +1515,8 @@ function buildFitnessCalendar(){
             });
             if(totalKm>0)h+='<div style="font-size:9px;color:var(--teal);font-weight:700;margin-top:3px">סה"כ ~'+totalKm.toFixed(1)+' ק"מ</div>';
           }
+        } else {
+          h+=renderActivityDetails(w);
         }
       });
     }
@@ -1981,7 +1795,7 @@ function renderProductivity(){
   });
   h+='</div>';
 
-  if(prodTab==="score") h+=buildScoreHTML();
+  if(prodTab==="score") h+='<div class="mw-productivity-score">'+buildScoreHTML()+'</div>';
   else h+=buildNotesHTML();
 
   el.innerHTML=h;
@@ -2327,6 +2141,54 @@ document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){
 // ═══════════════════════════════════════════════
 // WORKOUT EDITOR
 // ═══════════════════════════════════════════════
+const WORKOUT_TYPES={
+  strength:{title:"אימון כוח",icon:"💪",color:"#FF7A45"},
+  run:{title:"ריצה",icon:"🏃",color:"#6FA86B"},
+  muay_thai:{title:"אגרוף תאילנדי",icon:"🥊",color:"#F29B83"},
+  cycling:{title:"רכיבה על אופניים",icon:"🚴",color:"#79B5E6"},
+  swimming:{title:"שחייה",icon:"🏊",color:"#77C8E8"},
+  walking:{title:"הליכה",icon:"🚶",color:"#9BC889"},
+  hiking:{title:"טיול רגלי",icon:"🥾",color:"#B7BE87"},
+  yoga:{title:"יוגה",icon:"🧘",color:"#BEA6E6"},
+  pilates:{title:"פילאטיס",icon:"🤸",color:"#C8A7D4"},
+  mobility:{title:"מוביליטי ומתיחות",icon:"🧘",color:"#A5C9B4"},
+  hiit:{title:"אימון אינטרוולים (HIIT)",icon:"⚡",color:"#F0BB65"},
+  rowing:{title:"חתירה",icon:"🚣",color:"#87C9CE"},
+  football:{title:"כדורגל",icon:"⚽",color:"#B4D391"},
+  basketball:{title:"כדורסל",icon:"🏀",color:"#ECAE79"},
+  tennis:{title:"טניס",icon:"🎾",color:"#CFCE80"},
+  other:{title:"אימון אחר",icon:"🏅",color:"#A8BBCF"}
+};
+
+function workoutDisplay(workout){
+  const type=workout?.type;
+  const meta=Object.hasOwn(WORKOUT_TYPES,type)?WORKOUT_TYPES[type]:WORKOUT_TYPES.other;
+  if(typeof workout?.activityName==="string"&&workout.activityName.trim()){
+    return {...meta,title:workout.activityName.trim()};
+  }
+  if(type==="run"){
+    const title={easy:"ריצה קלה",tempo:"ריצת טמפו",intervals:"ריצת אינטרוולים",long:"ריצה ארוכה"}[workout.runType];
+    return {...meta,title:typeof title==="string"?title:meta.title};
+  }
+  return meta;
+}
+
+function hasWorkoutDetails(workout){
+  return typeof workout?.type==="string"&&!["run","strength","rest"].includes(workout.type);
+}
+
+function workoutCompletionKey(date,day,workout,index){
+  if(hasWorkoutDetails(workout)&&workout.id)return date+"-workout-"+workout.id;
+  return date+"-"+day+(index?"-"+index:"");
+}
+
+function renderActivityDetails(workout){
+  let h="";
+  if(Number.isFinite(workout.durationMin)&&workout.durationMin>0)h+='<div>'+workout.durationMin+' דקות</div>';
+  if(workout.activityNotes)h+='<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(workout.activityNotes)+'</div>';
+  return h?'<div style="font-size:11px;color:var(--muted);margin-top:4px">'+h+'</div>':"";
+}
+
 function getDayWorkouts(day){
   if(!USER_PLAN) return [];
   const d=USER_PLAN[day];
@@ -2373,11 +2235,19 @@ function fitWeekChange(delta){
 function resolveWorkout(weekKey,day,idx){
   const slot=getDayWorkouts(day)[idx];
   if(!slot)return null;
+  if(slot.rotation&&rotationWeek(slot.rotation,weekKey)===1){
+    return {...slot.rotation.alternate,id:slot.id,fixed:true,rotation:slot.rotation};
+  }
   if(slot.fixed===false){
     const ov=(WEEK_PLAN[weekKey]&&WEEK_PLAN[weekKey][day]&&WEEK_PLAN[weekKey][day][slot.id])||{};
     return Object.assign({},slot,ov);
   }
   return slot;
+}
+function rotationWeek(rotation,weekKey){
+  // UTC date arithmetic keeps the rotation stable across daylight-saving changes.
+  const weeks=Math.round((Date.parse(weekKey)-Date.parse(rotation.startWeek))/604800000);
+  return Math.abs(weeks%2);
 }
 function getEffectiveWorkouts(weekKey,day){
   return getDayWorkouts(day).map((slot,i)=>resolveWorkout(weekKey,day,i));
@@ -2388,6 +2258,7 @@ function getEditingSlot(){
 function getEditingWorkout(){
   const slot=getEditingSlot();
   if(!slot)return null;
+  if(slot.rotation&&weRotationWeek===1)return slot.rotation.alternate;
   if(slot.fixed===false){
     if(!WEEK_PLAN[weWeekKey])WEEK_PLAN[weWeekKey]={};
     if(!WEEK_PLAN[weWeekKey][weDay])WEEK_PLAN[weWeekKey][weDay]={};
@@ -2396,25 +2267,41 @@ function getEditingWorkout(){
   }
   return slot;
 }
+const WORKOUT_FIELDS=["type","exercises","segments","runType","distance","pace","activityName","durationMin","activityNotes"];
+
 function setSlotFixed(fixedVal){
   normalizePlan();
   const slot=getEditingSlot();
-  if(!slot||slot.fixed===fixedVal)return;
-  const cur=getEditingWorkout();
-  if(fixedVal===true){
-    slot.exercises=cur.exercises||[];
-    slot.segments=cur.segments||[];
-    slot.fixed=true;
-  } else {
+  if(!slot||(slot.rotation?"biweekly":slot.fixed)===fixedVal)return;
+  const cur=slot.fixed===false?{...slot,...getEditingWorkout()}:getEditingWorkout();
+  const config=Object.fromEntries(WORKOUT_FIELDS.filter(field=>Object.hasOwn(cur,field)).map(field=>[field,cur[field]]));
+  config.type??=slot.type;
+  if(fixedVal==="biweekly"){
+    const startWeek=DAYS.flatMap(getDayWorkouts).find(workout=>workout.rotation)?.rotation.startWeek||weWeekKey;
+    Object.assign(slot,config,{fixed:true,rotation:{startWeek,alternate:structuredClone(config)}});
+    weRotationWeek=rotationWeek(slot.rotation,weWeekKey);
+  } else if(fixedVal===false){
     if(!WEEK_PLAN[weWeekKey])WEEK_PLAN[weWeekKey]={};
     if(!WEEK_PLAN[weWeekKey][weDay])WEEK_PLAN[weWeekKey][weDay]={};
-    WEEK_PLAN[weWeekKey][weDay][slot.id]={exercises:slot.exercises||[],segments:slot.segments||[]};
+    WORKOUT_FIELDS.forEach(field=>{delete slot[field];});
+    slot.type=config.type;
+    delete config.type;
+    WEEK_PLAN[weWeekKey][weDay][slot.id]=config;
     save("week_plan",WEEK_PLAN);
-    delete slot.exercises;
-    delete slot.segments;
     slot.fixed=false;
+    delete slot.rotation;
+  } else {
+    WORKOUT_FIELDS.forEach(field=>{delete slot[field];});
+    Object.assign(slot,config,{fixed:true});
+    delete slot.rotation;
   }
   save("user_plan",USER_PLAN);
+  renderWorkoutEdit();
+}
+
+function selectWorkoutRotationWeek(week){
+  if(!getEditingSlot()?.rotation||(week!==0&&week!==1))return;
+  weRotationWeek=week;
   renderWorkoutEdit();
 }
 
@@ -2424,11 +2311,10 @@ function openCopyWorkout(weekKey,day,idx){
   if(!USER_PLAN){toast("אין תוכנית אימונים מוגדרת");return;}
   copySource={weekKey,day,idx};
   const src=resolveWorkout(weekKey,day,idx);
-  const icon=src?.type==="strength"?"💪":"🏃";
-  const label=src?.type==="strength"?"אימון כוח":"ריצה";
+  const {icon,title:label}=workoutDisplay(src);
   const el=document.getElementById("copy-modal-days");
   if(el){
-    let h='<div style="font-size:12px;color:var(--muted);margin-bottom:12px">מעתיק: <strong style="color:var(--text)">'+icon+' '+label+' ('+day+')</strong></div>';
+    let h='<div style="font-size:12px;color:var(--muted);margin-bottom:12px">מעתיק: <strong style="color:var(--text)">'+icon+' '+esc(label)+' ('+day+')</strong></div>';
     h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
     DAYS.forEach(d=>{
       const isSource=d===day;
@@ -2452,7 +2338,8 @@ function doCopyWorkout(targetDay){
   normalizePlan();
   const src=resolveWorkout(copySource.weekKey,copySource.day,copySource.idx);
   if(!src){closeCopyWorkout();return;}
-  const copy=JSON.parse(JSON.stringify(src));
+  const slot=getDayWorkouts(copySource.day)[copySource.idx];
+  const copy=JSON.parse(JSON.stringify(slot.rotation?slot:src));
   delete copy.id;
   copy.fixed=true;
   if(!Array.isArray(USER_PLAN[targetDay]))USER_PLAN[targetDay]=[];
@@ -2465,16 +2352,16 @@ function doCopyWorkout(targetDay){
 }
 
 let weDay=null;
+let weRotationWeek=0;
 function openWorkoutEdit(weekKey,day,workoutIdx){
   normalizePlan();
   weWeekKey=weekKey;
   weDay=day;
   weWorkoutIdx=workoutIdx||0;
+  const rotation=getEditingSlot()?.rotation;
+  weRotationWeek=rotation?rotationWeek(rotation,weekKey):0;
   _newSegType="warmup";
   _newSegUnit="km";
-  const dp=(USER_PLAN[weDay]&&USER_PLAN[weDay][weWorkoutIdx])||{type:"strength"};
-  const icon=dp.type==="strength"?"💪":"🏃";
-  document.getElementById("we-title").textContent=icon+" "+day;
   document.getElementById("workout-edit-modal").style.display="flex";
   renderWorkoutEdit();
 }
@@ -2485,23 +2372,37 @@ function closeWorkoutEdit(){
 }
 function renderWorkoutEdit(){
   const slot=getEditingSlot()||{type:"strength",fixed:true};
-  const dp=Object.assign({},getEditingWorkout(),{type:slot.type});
+  const workout=getEditingWorkout();
+  const dp={...workout,type:workout?.type??slot.type};
   const isFixed=slot.fixed!==false;
-  const tc=dp.type==="strength"?"var(--purple)":"var(--teal)";
+  const recurrence=slot.rotation?"biweekly":isFixed;
+  document.getElementById("we-title").textContent=workoutDisplay(dp).icon+" "+weDay;
   let h="";
-  h+='<div style="display:flex;gap:7px;margin-bottom:8px">';
-  [[true,"🔁","קבוע כל שבוע"],[false,"🔀","משתנה כל שבוע"]].forEach(([val,ic,l])=>{
-    const sel=isFixed===val;
-    h+='<button onclick="setSlotFixed('+val+')" style="flex:1;padding:8px;border-radius:10px;border:1.5px solid '+(sel?"var(--blue)":"var(--border)")+';background:'+(sel?"rgba(107,143,163,0.12)":"var(--bg3)")+';color:'+(sel?"var(--blue)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px">';
+  [[true,"🔁","קבוע כל שבוע"],["biweekly","🔁","חוזר כל שבועיים"],[false,"🔀","משתנה כל שבוע"]].forEach(([val,ic,l])=>{
+    const sel=recurrence===val;
+    const arg=typeof val==="string"?"'"+val+"'":val;
+    h+='<button onclick="setSlotFixed('+arg+')" aria-pressed="'+sel+'" style="flex:1 1 105px;padding:8px;border-radius:10px;border:1.5px solid '+(sel?"var(--blue)":"var(--border)")+';background:'+(sel?"rgba(107,143,163,0.12)":"var(--bg3)")+';color:'+(sel?"var(--blue)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
   });
   h+='</div>';
+  if(slot.rotation){
+    h+='<div class="subtabs" aria-label="שבוע במחזור" style="margin-bottom:12px">';
+    ["שבוע א׳","שבוע ב׳"].forEach((label,index)=>{
+      const selected=weRotationWeek===index;
+      h+='<button class="stb'+(selected?" on":"")+'" aria-pressed="'+selected+'" onclick="selectWorkoutRotationWeek('+index+')">'+label+'</button>';
+    });
+    h+='</div>';
+  }
   if(!isFixed)h+='<div style="font-size:10px;color:var(--muted);margin-bottom:10px">התוכן שתזין כאן ישמר רק לשבוע הזה</div>';
-  h+='<div style="display:flex;gap:7px;margin-bottom:14px">';
-  [["strength","💪","כוח"],["run","🏃","ריצה"]].forEach(([tp,ic,l])=>{
-    const sel=dp.type===tp;
-    h+='<button onclick="setWorkoutType(\''+tp+'\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid '+(sel?"var(--purple)":"var(--border)")+';background:'+(sel?"rgba(255,122,69,0.12)":"var(--bg3)")+';color:'+(sel?"var(--purple)":"var(--muted)")+';font-family:Rubik,sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+ic+' '+l+'</button>';
+  h+='<label for="we-type" style="display:block;font-size:12px;margin-bottom:5px">סוג אימון</label>';
+  h+='<select id="we-type" class="inp" style="width:100%;margin-bottom:14px" onchange="setWorkoutType(this.value)">';
+  if(!Object.hasOwn(WORKOUT_TYPES,dp.type))h+='<option selected disabled>בחר סוג אימון</option>';
+  Object.entries(WORKOUT_TYPES).forEach(([type,{icon,title}])=>{
+    h+='<option value="'+type+'"'+(dp.type===type?' selected':'')+'>'+icon+' '+title+'</option>';
   });
-  h+='</div>';
+  h+='</select>';
+  h+='<label for="we-activity-name" style="display:block;font-size:12px;margin-bottom:5px">שם האימון (אופציונלי)</label>';
+  h+='<input id="we-activity-name" class="inp" style="width:100%;margin-bottom:14px" maxlength="80" value="'+esc(dp.activityName||"")+'" oninput="getEditingWorkout().activityName=this.value">';
   if(dp.type==="strength"){
     h+='<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px">תרגילים</div>';
     const exs=dp.exercises||[];
@@ -2531,7 +2432,7 @@ function renderWorkoutEdit(){
     h+='<button onclick="addExercise()" class="btn" style="flex:1;padding:10px;background:var(--bg3);color:var(--purple);font-size:12px;font-weight:700">+ הוסף ריק</button>';
     h+='<button onclick="openExPicker()" class="btn btn-p" style="flex:2;padding:10px;font-size:12px;font-weight:700">🔍 בחר מהמאגר</button>';
     h+='</div>';
-  } else {
+  } else if(dp.type==="run"){
     const rt=dp.runType||"easy";
     const segs=dp.segments||[];
     // Run type selector
@@ -2592,6 +2493,10 @@ function renderWorkoutEdit(){
     h+='</div>';
     h+='<button onclick="addRunSegment()" class="btn btn-p" style="width:100%;font-size:13px;padding:10px">+ הוסף מקטע</button>';
     h+='</div>';
+  } else {
+    h+='<div style="display:grid;gap:6px;margin-bottom:14px">';
+    h+='<label for="we-activity-duration">משך בדקות</label><input id="we-activity-duration" class="inp" type="number" min="1" step="1" value="'+(Number.isFinite(dp.durationMin)?dp.durationMin:"")+'" oninput="getEditingWorkout().durationMin=this.validity.valid&&this.value?this.valueAsNumber:null">';
+    h+='<label for="we-activity-notes">הערות</label><textarea id="we-activity-notes" class="inp" maxlength="1000" rows="3" oninput="getEditingWorkout().activityNotes=this.value">'+esc(dp.activityNotes||"")+'</textarea></div>';
   }
   h+='<button onclick="saveWorkoutDay()" class="btn btn-p" style="width:100%;padding:13px;font-size:14px">שמור</button>';
   document.getElementById("we-content").innerHTML=h;
@@ -2701,11 +2606,13 @@ function setRunType(val){
   renderWorkoutEdit();
 }
 function setWorkoutType(type){
+  if(!Object.hasOwn(WORKOUT_TYPES,type))return;
   normalizePlan();
   const slot=getEditingSlot();
   if(!slot) return;
-  slot.type=type;
   const w=getEditingWorkout();
+  if(slot.fixed===false)slot.type=type;
+  else w.type=type;
   if(type==="strength"&&!w.exercises) w.exercises=[];
   if(type==="run"&&!w.segments) w.segments=[];
   save("user_plan",USER_PLAN);
@@ -2715,7 +2622,7 @@ function saveWorkoutDay(){
   normalizePlan();
   const slot=getEditingSlot();
   const w=getEditingWorkout();
-  if(w&&slot&&slot.type==="strength"&&w.exercises){
+  if(w&&slot&&(w.type??slot.type)==="strength"&&w.exercises){
     w.exercises.forEach(ex=>{
       const k=(ex.name||"").trim().toLowerCase();
       if(k&&(ex.sets||ex.reps||ex.weight)){
@@ -2726,8 +2633,9 @@ function saveWorkoutDay(){
   }
   save("user_plan",USER_PLAN);
   if(slot&&slot.fixed===false)save("week_plan",WEEK_PLAN);
+  const day=weDay;
   closeWorkoutEdit();
-  toast("✓ "+weDay+" נשמר!");
+  toast("✓ "+day+" נשמר!");
   renderFitness();
 }
 

@@ -85,7 +85,7 @@ function garminCompletedWorkout(date, workouts, index) {
 function completedWorkoutOn(date, day) {
   const workouts = getEffectiveWorkouts(weekKeyOf(date), day);
   return workouts.some((_, index) =>
-    !!COMP[date + '-' + day + (index ? '-' + index : '')] || garminCompletedWorkout(date, workouts, index)
+    !!COMP[workoutCompletionKey(date, day, workouts[index], index)] || garminCompletedWorkout(date, workouts, index)
   );
 }
 

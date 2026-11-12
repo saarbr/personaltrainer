@@ -1,20 +1,98 @@
 .garmin-run-summary {
   margin-block: 14px;
-  padding: 16px;
-  background: radial-gradient(ellipse at top right, rgba(90, 224, 194, .13), transparent 70%), var(--card);
+  padding: clamp(14px, 3vw, 24px);
+  background: radial-gradient(ellipse at top right, rgba(90, 224, 194, .16), transparent 65%), var(--card);
 }
 .garmin-run-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-.garmin-run-heading h2 { font-size: 17px; margin: 4px 0 0; overflow-wrap: anywhere; }
-.garmin-run-heading a { color: var(--teal); font-size: 12px; }
-.garmin-run-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 10px; margin-top: 14px; }
-.garmin-run-metrics div { display: grid; gap: 3px; padding: 8px; border-radius: 9px; background: var(--bg2); }
-.garmin-run-metrics strong { font-size: 21px; text-align: right; }
-.garmin-run-metrics span { font-size: 11px; color: var(--muted); }
-.garmin-route { margin-block: 12px 4px; width: 100%; }
-.garmin-route summary { cursor: pointer; color: var(--teal); font-size: 13px; font-weight: 700; padding-block: 6px; }
-.garmin-route-body { padding: 8px; border-radius: 10px; color: #74e2cb; background: var(--bg2); }
-.garmin-route-body svg { display: block; width: 100%; max-height: 190px; }
+.garmin-run-heading h2 { font-size: clamp(19px, 4vw, 27px); margin: 4px 0 0; overflow-wrap: anywhere; }
+.garmin-run-heading a { color: var(--teal); font-size: 12px; padding: 8px 12px; border: 1px solid rgba(116, 226, 203, .25); border-radius: 999px; }
+.garmin-run-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 8px; margin-top: 16px; }
+.garmin-run-metrics div { display: grid; gap: 4px; align-content: center; padding: 10px 12px; border: 1px solid rgba(148, 163, 184, .18); border-radius: 12px; background: var(--bg2); }
+.garmin-run-metrics div:first-child { grid-row: span 2; border-color: rgba(116, 226, 203, .32); background: rgba(116, 226, 203, .09); }
+.garmin-run-metrics strong { font-size: 22px; line-height: 1.12; text-align: right; }
+.garmin-run-metrics div:first-child strong { color: var(--teal); font-size: clamp(24px, 5vw, 36px); }
+.garmin-run-metrics span { font-size: 12px; color: var(--muted); }
+@media (min-width: 700px) {
+  .garmin-run-metrics div:first-child { grid-row: auto; }
+}
+.garmin-route { margin-block: 14px 4px; width: 100%; }
+.garmin-route summary { cursor: pointer; color: var(--teal); font-size: 13px; font-weight: 700; padding-block: 8px; }
+.garmin-route-body { padding: 8px; border-radius: 14px; color: var(--text); background: var(--bg2); }
+.garmin-route-map {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(116, 226, 203, .23);
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 12% 15%, rgba(42, 108, 91, .43), transparent 56%),
+    radial-gradient(ellipse at 88% 93%, rgba(26, 88, 103, .47), transparent 55%),
+    linear-gradient(rgba(157, 212, 202, .055) 1px, transparent 1px) center / 22px 22px,
+    linear-gradient(90deg, rgba(157, 212, 202, .055) 1px, transparent 1px) center / 22px 22px,
+    #101e27;
+}
+.garmin-route-map svg { display: block; width: 100%; max-height: 300px; }
+.garmin-route-imagery { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+.garmin-route-with-imagery svg { position: relative; max-height: none; }
+.garmin-route-with-imagery .garmin-route-contours { display: none; }
+.garmin-route-with-imagery .garmin-route-line { filter: drop-shadow(0 0 2px #061b1b) drop-shadow(0 0 5px #0e4038); }
+.garmin-route-imagery-credit { display: block; padding: 4px 2px 0; color: var(--muted); font-size: 10px; text-align: left; }
+.garmin-route-contours { fill: none; stroke: #89c9b3; stroke-opacity: .24; stroke-width: .75; }
+.garmin-route-map-caption {
+  position: absolute;
+  inset-block-end: 6px;
+  inset-inline-end: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #c4d9d4;
+  background: rgba(16, 30, 39, .86);
+  font-size: 10px;
+}
+.garmin-route-line { fill: none; stroke: #74f1d1; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(89, 238, 199, .65)); }
+.garmin-route-start { fill: #9ce8cb; stroke: #101e27; stroke-width: 1.5; }
+.garmin-route-finish { fill: #ffa783; stroke: #101e27; stroke-width: 1.5; }
 .garmin-route-body p { font-size: 12px; color: var(--muted); margin: 4px; }
-.garmin-route-key { display: flex; gap: 12px; justify-content: center; font-size: 11px; color: var(--muted); }
+.garmin-route-key { display: flex; gap: 16px; justify-content: center; padding-block: 8px 2px; font-size: 12px; color: var(--muted); }
 .garmin-route-key span::before { content: '●'; color: #9ce8cb; margin-inline-end: 4px; }
 .garmin-route-key span:last-child::before { color: #ffa783; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .garmin-route-awaiting .garmin-route-line,
+  .garmin-route-awaiting circle { opacity: 0; }
+  .garmin-route-drawing .garmin-route-line {
+    stroke-dasharray: 1 1;
+    animation: garmin-route-trace 1.7s linear;
+  }
+  .garmin-route-drawing .garmin-route-finish { animation: garmin-route-finish .22s ease-out 1.7s both; }
+}
+@keyframes garmin-route-trace {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes garmin-route-finish { from { opacity: 0; } to { opacity: 1; } }
+
+.garmin-run-details { margin-top: 8px; border-top: 1px solid rgba(148, 163, 184, .2); }
+.garmin-run-details > summary { padding-inline: 6px; }
+.garmin-run-splits, .garmin-run-chart {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, .2);
+  border-radius: 12px;
+  background: var(--card);
+}
+.garmin-run-details h4 { margin: 0 0 8px; font-size: 14px; }
+.garmin-run-chart small { margin-inline-start: 4px; color: var(--muted); font-weight: 400; }
+.garmin-splits-scroll { overflow-x: auto; }
+.garmin-run-splits table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+.garmin-run-splits th, .garmin-run-splits td { padding: 8px 4px; border-bottom: 1px solid rgba(148, 163, 184, .14); }
+.garmin-run-splits thead { color: var(--muted); }
+.garmin-run-splits tbody td { direction: ltr; }
+.garmin-run-splits tbody tr:last-child > * { border-bottom: 0; }
+.garmin-run-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 8px; margin-top: 8px; }
+.garmin-run-chart { --garmin-chart-color: #ffa78e; }
+.garmin-run-chart-pace { --garmin-chart-color: #74e2cb; }
+.garmin-run-chart svg { display: block; width: 100%; }
+.garmin-run-chart line { stroke: rgba(148, 163, 184, .27); }
+.garmin-run-chart text { fill: var(--muted); font-size: 12px; }
+.garmin-run-chart path { fill: none; stroke: var(--garmin-chart-color); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.garmin-run-chart circle { fill: var(--garmin-chart-color); }
+.garmin-chart-axis { text-align: center; color: var(--muted); font-size: 11px; }

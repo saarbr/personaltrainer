@@ -41,8 +41,8 @@ exports.handler = async (event) => {
         if (response.status === 401) cachedToken = null;
         return reply(502, { error: 'Garmin לא הצליחה לספק את המסלול כרגע.' });
       }
-      const { routeFromActivity } = require('../lib/garmin-route.cjs');
-      return reply(200, { points: await routeFromActivity(response) });
+      const { detailsFromActivity } = require('../lib/garmin-route.cjs');
+      return reply(200, await detailsFromActivity(response));
     }
     if (body.action === 'wellness') {
       const date = body.date;
