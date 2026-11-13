@@ -1203,6 +1203,23 @@ function toggleManual(){
   if(icon) icon.textContent = manualOpen ? '▲' : '▼';
 }
 
+async function foodPhotoData(file){
+  if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
+    throw new Error('בחר תמונה בגודל עד 20 מגה־בייט.');
+  }
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+  } finally {
+    bitmap.close();
+  }
+}
+
 async function analyzeFood(){
   const input = document.getElementById('ai-food-input');
   const btn = document.getElementById('ai-food-btn');
@@ -1210,8 +1227,13 @@ async function analyzeFood(){
   const errDiv = document.getElementById('ai-food-err');
   const text = input?.value?.trim();
 
-  if(!text){
-    if(errDiv){ errDiv.textContent='נא לכתוב מה אכלת'; errDiv.style.display='block'; }
+  const photo = document.getElementById('ai-food-photo');
+  const file = photo?.files?.[0];
+  const owner = currentUser;
+  const date = selDate;
+  window._pendingFood = null;
+  if(!text && !file){
+    if(errDiv){ errDiv.textContent='יש לכתוב מה אכלת או לצרף תמונה'; errDiv.style.display='block'; }
     return;
   }
 
@@ -1220,42 +1242,55 @@ async function analyzeFood(){
   if(btn){ btn.textContent='⏳ מנתח...'; btn.disabled=true; }
 
   try {
-    const token=currentUser?await currentUser.getIdToken():"";
+    if (!owner) throw new Error('יש להתחבר כדי לנתח ארוחה.');
+    const image = file ? await foodPhotoData(file) : undefined;
+    const token = await owner.getIdToken();
+    if (!result.isConnected || currentUser !== owner || selDate !== date) return;
     const resp = await fetch('/.netlify/functions/analyze', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-      body: JSON.stringify({ type: 'food', text: text })
+      body: JSON.stringify({ type: 'food', text, image, mediaType: image ? 'image/jpeg' : undefined })
     });
     if(!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     if(data.error) throw new Error(data.error);
 
+    if (!result.isConnected || currentUser !== owner || selDate !== date) return;
+    if (typeof data.desc !== 'string' || !data.desc.trim() ||
+        ['cal', 'p', 'c', 'f'].some(key => !Number.isFinite(data[key]) || data[key] < 0)) {
+      throw new Error('לא התקבלה הערכה תקינה. נסה להוסיף תיאור קצר או להזין ידנית.');
+    }
     const d = data;
-    window._pendingFood = d;
-    result.innerHTML =
+    window._pendingFood = { ...d, owner, date };
+    if (text) {
+      const message = document.createElement('p');
+      message.textContent = text;
+      message.style.cssText = 'background:var(--bg3);padding:10px;border-radius:12px;white-space:pre-wrap';
+      result.replaceChildren(message);
+    } else {
+      result.textContent = 'תמונה של הארוחה';
+    }
+    result.insertAdjacentHTML('beforeend',
       '<div style="background:rgba(111,168,107,0.08);border:1px solid rgba(111,168,107,0.25);border-radius:12px;padding:13px;margin-bottom:9px">' +
       '<div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:8px">✓ ' + esc(d.desc) + '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">' +
-      '<div style="background:var(--bg3);border-radius:9px;padding:9px;text-align:center"><div style="font-size:9px;color:var(--muted);margin-bottom:2px">קלוריות</div><div style="font-size:18px;font-weight:800;color:var(--coral)">' + esc(d.cal) + '</div></div>' +
-      '<div style="background:var(--bg3);border-radius:9px;padding:9px;text-align:center"><div style="font-size:9px;color:var(--muted);margin-bottom:2px">חלבון</div><div style="font-size:18px;font-weight:800;color:var(--purple)">' + esc(d.p) + 'g</div></div>' +
-      '<div style="background:var(--bg3);border-radius:9px;padding:9px;text-align:center"><div style="font-size:9px;color:var(--muted);margin-bottom:2px">פחמימות</div><div style="font-size:18px;font-weight:800;color:var(--teal)">' + esc(d.c) + 'g</div></div>' +
-      '<div style="background:var(--bg3);border-radius:9px;padding:9px;text-align:center"><div style="font-size:9px;color:var(--muted);margin-bottom:2px">שומן</div><div style="font-size:18px;font-weight:800;color:var(--amber)">' + esc(d.f) + 'g</div></div>' +
-      '</div>' +
+      '<p>הערכה: '+Math.round(d.cal)+' קלוריות · '+Math.round(d.p)+' ג׳ חלבון</p>' +
+      '<details style="margin-bottom:10px"><summary>עוד ערכים</summary><p>'+Math.round(d.c)+' ג׳ פחמימות · '+Math.round(d.f)+' ג׳ שומן</p></details>' +
       (d.notes ? '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">📝 ' + esc(d.notes) + '</div>' : '') +
       '<button onclick="confirmAddFood()" class="btn btn-p" style="width:100%;font-size:13px">✓ הוסף ליומן</button>' +
-      '</div>';
+      '</div>');
 
     input.value = '';
+    if (photo) photo.value = '';
   } catch(e) {
     if(result) result.style.display='none';
     if(errDiv){ errDiv.textContent='שגיאה: ' + e.message; errDiv.style.display='block'; }
   }
-  if(btn){ btn.textContent='🔍 נתח עם AI'; btn.disabled=false; }
+  if(btn){ btn.textContent='שלח לניתוח'; btn.disabled=false; }
 }
 
 function confirmAddFood(){
   const d = window._pendingFood;
-  if(!d) return;
+  if(!d || d.owner !== currentUser || d.date !== selDate) return;
   addFoodFromAI(d.cal, d.p, d.c, d.f, d.desc);
   window._pendingFood = null;
 }
@@ -1546,13 +1581,43 @@ function renderNut(){
   h+='</div>';
 
   if(nutView==="log"){
-    const isToday=selDate===todayStr();
-    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
-    h+='<button onclick="nutChangeDay(-1)" style="width:36px;height:36px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>';
-    h+='<div style="flex:1;text-align:center;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:8px;font-size:13px;font-weight:700">'+new Date(selDate+'T12:00:00').toLocaleDateString("he-IL",{weekday:"short",day:"numeric",month:"long"})+'</div>';
-    h+='<button onclick="nutChangeDay(1)" style="width:36px;height:36px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:'+(isToday?"var(--muted2)":"var(--text)")+';font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;'+(isToday?"opacity:0.35;pointer-events:none":"")+'">›</button>';
-    h+='</div>';
+    h+=buildNutritionWeek();
 
+    const recent = recentNutMeals();
+    if (recent.length) {
+      h+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">ארוחות אחרונות</div>';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+      recent.forEach((meal, index) => {
+        h+='<button type="button" class="btn" onclick="prefillNutMeal('+index+')">'+esc(meal.desc)+' · '+Math.round(meal.cal)+' קל</button>';
+      });
+      h+='</div></div>';
+    }
+
+    // AI Food input
+    h+='<div class="card">';
+    h+='<div style="margin-bottom:10px;color:var(--muted)">מה אכלת? אפשר לכתוב או לצרף תמונה.</div>';
+    h+='<div style="display:flex;gap:7px;margin-bottom:10px">';
+        h+='<textarea id="ai-food-input" class="inp" style="height:80px;resize:none;margin-bottom:9px" placeholder="מה אכלת?"></textarea>';
+    h+='</div>';
+    h+='<label for="ai-food-photo" style="display:block;margin-bottom:8px">צילום או תמונה של הארוחה</label>';
+    h+='<input id="ai-food-photo" type="file" accept="image/*" capture="environment" class="inp" style="margin-bottom:9px">';
+    h+='<button onclick="analyzeFood()" id="ai-food-btn" class="btn btn-p" style="width:100%;margin-bottom:10px">שלח לניתוח</button>';
+    h+='<div id="ai-food-result" role="status" style="display:none"></div>';
+    h+='<div id="ai-food-err" style="display:none;padding:8px;border-radius:9px;background:rgba(232,92,74,0.1);color:var(--coral);font-size:12px;margin-bottom:7px"></div>';
+    h+='<details id="manual-food" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><summary style="cursor:pointer;margin-bottom:8px">הזנה ידנית</summary>';
+    h+='<div style="display:flex;gap:7px;margin-bottom:7px">';
+    h+='<input type="text" id="nd" class="inp" placeholder="תיאור" style="flex:2"/>';
+    h+='<input type="number" id="nc" class="inp" placeholder="קלוריות" style="flex:1"/>';
+    h+='</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">';
+    h+='<input type="number" id="np" class="inp" placeholder="חלבון g"/>';
+    h+='<input type="number" id="ncarb" class="inp" placeholder="פחמימות g"/>';
+    h+='<input type="number" id="nf" class="inp" placeholder="שומן g"/>';
+    h+='</div>';
+    h+='<button onclick="addNut()" class="btn" style="width:100%;background:var(--bg3);color:var(--muted);font-size:13px">+ הוסף ידנית</button>';
+    h+='</details></div>';
+
+    h+='<details class="card"><summary style="cursor:pointer">סיכום יומי ויעדים</summary>';
     // Calorie gauge
     const pct=Math.min(tot.cal/PROFILE.target,1.3);
     const ringColor=tot.cal>PROFILE.target?"#E85C4A":defBig?"#E8B54A":"#6FA86B";
@@ -1622,35 +1687,7 @@ function renderNut(){
     if(burnT>0) h+='<div style="margin-top:7px;font-size:11px;font-weight:600;color:var(--amber)">✓ שריפה: '+burnT+' קל</div>';
     h+='</div>';
 
-    // AI Food input
-    h+='<div class="card">';
-    h+='<div style="font-size:13px;font-weight:700;margin-bottom:4px">🤖 הוסף ארוחה עם AI</div>';
-    h+='<div style="font-size:11px;color:var(--muted);margin-bottom:11px">תאר מה אכלת ← AI מחשב הכל אוטומטית</div>';
-    h+='<div style="display:flex;gap:7px;margin-bottom:10px">';
-        h+='<textarea id="ai-food-input" class="inp" style="height:80px;resize:none;margin-bottom:9px" placeholder="מה אכלת?"></textarea>';
-    h+='</div>';
-    h+='<button onclick="analyzeFood()" id="ai-food-btn" class="btn btn-p" style="width:100%;margin-bottom:10px">🔍 נתח עם AI</button>';
-    h+='<div id="ai-food-result" style="display:none">';
-    h+='<div style="background:rgba(111,168,107,0.08);border:1px solid rgba(111,168,107,0.25);border-radius:11px;padding:12px;margin-bottom:10px">';
-    h+='<div style="font-size:13px;font-weight:700;margin-bottom:8px" id="ai-food-desc"></div>';
-    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px" id="ai-food-macros"></div>';
-    h+='<div id="ai-food-notes" style="font-size:11px;color:var(--muted);margin-bottom:10px"></div>';
-    h+='<button onclick="confirmAddFood()" class="btn btn-p" style="width:100%;font-size:14px">✓ הוסף ליומן</button>';
-    h+='</div></div>';
-    h+='<div id="ai-food-err" style="display:none;padding:8px;border-radius:9px;background:rgba(232,92,74,0.1);color:var(--coral);font-size:12px;margin-bottom:7px"></div>';
-    h+='<div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">';
-    h+='<div style="font-size:11px;color:var(--muted);margin-bottom:8px">או הכנס ידנית:</div>';
-    h+='<div style="display:flex;gap:7px;margin-bottom:7px">';
-    h+='<input type="text" id="nd" class="inp" placeholder="תיאור" style="flex:2"/>';
-    h+='<input type="number" id="nc" class="inp" placeholder="קלוריות" style="flex:1"/>';
-    h+='</div>';
-    h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">';
-    h+='<input type="number" id="np" class="inp" placeholder="חלבון g"/>';
-    h+='<input type="number" id="ncarb" class="inp" placeholder="פחמימות g"/>';
-    h+='<input type="number" id="nf" class="inp" placeholder="שומן g"/>';
-    h+='</div>';
-    h+='<button onclick="addNut()" class="btn" style="width:100%;background:var(--bg3);color:var(--muted);font-size:13px">+ הוסף ידנית</button>';
-    h+='</div></div>';
+    h+='</details>';
 
     // Food log
     if(todayE.length>0){
@@ -1748,6 +1785,36 @@ function setBurn(){
   const val=cv?Number(cv):(BURN_P.find(([t])=>t===dayType)?.[1]||0);
   BURNS[selDate]=val;save("burns",BURNS);toast("✓ שריפה עודכנה");renderNut();
 }
+function recentNutMeals(){
+  const recent = [];
+  const seen = new Set();
+  for (const date of Object.keys(NUT).sort().reverse()) {
+    if (!Array.isArray(NUT[date])) continue;
+    for (const meal of [...NUT[date]].reverse()) {
+      if (typeof meal?.desc !== 'string' || !meal.desc.trim() || !Number.isFinite(meal.cal)) continue;
+      const key = meal.desc.trim().toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recent.push(meal);
+      if (recent.length === 6) return recent;
+    }
+  }
+  return recent;
+}
+
+function prefillNutMeal(index){
+  const meal = recentNutMeals()[index];
+  const description = document.getElementById('nd');
+  if (!meal || !description) return;
+  document.getElementById('manual-food').open = true;
+  const fields = {nd:meal.desc,nc:meal.cal,np:meal.p,ncarb:meal.c,nf:meal.f};
+  for (const [id, value] of Object.entries(fields)) {
+    const field = document.getElementById(id);
+    if (field) field.value = value ?? '';
+  }
+  description.focus();
+}
+
 function addNut(){
   const desc=document.getElementById("nd")?.value;
   const cal=document.getElementById("nc")?.value;
@@ -1776,6 +1843,35 @@ function quickAddProtein(g){
   NUT[selDate].push({id:Date.now(),desc:"💊 "+g+"g חלבון",cal:g*4,p:g,c:0,f:0,time});
   save("nut",NUT);toast("✓ +"+g+"g חלבון נוסף!");renderNut();
 }
+function buildNutritionWeek(){
+  const today = todayStr();
+  const week = weekKeyOf(selDate);
+  const currentWeek = weekKeyOf(today);
+  const shortDate = date => new Date(date+'T12:00:00').toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});
+  const navStyle = 'width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer';
+  let html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html += '<button type="button" aria-label="שבוע קודם" style="'+navStyle+'" onclick="nutChangeDay(-7)">‹</button>';
+  html += '<strong>'+shortDate(week)+' – '+shortDate(addDaysStr(week,6))+'</strong>';
+  html += '<button type="button" aria-label="שבוע הבא" style="'+navStyle+'" onclick="nutNextWeek()"'+(week===currentWeek?' disabled':'')+'>›</button></div>';
+  html += '<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px">';
+  DAYS.forEach((day, index) => {
+    const date = addDaysStr(week,index);
+    const selected = date === selDate;
+    const count = Array.isArray(NUT[date]) ? NUT[date].length : 0;
+    html += '<button type="button" aria-pressed="'+selected+'" onclick="nutChangeDay('+Math.round((Date.parse(date)-Date.parse(selDate))/86400000)+')"'+(date>today?' disabled':'')+' style="flex:1 0 78px;min-height:65px;border-radius:10px;border:1px solid '+(selected?'var(--coral)':'var(--border)')+';background:var(--card);color:var(--text);cursor:pointer">';
+    html += '<strong>'+esc(day)+'</strong> <span>'+shortDate(date)+'</span>';
+    html += '<span style="display:block;font-size:11px;color:var(--muted)">'+(count ? count+' ארוחות' : '—')+'</span></button>';
+  });
+  return html+'</div>';
+}
+
+function nutNextWeek(){
+  const next = addDaysStr(selDate,7);
+  const today = todayStr();
+  selDate = next > today ? today : next;
+  renderNut();
+}
+
 function nutChangeDay(delta){
   const d=new Date(selDate+'T12:00:00');
   d.setDate(d.getDate()+delta);
