@@ -42,10 +42,20 @@ exports.handler = async function(event, context) {
         content: `נתח את הארוחה הבאה וחשב ערכים תזונתיים. החזר JSON בלבד ללא markdown:
 {"desc":"<תיאור קצר של הארוחה בעברית>","cal":<קלוריות מספר שלם>,"p":<חלבון גרם מספר שלם>,"c":<פחמימות גרם מספר שלם>,"f":<שומן גרם מספר שלם>,"notes":"<הערות על הדיוק או מידע תזונתי חשוב, קצר>"}
 
-הארוחה: ${text}
+תיאור הארוחה: ${typeof text === 'string' ? text.slice(0, 2000) : ''}
 
 חשוב: תן הערכה ריאלית ומדויקת ככל האפשר לפי כמויות סטנדרטיות אם לא צוינו כמויות.`
       }];
+      if (image !== undefined) {
+        if (mediaType !== 'image/jpeg' || typeof image !== 'string' || !image.length ||
+            image.length > 2000000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(image)) {
+          return { statusCode: 400, headers, body: JSON.stringify({ error: "Invalid food image" }) };
+        }
+        messages[0].content = [
+          { type: "image", source: { type: "base64", media_type: mediaType, data: image } },
+          { type: "text", text: messages[0].content + "\nהערך את הכמויות לפי התמונה. ציין אי־ודאות, ואל תנחש רכיבים שאי אפשר לזהות." }
+        ];
+      }
     } else if (type === "splits") {
       if (!image) return { statusCode: 400, headers, body: JSON.stringify({ error: "No image provided" }) };
       messages = [{
