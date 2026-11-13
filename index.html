@@ -1553,6 +1553,16 @@ function renderNut(){
     h+='<button onclick="nutChangeDay(1)" style="width:36px;height:36px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:'+(isToday?"var(--muted2)":"var(--text)")+';font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;'+(isToday?"opacity:0.35;pointer-events:none":"")+'">›</button>';
     h+='</div>';
 
+    const recent = recentNutMeals();
+    if (recent.length) {
+      h+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">ארוחות אחרונות</div>';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+      recent.forEach((meal, index) => {
+        h+='<button type="button" class="btn" onclick="prefillNutMeal('+index+')">'+esc(meal.desc)+' · '+Math.round(meal.cal)+' קל</button>';
+      });
+      h+='</div></div>';
+    }
+
     // Calorie gauge
     const pct=Math.min(tot.cal/PROFILE.target,1.3);
     const ringColor=tot.cal>PROFILE.target?"#E85C4A":defBig?"#E8B54A":"#6FA86B";
@@ -1748,6 +1758,35 @@ function setBurn(){
   const val=cv?Number(cv):(BURN_P.find(([t])=>t===dayType)?.[1]||0);
   BURNS[selDate]=val;save("burns",BURNS);toast("✓ שריפה עודכנה");renderNut();
 }
+function recentNutMeals(){
+  const recent = [];
+  const seen = new Set();
+  for (const date of Object.keys(NUT).sort().reverse()) {
+    if (!Array.isArray(NUT[date])) continue;
+    for (const meal of [...NUT[date]].reverse()) {
+      if (typeof meal?.desc !== 'string' || !meal.desc.trim() || !Number.isFinite(meal.cal)) continue;
+      const key = meal.desc.trim().toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recent.push(meal);
+      if (recent.length === 6) return recent;
+    }
+  }
+  return recent;
+}
+
+function prefillNutMeal(index){
+  const meal = recentNutMeals()[index];
+  const description = document.getElementById('nd');
+  if (!meal || !description) return;
+  const fields = {nd:meal.desc,nc:meal.cal,np:meal.p,ncarb:meal.c,nf:meal.f};
+  for (const [id, value] of Object.entries(fields)) {
+    const field = document.getElementById(id);
+    if (field) field.value = value ?? '';
+  }
+  description.focus();
+}
+
 function addNut(){
   const desc=document.getElementById("nd")?.value;
   const cal=document.getElementById("nc")?.value;
